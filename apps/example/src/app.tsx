@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import type { TLDocumentModel } from '@tldraw/core'
+import type { TLAppStateModel, TLDocumentModel } from '@tldraw/core'
 import {
   App as TLDrawApp,
   TLReactApp,
@@ -49,35 +49,39 @@ function App(): JSX.Element {
 
   const [Shapes] = React.useState<TLReactShapeConstructor<Shape>[]>(() => [
     NuBoxShape,
-    NuEllipseShape,
-    NuPolygonShape,
-    NuPenShape,
-    NuHighlighterShape,
-    NuDotShape,
-    NuStarShape,
-    NuPolylineShape,
-    NuLineShape,
-    NuCodeSandboxShape,
-    NuYouTubeShape,
+    // NuEllipseShape,
+    // NuPolygonShape,
+    // NuPenShape,
+    // NuHighlighterShape,
+    // NuDotShape,
+    // NuStarShape,
+    // NuPolylineShape,
+    // NuLineShape,
+    // NuCodeSandboxShape,
+    // NuYouTubeShape,
   ])
 
   const [Tools] = React.useState<TLReactToolConstructor<Shape>[]>(() => [
     NuBoxTool,
-    NuEllipseTool,
-    NuPolygonTool,
-    NuPenTool,
-    NuHighlighterTool,
-    NuDotTool,
-    NuStarTool,
-    NuEraseTool,
-    NuLineTool,
-    NuCodeSandboxTool,
-    NuYouTubeTool,
+    // NuEllipseTool,
+    // NuPolygonTool,
+    // NuPenTool,
+    // NuHighlighterTool,
+    // NuDotTool,
+    // NuStarTool,
+    // NuEraseTool,
+    // NuLineTool,
+    // NuCodeSandboxTool,
+    // NuYouTubeTool,
   ])
 
-  const [model] = React.useState<TLDocumentModel>({
+  const [state] = React.useState<TLAppStateModel>({
     currentPageId: 'page1',
     selectedIds: [],
+  })
+
+  const [document] = React.useState<TLDocumentModel>({
+    id: 'nu',
     pages: [
       {
         name: 'Page',
@@ -92,13 +96,13 @@ function App(): JSX.Element {
           //     size: [100, 100],
           //   }))
           // ),
-          // {
-          //   id: 'box0',
-          //   type: 'box',
-          //   parentId: 'page1',
-          //   point: [300, 200],
-          //   size: [100, 100],
-          // },
+          {
+            id: 'box0',
+            type: 'box',
+            parentId: 'page1',
+            point: [300, 200],
+            size: [100, 100],
+          },
           // {
           //   id: 'box1',
           //   type: 'box',
@@ -232,7 +236,8 @@ function App(): JSX.Element {
       <TLDrawApp
         onMount={onMount}
         onPersist={onPersist}
-        model={model}
+        state={state}
+        document={document}
         components={components}
         Shapes={Shapes}
         Tools={Tools}

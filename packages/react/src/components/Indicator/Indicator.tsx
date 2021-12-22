@@ -19,9 +19,12 @@ export const Indicator = observer(function Shape({
   isSelected = false,
   isBinding = false,
   isEditing = false,
-  meta,
 }: IndicatorProps) {
-  const { bounds, rotation = 0, ReactIndicator } = shape
+  const {
+    props: { rotation = 0 },
+    bounds,
+    ReactIndicator,
+  } = shape
 
   return (
     <Container bounds={bounds} rotation={rotation} zIndex={10000}>
@@ -33,7 +36,6 @@ export const Indicator = observer(function Shape({
             isHovered={isHovered}
             isSelected={isSelected}
             isErasing={false}
-            meta={meta}
           />
         </g>
       </SVGContainer>

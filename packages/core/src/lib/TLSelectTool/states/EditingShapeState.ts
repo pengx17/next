@@ -1,6 +1,5 @@
-import { Vec } from '@tldraw/vec'
 import { TLApp, TLSelectTool, TLShape, TLToolState } from '~lib'
-import { TLEventInfo, TLEventMap, TLEvents, TLHandle, TLTargetType } from '~types'
+import { TLEventInfo, TLEventMap, TLTargetType } from '~types'
 
 export class EditingShapeState<
   S extends TLShape,

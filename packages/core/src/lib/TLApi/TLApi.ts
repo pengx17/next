@@ -1,5 +1,5 @@
-import type { TLApp, TLCustomProps, TLPage, TLShapeModel, TLShape } from '~lib'
-import type { TLEventMap } from '~types'
+import type { TLApp, TLCustomProps, TLPage, TLShape } from '~lib'
+import type { TLEventMap, TLShapeModel } from '~types'
 import { BoundsUtils } from '~utils'
 
 export class TLApi<S extends TLShape = TLShape, K extends TLEventMap = TLEventMap> {
@@ -85,7 +85,7 @@ export class TLApi<S extends TLShape = TLShape, K extends TLEventMap = TLEventMa
 
   /** Select all shapes on the current page. */
   selectAll = (): this => {
-    this.#app.setSelectedShapes(this.#app.currentPage.shapes)
+    this.#app.setSelectedShapes(Array.from(this.#app.currentPage.shapes.values()))
     return this
   }
 
@@ -116,8 +116,10 @@ export class TLApi<S extends TLShape = TLShape, K extends TLEventMap = TLEventMa
   /** Zoom to fit all of the current page's shapes in the viewport. */
   zoomToFit = (): this => {
     const { shapes } = this.#app.currentPage
-    if (shapes.length === 0) return this
-    const commonBounds = BoundsUtils.getCommonBounds(shapes.map(shape => shape.bounds))
+    if (shapes.size === 0) return this
+    const commonBounds = BoundsUtils.getCommonBounds(
+      Array.from(shapes.values()).map(shape => shape.bounds)
+    )
     this.#app.viewport.zoomToBounds(commonBounds)
     return this
   }

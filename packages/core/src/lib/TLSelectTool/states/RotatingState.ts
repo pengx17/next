@@ -9,7 +9,6 @@ import {
   TLEvents,
   TLEventSelectionInfo,
   TLHandle,
-  TLRotateCorner,
   TLSelectionHandle,
 } from '~types'
 import { BoundsUtils, deepCopy, GeomUtils } from '~utils'
@@ -54,9 +53,9 @@ export class RotatingState<
       selectedShapesArray.map(shape => [
         shape.id,
         {
-          point: [...shape.point],
+          point: [...shape.props.point],
           center: [...shape.center],
-          rotation: shape.rotation,
+          rotation: shape.props.rotation,
           handles: 'handles' in shape ? deepCopy((shape as any).handles) : undefined,
         },
       ])

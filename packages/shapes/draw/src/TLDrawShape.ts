@@ -1,85 +1,67 @@
-import * as React from 'react'
-import { computed, makeObservable, observable } from 'mobx'
-import { observer } from 'mobx-react-lite'
-import {
-  TLShape,
-  BoundsUtils,
-  TLBounds,
-  TLResizeInfo,
-  PointUtils,
-  TLCustomProps,
-} from '@tldraw/core'
+import { computed, makeObservable } from 'mobx'
+import { TLShape, BoundsUtils, TLBounds, TLResizeInfo, PointUtils, TLApp } from '@tldraw/core'
 import { Vec } from '@tldraw/vec'
 import {
   intersectBoundsLineSegment,
   intersectLineSegmentPolyline,
   intersectPolylineBounds,
 } from '@tldraw/intersect'
-import { SVGContainer, TLComponentProps, TLIndicatorProps } from '@tldraw/react'
 
 export interface TLDrawShapeProps {
   points: number[][]
   isComplete: boolean
 }
 
-export class TLDrawShape<P extends TLDrawShapeProps = any> extends TLShape<P> {
-  constructor(props = {} as TLCustomProps<Partial<P>>) {
-    super(props)
-    this.init(props)
+export abstract class TLDrawShape<
+  P extends TLDrawShapeProps = TLDrawShapeProps,
+  A extends TLApp<any, any> = TLApp<any, any>
+> extends TLShape<P, A> {
+  static id = 'draw'
+
+  abstract defaultProps: P
+
+  constructor(app: A, pageId: string, id: string) {
+    super(app, pageId, id)
     makeObservable(this)
   }
 
-  static id = 'draw'
-
-  @observable points: number[][] = []
-  @observable isComplete = false
-
-  ReactComponent = observer(({ events, isErasing }: TLComponentProps) => {
-    const { points } = this
-
-    return (
-      <SVGContainer {...events} opacity={isErasing ? 0.2 : 1}>
-        <polyline
-          points={points.join()}
-          stroke={'#000'}
-          fill={'none'}
-          strokeWidth={2}
-          pointerEvents="all"
-        />
-      </SVGContainer>
-    )
-  })
-
-  ReactIndicator = observer((props: TLIndicatorProps) => {
-    const { points } = this
-    return <polyline points={points.join()} fill="transparent" />
-  })
-
   /** The shape's bounds in "shape space". */
   @computed get pointBounds(): TLBounds {
-    const { points } = this
+    const {
+      props: { points },
+    } = this
     return BoundsUtils.getBoundsFromPoints(points)
   }
 
   /** The shape's bounds in "page space". */
   getBounds = (): TLBounds => {
-    const { pointBounds, point } = this
+    const {
+      pointBounds,
+      props: { point },
+    } = this
     return BoundsUtils.translateBounds(pointBounds, point)
   }
 
   /** The shape's rotated points in "shape space". */
   @computed get rotatedPoints(): number[][] {
-    const { point, points, center, rotation } = this
-    if (!this.rotation) return points
+    const {
+      center,
+      props: { point, points, rotation },
+    } = this
+    if (!rotation) return points
     const relativeCenter = Vec.sub(center, point)
-    return points.map((point) => Vec.rotWith(point, relativeCenter, rotation))
+    return points.map(point => Vec.rotWith(point, relativeCenter, rotation))
   }
 
   /** The shape's rotated bounds in "page space". */
   getRotatedBounds = (): TLBounds => {
-    const { rotation, bounds, rotatedPoints } = this
+    const {
+      bounds,
+      rotatedPoints,
+      props: { rotation, point },
+    } = this
     if (!rotation) return bounds
-    return BoundsUtils.translateBounds(BoundsUtils.getBoundsFromPoints(rotatedPoints), this.point)
+    return BoundsUtils.translateBounds(BoundsUtils.getBoundsFromPoints(rotatedPoints), point)
   }
 
   /**
@@ -92,9 +74,12 @@ export class TLDrawShape<P extends TLDrawShapeProps = any> extends TLShape<P> {
 
   /** Prepare the shape for a resize session. */
   onResizeStart = () => {
-    const { bounds, points } = this
+    const {
+      bounds,
+      props: { points },
+    } = this
     const size = [bounds.width, bounds.height]
-    this.normalizedPoints = points.map((point) => Vec.divV(point, size))
+    this.normalizedPoints = points.map(point => Vec.divV(point, size))
   }
 
   /**
@@ -110,7 +95,7 @@ export class TLDrawShape<P extends TLDrawShapeProps = any> extends TLShape<P> {
 
     this.update({
       point: [bounds.minX, bounds.minY],
-      points: this.normalizedPoints.map((point) => {
+      points: this.normalizedPoints.map(point => {
         if (flipX) point = [1 - point[0], point[1]]
         if (flipY) point = [point[0], 1 - point[1]]
         return Vec.mulV(point, size).concat(point[2])
@@ -120,12 +105,15 @@ export class TLDrawShape<P extends TLDrawShapeProps = any> extends TLShape<P> {
   }
 
   hitTestPoint = (point: number[]): boolean => {
-    const { points } = this
-    return PointUtils.pointNearToPolyline(Vec.sub(point, this.point), points)
+    const { points, point: ownPoint } = this.props
+    return PointUtils.pointNearToPolyline(Vec.sub(point, ownPoint), points)
   }
 
   hitTestLineSegment = (A: number[], B: number[]): boolean => {
-    const { bounds, points, point } = this
+    const {
+      bounds,
+      props: { points, point },
+    } = this
     if (
       PointUtils.pointInBounds(A, bounds) ||
       PointUtils.pointInBounds(B, bounds) ||
@@ -135,18 +123,21 @@ export class TLDrawShape<P extends TLDrawShapeProps = any> extends TLShape<P> {
       const rB = Vec.sub(B, point)
       return (
         intersectLineSegmentPolyline(rA, rB, points).didIntersect ||
-        !!points.find((point) => Vec.dist(rA, point) < 5 || Vec.dist(rB, point) < 5)
+        !!points.find(point => Vec.dist(rA, point) < 5 || Vec.dist(rB, point) < 5)
       )
     }
     return false
   }
 
   hitTestBounds = (bounds: TLBounds): boolean => {
-    const { rotatedBounds, points, point } = this
+    const {
+      rotatedBounds,
+      props: { points, point },
+    } = this
     const oBounds = BoundsUtils.translateBounds(bounds, Vec.neg(point))
     return (
       BoundsUtils.boundsContain(bounds, rotatedBounds) ||
-      points.every((vert) => PointUtils.pointInBounds(vert, oBounds)) ||
+      points.every(vert => PointUtils.pointInBounds(vert, oBounds)) ||
       (BoundsUtils.boundsCollide(bounds, rotatedBounds) &&
         intersectPolylineBounds(points, oBounds).length > 0)
     )

@@ -19,7 +19,7 @@ export class BrushingState<
     const { selectedShapes, currentPage, selectedIds } = this.app
     this.initialSelectedIds = Array.from(selectedIds.values())
     this.initialSelectedShapes = Array.from(selectedShapes.values())
-    this.tree.load(currentPage.shapes)
+    this.tree.load(Array.from(currentPage.shapes.values()))
   }
 
   onExit = () => {

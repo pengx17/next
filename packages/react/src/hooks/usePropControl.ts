@@ -8,7 +8,7 @@ export function usePropControl<S extends TLReactShape, R extends TLReactApp<S> =
   props: TLAppPropsWithoutApp<S> | TLAppPropsWithApp<S>
 ) {
   React.useEffect(() => {
-    if (!('model' in props)) return
-    if (props.model) app.loadDocumentModel(props.model)
-  }, [(props as TLAppPropsWithoutApp<S>).model])
+    if (!('document' in props)) return
+    if (props.document) app.loadDocumentModel(props.document)
+  }, [(props as TLAppPropsWithoutApp<S>).document])
 }

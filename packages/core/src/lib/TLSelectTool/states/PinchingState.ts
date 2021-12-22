@@ -1,5 +1,4 @@
 import { Vec } from '@tldraw/vec'
-import type { FullGestureState, WebKitGestureEvent } from '@use-gesture/core/types'
 import { TLApp, TLSelectTool, TLShape, TLToolState } from '~lib'
 import type { TLEventInfo, TLEventMap, TLEvents } from '~types'
 
@@ -36,14 +35,14 @@ export class PinchingState<
     this.origin = info.info.point
   }
 
-  onPinch: TLEvents<S>['pinch'] = (info, event) => {
+  onPinch: TLEvents<S>['pinch'] = info => {
     // const delta = Vec.sub(this.origin, gesture.origin)
     // const trueDelta = Vec.sub(delta, this.prevDelta)
     // this.prevDelta = gesture.delta
     this.pinchCamera(info.point, [0, 0], info.offset[0])
   }
 
-  onPinchEnd: TLEvents<S>['pinch'] = (_info, event) => {
+  onPinchEnd: TLEvents<S>['pinch'] = () => {
     this.tool.transition('idle')
   }
 }

@@ -33,7 +33,7 @@ export class TranslatingHandleState<
     this.initialShape = this.shape.clone()
     this.handles = deepCopy(info.shape.handles)
     this.initialHandles = deepCopy(info.shape.handles)
-    this.initialTopLeft = [...info.shape.point]
+    this.initialTopLeft = [...info.shape.props.point]
   }
 
   onExit = () => {

@@ -187,7 +187,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
                   shapes={selectedShapes}
                   hidden={!showContextBar}
                   bounds={selectedShapes.length === 1 ? selectedShapes[0].bounds : selectionBounds}
-                  rotation={selectedShapes.length === 1 ? selectedShapes[0].rotation : 0}
+                  rotation={selectedShapes.length === 1 ? selectedShapes[0].props.rotation : 0}
                 />
               )}
             </>

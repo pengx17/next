@@ -10,6 +10,7 @@ import type {
   TLCallback,
   TLTheme,
   TLToolConstructor,
+  TLAppStateModel,
 } from '@tldraw/core'
 import type { TLReactComponents } from '~types/component-props'
 import type { TLReactApp, TLReactEventMap } from '~types'
@@ -37,7 +38,8 @@ export interface TLAppPropsWithoutApp<
   S extends TLReactShape = TLReactShape,
   R extends TLReactApp<S> = TLReactApp<S>
 > extends TLCommonAppProps<S, R> {
-  model?: TLDocumentModel
+  document?: TLDocumentModel
+  state?: TLAppStateModel
   Shapes?: TLReactShapeConstructor<S>[]
   Tools?: TLToolConstructor<S, TLReactEventMap, TLReactApp<S>>[]
   children?: React.ReactNode

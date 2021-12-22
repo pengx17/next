@@ -92,7 +92,7 @@ describe('app.deregisterShapes', () => {
   it.todo('Deregisters a shape class when passed an array of shape classes')
 })
 
-describe('app.getShapeClass', () => {
+describe('app.getShapeConstructor', () => {
   it.todo('Accesses a tool class when passed an id')
 })
 

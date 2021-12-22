@@ -9,10 +9,8 @@ import {
   TLPage,
   TLViewport,
   TLShape,
-  TLPageModel,
   TLToolConstructor,
   TLShapeConstructor,
-  TLShapeModel,
   TLCustomProps,
 } from '~lib'
 import type {
@@ -25,6 +23,10 @@ import type {
   TLShortcut,
   TLEventMap,
   TLStateEvents,
+  TLShapeModel,
+  TLPageModel,
+  TLDocumentModel,
+  TLAppStateModel,
 } from '~types'
 import { TLHistory } from '../TLHistory'
 import { TLSettings } from '../TLSettings'
@@ -32,18 +34,21 @@ import { TLRootState } from '../TLState'
 import { TLApi } from '~lib/TLApi'
 import { TLCursors } from '~lib/TLCursors'
 
-export interface TLDocumentModel {
-  currentPageId: string
-  selectedIds: string[]
-  pages: TLPageModel[]
-}
+// export interface TLSnapshot {
+//   currentPageId: string
+//   selectedIds: string[]
+//   pages: Record<string, TLPageModel>
+//   shapes: Record<string, TLShapeModel>
+// }
 
 export class TLApp<
   S extends TLShape = TLShape,
   K extends TLEventMap = TLEventMap
 > extends TLRootState<S, K> {
   constructor(
-    serializedApp?: TLDocumentModel,
+    id: string,
+    document?: TLDocumentModel,
+    appState?: TLAppStateModel,
     Shapes?: TLShapeConstructor<S>[],
     Tools?: TLToolConstructor<S, K>[]
   ) {
@@ -60,8 +65,31 @@ export class TLApp<
     }
     if (Shapes) this.registerShapes(Shapes)
     if (Tools) this.registerTools(Tools)
+    // Load document
+    if (document) {
+      // this.history.deserialize(document)
+      this.loadDocumentModel(document)
+    } else {
+      this.loadDocumentModel({
+        id: this.id,
+        pages: [
+          {
+            name: 'Page',
+            id: 'page1',
+            shapes: [],
+            bindings: [],
+          },
+        ],
+      })
+    }
+    // Set app state
+    this.appState = {
+      currentPageId: this.document.pages[0].id,
+      selectedIds: [],
+      ...appState,
+    }
+
     this.history.resume()
-    if (serializedApp) this.history.deserialize(serializedApp)
     const ownShortcuts: TLShortcut<S, K>[] = [
       {
         keys: 'mod+shift+g',
@@ -158,7 +186,6 @@ export class TLApp<
     this.notify('mount', null)
   }
 
-  static id = 'app'
   static states: TLToolConstructor<any, any>[] = [TLSelectTool]
   static initial = 'select'
 
@@ -192,11 +219,47 @@ export class TLApp<
   }
 
   /* -------------------------------------------------- */
+  /*                      App State                     */
+  /* -------------------------------------------------- */
+
+  @observable appState: TLAppStateModel
+
+  @action loadAppState(appState: TLAppStateModel): this {
+    this.appState = appState
+    return this
+  }
+
+  /* -------------------------------------------------- */
   /*                      Document                      */
   /* -------------------------------------------------- */
 
-  loadDocumentModel(state: TLDocumentModel): this {
-    this.history.deserialize(state)
+  @observable document: TLDocumentModel = {
+    id: this.id,
+    pages: [
+      {
+        name: 'Page',
+        id: 'page1',
+        shapes: [],
+        bindings: [],
+      },
+    ],
+  }
+
+  @action loadDocumentModel(document: TLDocumentModel): this {
+    this.document = document
+    this.pages.clear()
+    this.addPages(this.document.pages)
+    this.document.pages.forEach(pageModel => {
+      const page = this.getPageById(pageModel.id)
+      const { shapes } = pageModel
+      pageModel.shapes = []
+      shapes.forEach(props => {
+        const ShapeClass = this.getShapeConstructor(props.type)
+        const shape = new ShapeClass(this, pageModel.id, props.id)
+        pageModel.shapes.push({ ...shape.defaultProps, ...props })
+        page.shapes.set(props.id, shape)
+      })
+    })
     return this
   }
 
@@ -219,52 +282,52 @@ export class TLApp<
   }
 
   @computed get serialized(): TLDocumentModel {
-    return {
-      currentPageId: this.currentPageId,
-      selectedIds: Array.from(this.selectedIds.values()),
-      pages: Array.from(this.pages.values()).map(page => page.serialized),
-    }
+    return this.document
   }
 
   /* ---------------------- Pages --------------------- */
 
-  @observable pages: Map<string, TLPage<S, K>> = new Map([
-    ['page', new TLPage(this, { id: 'page', name: 'page', shapes: [], bindings: [] })],
-  ])
+  @observable pages = new Map<string, TLPage<S, K>>([])
 
-  @observable currentPageId = 'page'
-
-  @computed get currentPage(): TLPage<S, K> {
-    return this.getPageById(this.currentPageId)
-  }
-
-  getPageById = (pageId: string): TLPage<S, K> => {
-    const page = this.pages.get(pageId)
-    if (!page) throw Error(`Could not find a page named ${pageId}.`)
-    return page
-  }
-
-  @action setCurrentPage(page: string | TLPage<S, K>): this {
-    this.currentPageId = typeof page === 'string' ? page : page.id
-    return this
-  }
-
-  @action addPages(pages: TLPage<S, K>[]): this {
-    pages.forEach(page => this.pages.set(page.id, page))
+  @action addPages(pages: TLPageModel[]): this {
+    this.document.pages.concat(pages)
+    pages.forEach(props => this.pages.set(props.id, new TLPage(this, props.id)))
     this.persist()
     return this
   }
 
-  @action removePages(pages: TLPage<S, K>[]): this {
+  @action removePages(pages: TLPageModel[]): this {
+    this.document.pages = this.document.pages.filter(page => !pages.includes(page))
     pages.forEach(page => this.pages.delete(page.id))
     this.persist()
     return this
   }
 
+  @computed get currentPageId() {
+    return this.appState.currentPageId
+  }
+
+  @computed get currentPage(): TLPage<S, K> {
+    const page = this.pages.get(this.currentPageId)
+    if (!page) throw Error(`Could not the current page: ${this.currentPageId}`)
+    return page
+  }
+
+  getPageById = (pageId: string): TLPage<S, K> => {
+    const page = this.pages.get(pageId)
+    if (!page) throw Error(`Could not find a page: ${pageId}.`)
+    return page
+  }
+
+  @action setCurrentPage(page: string | TLPage<S, K>): this {
+    this.appState.currentPageId = typeof page === 'string' ? page : page.id
+    return this
+  }
+
   /* --------------------- Shapes --------------------- */
 
-  getShapeById = <T extends S>(id: string, pageId = this.currentPage.id): T => {
-    const shape = this.getPageById(pageId)?.shapes.find(shape => shape.id === id) as T
+  getShapeById = (id: string, pageId = this.currentPage.id) => {
+    const shape = this.getPageById(pageId).shapes.get(id)
     if (!shape) throw Error(`Could not find that shape: ${id} on page ${pageId}`)
     return shape
   }
@@ -275,7 +338,7 @@ export class TLApp<
   }
 
   @action updateShapes = (shapes: ({ id: string } & Partial<TLCustomProps<S>>)[]): this => {
-    shapes.forEach(shape => this.getShapeById(shape.id)?.update(shape))
+    shapes.forEach(shape => this.getShapeById(shape.id).update(shape))
     return this
   }
 
@@ -330,7 +393,7 @@ export class TLApp<
 
   @computed get editingShape(): S | undefined {
     const { editingId, currentPage } = this
-    return editingId ? currentPage.shapes.find(shape => shape.id === editingId) : undefined
+    return editingId ? currentPage.shapes.get(editingId) : undefined
   }
 
   @action readonly setEditingShape = (shape?: string | S): this => {
@@ -344,7 +407,7 @@ export class TLApp<
 
   @computed get hoveredShape(): S | undefined {
     const { hoveredId, currentPage } = this
-    return hoveredId ? currentPage.shapes.find(shape => shape.id === hoveredId) : undefined
+    return hoveredId ? currentPage.shapes.get(hoveredId) : undefined
   }
 
   @action readonly setHoveredShape = (shape?: string | S): this => {
@@ -376,13 +439,14 @@ export class TLApp<
     } else {
       shapes.forEach(s => selectedIds.add((s as S).id))
     }
-    const newSelectedShapes = this.currentPage.shapes.filter(shape => selectedIds.has(shape.id))
+    const newSelectedShapes = Array.from(selectedIds).map(id => this.getShapeById(id))
     newSelectedShapes.forEach(s => selectedShapes.add(s))
     if (newSelectedShapes.length === 1) {
-      this.selectionRotation = newSelectedShapes[0].rotation ?? 0
+      this.selectionRotation = newSelectedShapes[0].props.rotation ?? 0
     } else {
       this.selectionRotation = 0
     }
+    this.appState.selectedIds = Array.from(selectedIds.values())
     return this
   }
 
@@ -409,7 +473,7 @@ export class TLApp<
     } else {
       shapes.forEach(s => erasingIds.add((s as S).id))
     }
-    const newErasingShapes = this.currentPage.shapes.filter(shape => erasingIds.has(shape.id))
+    const newErasingShapes = Array.from(erasingIds).map(id => this.getShapeById(id))
     newErasingShapes.forEach(s => erasingShapes.add(s))
     return this
   }
@@ -456,23 +520,31 @@ export class TLApp<
       viewport: { currentView },
     } = this
 
-    return currentPage.shapes.filter(shape => {
-      return (
+    const results: S[] = []
+
+    currentPage.shapes.forEach(shape => {
+      if (
         shape.parentId === currentPage.id &&
         (shape.stayMounted ||
           BoundsUtils.boundsContain(currentView, shape.rotatedBounds) ||
           BoundsUtils.boundsCollide(currentView, shape.rotatedBounds))
       )
+        results.push(shape)
     })
+
+    return results
   }
 
   @computed get selectionBounds(): TLBounds | undefined {
     const { selectedShapesArray } = this
     if (selectedShapesArray.length === 0) return undefined
     if (selectedShapesArray.length === 1) {
-      return { ...selectedShapesArray[0].bounds, rotation: selectedShapesArray[0].rotation }
+      return { ...selectedShapesArray[0].bounds, rotation: selectedShapesArray[0].props.rotation }
     }
-    return BoundsUtils.getCommonBounds(this.selectedShapesArray.map(shape => shape.rotatedBounds))
+    const bounds = BoundsUtils.getCommonBounds(
+      this.selectedShapesArray.map(shape => shape.rotatedBounds)
+    )
+    return bounds
   }
 
   @computed get showSelection() {
@@ -547,7 +619,7 @@ export class TLApp<
     Shapes.forEach(Shape => this.Shapes.delete(Shape.id))
   }
 
-  getShapeClass = (type: string): TLShapeConstructor<S> => {
+  getShapeConstructor = (type: string): TLShapeConstructor<S> => {
     if (!type) throw Error('No shape type provided.')
     const Shape = this.Shapes.get(type)
     if (!Shape) throw Error(`Could not find shape class for ${type}`)

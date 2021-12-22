@@ -23,16 +23,15 @@ export const Shape = observer(function Shape({
   isBinding = false,
   isErasing = false,
   isEditing = false,
-  meta,
 }: ShapeProps) {
-  const { bounds, rotation, ReactComponent } = shape
+  const { rotation } = shape.props
+  const { bounds, ReactComponent } = shape
 
   const events = useShapeEvents(shape)
 
   return (
     <Container bounds={bounds} rotation={rotation} zIndex={zIndex}>
       <ReactComponent
-        meta={meta}
         isEditing={isEditing}
         isBinding={isBinding}
         isHovered={isHovered}

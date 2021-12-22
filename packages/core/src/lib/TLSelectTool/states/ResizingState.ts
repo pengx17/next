@@ -1,6 +1,14 @@
 import { Vec } from '@tldraw/vec'
-import { TLApp, TLShape, TLSelectTool, TLToolState, TLShapeModel } from '~lib'
-import { TLBounds, TLResizeCorner, TLResizeEdge, TLCursor, TLEventMap, TLEvents } from '~types'
+import { TLApp, TLShape, TLSelectTool, TLToolState } from '~lib'
+import {
+  TLBounds,
+  TLResizeCorner,
+  TLResizeEdge,
+  TLCursor,
+  TLEventMap,
+  TLEvents,
+  TLShapeModel,
+} from '~types'
 import { BoundsUtils } from '~utils'
 
 export class ResizingState<
@@ -17,7 +25,8 @@ export class ResizingState<
   snapshots: Record<
     string,
     {
-      shape: S
+      shape: TLShapeModel
+      bounds: TLBounds
       transformOrigin: number[]
     }
   > = {}
@@ -55,8 +64,8 @@ export class ResizingState<
     )
 
     this.isSingle = selectedShapesArray.length === 1
-    this.isAspectRatioLocked = this.isSingle && !!selectedShapesArray[0].isAspectRatioLocked
-    this.selectionRotation = this.isSingle ? selectedShapesArray[0].rotation ?? 0 : 0
+    this.isAspectRatioLocked = this.isSingle && !!selectedShapesArray[0].props.isAspectRatioLocked
+    this.selectionRotation = this.isSingle ? selectedShapesArray[0].props.rotation ?? 0 : 0
     this.initialCommonBounds = { ...selectionBounds }
     this.initialCommonCenter = BoundsUtils.getBoundsCenter(this.initialCommonBounds)
 
@@ -71,7 +80,8 @@ export class ResizingState<
         return [
           shape.id,
           {
-            shape: shape.clone(),
+            shape: shape.serialized,
+            bounds: shape.bounds,
             transformOrigin: [ix, iy],
           },
         ]
@@ -145,12 +155,12 @@ export class ResizingState<
     }
 
     this.app.selectedShapes.forEach(shape => {
-      const { shape: initialShape, transformOrigin } = snapshots[shape.id]
+      const { shape: initialShape, bounds: initialBounds, transformOrigin } = snapshots[shape.id]
 
       const relativeBounds = BoundsUtils.getRelativeTransformedBoundingBox(
         nextBounds,
         initialCommonBounds,
-        initialShape.bounds,
+        initialBounds,
         scaleX < 0,
         scaleY < 0
       )

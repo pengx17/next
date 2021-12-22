@@ -1,4 +1,5 @@
 export * from './types'
+export * from './models'
 export * from './TLEventMap'
 export * from './TLEvents'
 export * from './TLEventHandlers'

@@ -44,7 +44,7 @@ export class IdleState<
     }
   }
 
-  onPointerDown: TLEvents<S>['pointer'] = (info, event) => {
+  onPointerDown: TLEvents<S>['pointer'] = info => {
     const {
       selectedShapes,
       inputs: { ctrlKey },
