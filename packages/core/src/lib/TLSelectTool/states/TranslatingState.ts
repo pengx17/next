@@ -45,19 +45,12 @@ export class TranslatingState<
   private startCloning() {
     if (!this.didClone) {
       // Create the clones
-      this.clones = this.app.selectedShapesArray.map(shape => {
-        const ShapeClass = this.app.getShapeConstructor(shape.type)
-        if (!ShapeClass) throw Error('Could not find that shape class.')
-        const clone = {
-          ...shape.serialized,
-          id: uniqueId(),
-          point: this.initialPoints[shape.id],
-          rotation: shape.props.rotation,
-        }
-        return clone
-      })
-
-      this.app.createShapes(this.clones)
+      this.clones = this.app.selectedShapesArray.map(shape => ({
+        ...shape.serialized,
+        id: uniqueId(),
+        point: this.initialPoints[shape.id],
+        rotation: shape.props.rotation,
+      }))
 
       this.initialClonePoints = Object.fromEntries(
         this.clones.map(({ id, point }) => [id, point.slice()])
@@ -75,7 +68,7 @@ export class TranslatingState<
     this.initialPoints = this.initialClonePoints
 
     // Add the clones to the page
-    this.app.currentPage.addShapes(...this.clones)
+    this.app.currentPage.addShapes(this.clones)
 
     // Select the clones
     this.app.setSelectedShapes(Object.keys(this.initialClonePoints))

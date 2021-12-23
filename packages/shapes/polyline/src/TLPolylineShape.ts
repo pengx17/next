@@ -1,13 +1,14 @@
-import { computed } from 'mobx'
+import { computed, makeObservable } from 'mobx'
 import {
   BoundsUtils,
   TLBounds,
-  TLShapeProps,
   TLResizeInfo,
   PointUtils,
   PolygonUtils,
   TLHandle,
   TLShapeWithHandles,
+  TLShapeModel,
+  TLShapeProps,
 } from '@tldraw/core'
 import { Vec } from '@tldraw/vec'
 import {
@@ -16,19 +17,24 @@ import {
   intersectPolylineBounds,
 } from '@tldraw/intersect'
 
-export interface TLPolylineShapeProps extends TLShapeProps {
+export interface TLPolylineShapeProps {
   handles: TLHandle[]
 }
 
 export abstract class TLPolylineShape<
   P extends TLPolylineShapeProps = TLPolylineShapeProps
-> extends TLShapeWithHandles<P> {
+> extends TLShapeWithHandles<TLHandle, P> {
+  constructor(props: Partial<P> & TLShapeProps) {
+    super(props)
+    makeObservable(this)
+  }
+
   static id = 'polyline'
 
-  abstract defaultProps: P
+  static defaultProps: TLPolylineShapeProps
 
   @computed get points() {
-    return this.handles.map(h => h.point)
+    return this.props.handles.map(h => h.point)
   }
 
   @computed get centroid() {
@@ -39,8 +45,7 @@ export abstract class TLPolylineShape<
   @computed get rotatedPoints() {
     const {
       centroid,
-      handles,
-      props: { rotation },
+      props: { handles, rotation },
     } = this
     if (!rotation) return this.points
     return handles.map(h => Vec.rotWith(h.point, centroid, rotation))
@@ -65,13 +70,19 @@ export abstract class TLPolylineShape<
   private normalizedHandles: number[][] = []
 
   onResizeStart = () => {
-    const { handles, bounds } = this
+    const {
+      props: { handles },
+      bounds,
+    } = this
     const size = [bounds.width, bounds.height]
     this.normalizedHandles = handles.map(h => Vec.divV(h.point, size))
   }
 
   onResize = (bounds: TLBounds, info: TLResizeInfo<P>) => {
-    const { handles, normalizedHandles } = this
+    const {
+      props: { handles },
+      normalizedHandles,
+    } = this
     const size = [bounds.width, bounds.height]
 
     return this.update({
@@ -127,7 +138,7 @@ export abstract class TLPolylineShape<
     )
   }
 
-  validateProps = (props: Partial<TLShapeProps> & Partial<P>) => {
+  validateProps = (props: Partial<TLShapeModel<TLPolylineShapeProps>>) => {
     if (props.point) props.point = [0, 0]
     if (props.handles !== undefined && props.handles.length < 1) props.handles = [{ point: [0, 0] }]
     return props

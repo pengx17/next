@@ -104,7 +104,7 @@ export class RotatingState<
 
       if ('handles' in shape) {
         // Don't rotate shapes with handles; instead, rotate the handles
-        const initialHandles = (initialShape as unknown as TLShapeWithHandles).handles
+        const initialHandles = (initialShape as unknown as TLShapeWithHandles).props.handles
         const handlePoints = initialHandles!.map(handle =>
           Vec.rotWith(handle.point, relativeCenter, angleDelta)
         )

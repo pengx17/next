@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { BoundsUtils, TLBounds, TLResizeInfo, TLShape } from '@tldraw/core'
 
 export interface TLBoxShapeProps {
@@ -7,7 +8,9 @@ export interface TLBoxShapeProps {
 export abstract class TLBoxShape<P extends TLBoxShapeProps = TLBoxShapeProps> extends TLShape<P> {
   static id = 'box'
 
-  abstract defaultProps: P
+  static defaultProps: TLBoxShapeProps = {
+    size: [100, 100],
+  }
 
   getBounds = (): TLBounds => {
     const [x, y] = this.props.point

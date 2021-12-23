@@ -2,10 +2,10 @@ import { computed } from 'mobx'
 import {
   BoundsUtils,
   TLBounds,
-  TLShapeProps,
   TLResizeInfo,
   PointUtils,
   PolygonUtils,
+  TLShapeModel,
 } from '@tldraw/core'
 import { Vec } from '@tldraw/vec'
 import { intersectLineSegmentPolyline, intersectPolygonBounds } from '@tldraw/intersect'
@@ -17,8 +17,10 @@ export interface TLPolygonShapeProps extends TLBoxShapeProps {
   isFlippedY: boolean
 }
 
-export abstract class TLPolygonShape<P extends TLPolygonShapeProps = any> extends TLBoxShape<P> {
-  abstract defaultProps: P
+export abstract class TLPolygonShape<
+  P extends TLPolygonShapeProps = TLPolygonShapeProps
+> extends TLBoxShape<P> {
+  static defaultProps: TLPolygonShapeProps
 
   static id = 'polygon'
 
@@ -133,7 +135,7 @@ export abstract class TLPolygonShape<P extends TLPolygonShapeProps = any> extend
     )
   }
 
-  validateProps = (props: Partial<TLShapeProps> & Partial<P>) => {
+  validateProps = (props: Partial<TLShapeModel<any>>) => {
     if (props.point) props.point = [0, 0]
     if (props.sides !== undefined && props.sides < 3) props.sides = 3
     return props

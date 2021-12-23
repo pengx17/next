@@ -13,7 +13,7 @@ export interface NuBoxShapeProps extends TLBoxShapeProps, NuStyleProps {
 export class NuBoxShape extends TLBoxShape<NuBoxShapeProps> {
   static id = 'box'
 
-  defaultProps = {
+  static defaultProps: NuBoxShapeProps = {
     size: [100, 100],
     stroke: '#000000',
     fill: '#ffffff',
@@ -35,7 +35,7 @@ export class NuBoxShape extends TLBoxShape<NuBoxShapeProps> {
     return (
       <SVGContainer {...events} opacity={isErasing ? 0.2 : opacity}>
         <rect
-          className={isSelected ? 'tl-hitarea-fill' : 'tl-hitarea-stroke'}
+          className={'tl-hitarea-fill'}
           x={strokeWidth / 2}
           y={strokeWidth / 2}
           rx={borderRadius}

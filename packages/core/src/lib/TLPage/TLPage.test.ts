@@ -1,9 +1,8 @@
-import type { TLDocumentModel } from '~lib'
+import type { TLDocumentModel } from '~types'
 import { TLTestApp } from '~test/TLTestApp'
 
 const documentModel: TLDocumentModel = {
-  currentPageId: 'page1',
-  selectedIds: ['box1'],
+  id: 'doc',
   pages: [
     {
       name: 'Page',

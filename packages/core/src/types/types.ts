@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { TLApp, TLShape } from '~lib'
 import type { TLEventMap } from './TLEventMap'
@@ -224,3 +225,5 @@ export function isStringArray(arr: string[] | any[]): asserts arr is string[] {
 /* ---------------------- Misc ---------------------- */
 
 export type AnyObject = { [key: string]: any }
+
+export type Merge<A, B> = Omit<A, keyof B> & B

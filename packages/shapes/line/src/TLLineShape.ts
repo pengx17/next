@@ -1,4 +1,4 @@
-import type { TLShapeProps, TLHandle } from '@tldraw/core'
+import type { TLShapeProps, TLHandle, TLShapeModel, Merge } from '@tldraw/core'
 import { TLPolylineShape, TLPolylineShapeProps } from '@tldraw/polyline-shape'
 
 export interface TLLineShapeProps extends TLPolylineShapeProps {
@@ -10,9 +10,9 @@ export abstract class TLLineShape<
 > extends TLPolylineShape<P> {
   static id = 'line'
 
-  abstract defaultProps: P
+  static defaultProps: TLLineShapeProps
 
-  validateProps = (props: Partial<TLShapeProps> & Partial<P>) => {
+  validateProps = (props: Partial<TLShapeModel<TLLineShapeProps>>) => {
     if (props.point) props.point = [0, 0]
     if (props.handles !== undefined && props.handles.length < 1) props.handles = [{ point: [0, 0] }]
     return props

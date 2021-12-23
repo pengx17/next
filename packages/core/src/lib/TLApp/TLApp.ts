@@ -11,7 +11,6 @@ import {
   TLShape,
   TLToolConstructor,
   TLShapeConstructor,
-  TLCustomProps,
 } from '~lib'
 import type {
   TLBounds,
@@ -246,20 +245,8 @@ export class TLApp<
   }
 
   @action loadDocumentModel(document: TLDocumentModel): this {
-    this.document = document
-    this.pages.clear()
-    this.addPages(this.document.pages)
-    this.document.pages.forEach(pageModel => {
-      const page = this.getPageById(pageModel.id)
-      const { shapes } = pageModel
-      pageModel.shapes = []
-      shapes.forEach(props => {
-        const ShapeClass = this.getShapeConstructor(props.type)
-        const shape = new ShapeClass(this, pageModel.id, props.id)
-        pageModel.shapes.push({ ...shape.defaultProps, ...props })
-        page.shapes.set(props.id, shape)
-      })
-    })
+    this.pages = []
+    this.addPages(document.pages)
     return this
   }
 
@@ -287,18 +274,20 @@ export class TLApp<
 
   /* ---------------------- Pages --------------------- */
 
-  @observable pages = new Map<string, TLPage<S, K>>([])
+  @observable pages: TLPage<S, K>[] = []
 
-  @action addPages(pages: TLPageModel[]): this {
-    this.document.pages.concat(pages)
-    pages.forEach(props => this.pages.set(props.id, new TLPage(this, props.id)))
+  @action addPages(pageModels: TLPageModel[]): this {
+    pageModels.forEach(pageModel => {
+      const page = new TLPage(this, pageModel.id)
+      page.addShapes(pageModel.shapes)
+      this.pages.push(page)
+    })
     this.persist()
     return this
   }
 
-  @action removePages(pages: TLPageModel[]): this {
-    this.document.pages = this.document.pages.filter(page => !pages.includes(page))
-    pages.forEach(page => this.pages.delete(page.id))
+  @action removePages(pages: TLPage<S, K>[]): this {
+    this.pages = this.pages.filter(p => !pages.includes(p))
     this.persist()
     return this
   }
@@ -308,13 +297,13 @@ export class TLApp<
   }
 
   @computed get currentPage(): TLPage<S, K> {
-    const page = this.pages.get(this.currentPageId)
+    const page = this.pages.find(p => p.id === this.currentPageId)
     if (!page) throw Error(`Could not the current page: ${this.currentPageId}`)
     return page
   }
 
   getPageById = (pageId: string): TLPage<S, K> => {
-    const page = this.pages.get(pageId)
+    const page = this.pages.find(p => p.id === pageId)
     if (!page) throw Error(`Could not find a page: ${pageId}.`)
     return page
   }
@@ -327,17 +316,19 @@ export class TLApp<
   /* --------------------- Shapes --------------------- */
 
   getShapeById = (id: string, pageId = this.currentPage.id) => {
-    const shape = this.getPageById(pageId).shapes.get(id)
+    const shape = this.getPageById(pageId).shapes.find(s => s.id === id)
     if (!shape) throw Error(`Could not find that shape: ${id} on page ${pageId}`)
     return shape
   }
 
   @action readonly createShapes = (shapes: S[] | TLShapeModel[]): this => {
-    this.currentPage.addShapes(...shapes)
+    this.currentPage.addShapes(shapes)
     return this
   }
 
-  @action updateShapes = (shapes: ({ id: string } & Partial<TLCustomProps<S>>)[]): this => {
+  @action updateShapes = <T extends S = S>(
+    shapes: ({ id: string } & Partial<T['props']>)[]
+  ): this => {
     shapes.forEach(shape => this.getShapeById(shape.id).update(shape))
     return this
   }
@@ -393,7 +384,7 @@ export class TLApp<
 
   @computed get editingShape(): S | undefined {
     const { editingId, currentPage } = this
-    return editingId ? currentPage.shapes.get(editingId) : undefined
+    return editingId ? currentPage.shapes.find(s => s.id === editingId) : undefined
   }
 
   @action readonly setEditingShape = (shape?: string | S): this => {
@@ -407,7 +398,7 @@ export class TLApp<
 
   @computed get hoveredShape(): S | undefined {
     const { hoveredId, currentPage } = this
-    return hoveredId ? currentPage.shapes.get(hoveredId) : undefined
+    return hoveredId ? currentPage.shapes.find(s => s.id === hoveredId) : undefined
   }
 
   @action readonly setHoveredShape = (shape?: string | S): this => {

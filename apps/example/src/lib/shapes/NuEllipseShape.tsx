@@ -126,7 +126,7 @@ export class NuEllipseShape extends TLBoxShape<NuEllipseShapeProps> {
     )
   }
 
-  onResize = (bounds: TLBounds, info: TLResizeInfo<NuEllipseShapeProps>) => {
+  onResize = (bounds: TLBounds, info: TLResizeInfo<typeof this.props>) => {
     return this.update({
       point: [bounds.minX, bounds.minY],
       size: [Math.max(1, bounds.width), Math.max(1, bounds.height)],

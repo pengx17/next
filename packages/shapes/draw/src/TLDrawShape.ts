@@ -1,5 +1,12 @@
 import { computed, makeObservable } from 'mobx'
-import { TLShape, BoundsUtils, TLBounds, TLResizeInfo, PointUtils, TLApp } from '@tldraw/core'
+import {
+  TLShape,
+  BoundsUtils,
+  TLBounds,
+  TLResizeInfo,
+  PointUtils,
+  TLShapeProps,
+} from '@tldraw/core'
 import { Vec } from '@tldraw/vec'
 import {
   intersectBoundsLineSegment,
@@ -13,15 +20,14 @@ export interface TLDrawShapeProps {
 }
 
 export abstract class TLDrawShape<
-  P extends TLDrawShapeProps = TLDrawShapeProps,
-  A extends TLApp<any, any> = TLApp<any, any>
-> extends TLShape<P, A> {
+  P extends TLDrawShapeProps = TLDrawShapeProps
+> extends TLShape<P> {
   static id = 'draw'
 
-  abstract defaultProps: P
+  static defaultProps: TLDrawShapeProps
 
-  constructor(app: A, pageId: string, id: string) {
-    super(app, pageId, id)
+  constructor(props: Partial<P> & TLShapeProps) {
+    super(props)
     makeObservable(this)
   }
 
@@ -30,6 +36,7 @@ export abstract class TLDrawShape<
     const {
       props: { points },
     } = this
+    points.map(point => point[0])
     return BoundsUtils.getBoundsFromPoints(points)
   }
 
@@ -50,6 +57,7 @@ export abstract class TLDrawShape<
     } = this
     if (!rotation) return points
     const relativeCenter = Vec.sub(center, point)
+
     return points.map(point => Vec.rotWith(point, relativeCenter, rotation))
   }
 

@@ -1,6 +1,7 @@
 import type { TLShape } from '../../TLShape'
-import type { AnyObject, TLShortcut, TLEvent, TLEvents, TLStateEvent } from './shared'
+import type { TLShortcut, TLEvent, TLEvents, TLStateEvent } from './shared'
 import { action } from 'mobx'
+import type { AnyObject } from '~types'
 
 export interface TLStateNodeConstructor<S extends TLShape = TLShape, C extends any = any> {
   new (): TLStateNode<S, C>
@@ -43,22 +44,22 @@ export abstract class TLStateNode<S extends TLShape = TLShape, C extends any = a
   protected _disposables: (() => void)[] = []
 
   dispose() {
-    this._disposables.forEach((disposable) => disposable())
+    this._disposables.forEach(disposable => disposable())
     return this
   }
 
   /* --------------------- Events --------------------- */
 
-  onTransition: TLEvent<S>['onTransition'] = (info) => {
+  onTransition: TLEvent<S>['onTransition'] = info => {
     // this._onTransition?.(info, this.context)
   }
 
-  onEnter: TLEvent<S>['onEnter'] = (info) => {
+  onEnter: TLEvent<S>['onEnter'] = info => {
     this._isActive = true
     // this._onEnter?.(info, this.context)
   }
 
-  onExit: TLEvent<S>['onExit'] = (info) => {
+  onExit: TLEvent<S>['onExit'] = info => {
     this._isActive = false
     // this._onExit?.(info, this.context)
   }
@@ -181,17 +182,17 @@ export abstract class TLBranchStateNode<
     }
   }
 
-  onTransition: TLEvent<S>['onTransition'] = (info) => {
+  onTransition: TLEvent<S>['onTransition'] = info => {
     // this._onTransition?.(info, this.context)
   }
 
-  onEnter: TLEvent<S>['onEnter'] = (info) => {
+  onEnter: TLEvent<S>['onEnter'] = info => {
     this._isActive = true
     if (this.initial) this.transition(this.initial, info)
     // this._onEnter?.(info, this.context)
   }
 
-  onExit: TLEvent<S>['onExit'] = (info) => {
+  onExit: TLEvent<S>['onExit'] = info => {
     this._isActive = false
     this.currentState?.onExit?.({ fromId: 'parent' })
     // this._onExit?.(info, this.context)

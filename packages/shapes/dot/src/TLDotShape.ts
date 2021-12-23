@@ -1,13 +1,14 @@
-import { TLShape, BoundsUtils, TLBounds, TLResizeInfo } from '@tldraw/core'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { TLShape, BoundsUtils, TLBounds, TLResizeInfo, Merge } from '@tldraw/core'
 
 export interface TLDotShapeProps {
   radius: number
 }
 
 export abstract class TLDotShape<P extends TLDotShapeProps = TLDotShapeProps> extends TLShape<P> {
-  abstract defaultProps: P
-
   static id = 'dot'
+
+  abstract defaultProps: P
 
   readonly hideSelection = true
   readonly hideResizeHandles = true
@@ -19,6 +20,7 @@ export abstract class TLDotShape<P extends TLDotShapeProps = TLDotShapeProps> ex
       point: [x, y],
       radius,
     } = this.props
+
     return {
       minX: x,
       minY: y,

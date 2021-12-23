@@ -31,8 +31,8 @@ export class TranslatingHandleState<
     this.index = info.index
     this.shape = info.shape
     this.initialShape = this.shape.clone()
-    this.handles = deepCopy(info.shape.handles)
-    this.initialHandles = deepCopy(info.shape.handles)
+    this.handles = deepCopy(info.shape.props.handles)
+    this.initialHandles = deepCopy(info.shape.props.handles)
     this.initialTopLeft = [...info.shape.props.point]
   }
 

@@ -24,8 +24,6 @@ export interface TLPointerEvent<T = Element> extends React.MouseEvent<T, Pointer
   order?: number
 }
 
-export type AnyObject = { [key: string]: any }
-
 export type TLShortcut<C extends unknown> = {
   keys: string | string[]
   fn: (info: C) => void

@@ -3,7 +3,6 @@ import { Vec } from '@tldraw/vec'
 import { TLPolygonShapeProps, TLPolygonShape } from '@tldraw/polygon-shape'
 
 export interface TLStarShapeProps extends TLPolygonShapeProps {
-  points: number
   ratio: number
   isFlippedY: boolean
 }
@@ -13,11 +12,11 @@ export interface TLStarShapeProps extends TLPolygonShapeProps {
  * location of its vertices.
  */
 export abstract class TLStarShape<
-  P extends TLStarShapeProps = TLStarShapeProps
+  P extends TLPolygonShapeProps = TLPolygonShapeProps
 > extends TLPolygonShape<P> {
   id = 'star'
 
-  abstract defaultProps: P
+  static defaultProps: TLStarShapeProps
 
   getVertices(padding = 0): number[][] {
     const {
