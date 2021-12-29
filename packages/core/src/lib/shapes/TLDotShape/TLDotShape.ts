@@ -1,6 +1,6 @@
 import { intersectCircleBounds } from '@tldraw/intersect'
 import Vec from '@tldraw/vec'
-import { createShapeFactory, TLShape, TLShapeOptions, TLShapeProps } from '~lib'
+import { createShapeClass, TLShape, TLShapeOptions, TLShapeProps } from '~lib'
 import { BoundsUtils } from '~utils'
 
 export interface TLDotShapeProps extends TLShapeProps {
@@ -13,21 +13,25 @@ export type TLDotShape<
   C extends Record<string, unknown> = Record<string, unknown>
 > = TLShape<P, C>
 
-export type TLDotShapeFactory<
+export type TLDotShapeClass<
   P extends TLDotShapeProps = TLDotShapeProps,
   C extends Record<string, unknown> = Record<string, unknown>
-> = (props: P) => TLDotShape<P, C>
+> = {
+  new (props: P): TLDotShape<P, C>
+  id: P['id']
+}
 
-export function createDotShapeFactory<
+export function createDotShapeClass<
   P extends TLDotShapeProps = TLDotShapeProps,
   C extends Record<string, unknown> = Record<string, unknown>
->(options = {} as TLShapeOptions<P, C> & ThisType<TLDotShape<P, C>>): TLDotShapeFactory<P, C> {
-  return createShapeFactory<P, C>({
+>(options = {} as TLShapeOptions<P, C> & ThisType<TLDotShape<P, C>>): TLDotShapeClass<P, C> {
+  return createShapeClass<P, C>({
+    ...options,
     hideSelection: true,
     hideResizeHandles: true,
     hideRotateHandle: true,
     hideSelectionDetail: true,
-    get bounds() {
+    bounds() {
       const {
         point: [x, y],
         radius,
@@ -42,7 +46,7 @@ export function createDotShapeFactory<
         height: d,
       }
     },
-    get rotatedBounds() {
+    rotatedBounds() {
       return BoundsUtils.getBoundsFromPoints(
         BoundsUtils.getRotatedCorners(this.bounds, this.props.rotation)
       )
@@ -56,6 +60,5 @@ export function createDotShapeFactory<
     hitTestBounds(bounds) {
       return intersectCircleBounds(this.props.point, this.props.radius, bounds).length > 0
     },
-    ...options,
   })
 }

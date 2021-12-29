@@ -8,7 +8,7 @@ interface HandlesShape extends TLShapeProps {
   handles: TLHandle[]
 }
 
-const handlesShapeFactory = createShapeWithHandles<HandlesShape>({
+const ShapeWithHandles = createShapeWithHandles<HandlesShape>({
   type: 'handles',
   defaultProps: {
     id: 'id',
@@ -22,28 +22,29 @@ const handlesShapeFactory = createShapeWithHandles<HandlesShape>({
       },
     ],
   },
-  get bounds(): TLBounds {
+  bounds() {
+    const [x, y] = this.props.point
     return {
-      minX: 0,
-      minY: 0,
-      maxX: 100,
-      maxY: 100,
+      minX: x,
+      minY: y,
+      maxX: x + 100,
+      maxY: y + 100,
       width: 100,
       height: 100,
     }
   },
-  get center() {
-    return BoundsUtils.getBoundsCenter(this.bounds)
+  rotatedBounds() {
+    return BoundsUtils.getBoundsFromPoints(
+      BoundsUtils.getRotatedCorners(this.bounds, this.props.rotation)
+    )
   },
-  get rotatedBounds() {
-    const { bounds } = this
-    const { rotation } = this.props
-    if (!rotation) return bounds
-    return BoundsUtils.getBoundsFromPoints(BoundsUtils.getRotatedCorners(bounds, rotation))
+  center() {
+    const [x, y] = this.props.point
+    return [x + 50, y + 50]
   },
 })
 
-const handlesShape = handlesShapeFactory({
+const handlesShape = new ShapeWithHandles({
   id: 'handles1',
   type: 'handles',
   parentId: 'page',
@@ -53,4 +54,10 @@ const handlesShape = handlesShapeFactory({
 
 handlesShape.update({
   point: [0, 0],
+})
+
+describe('Shape with handles', () => {
+  it('Creates the shape', () => {
+    expect(handlesShape).toBeDefined()
+  })
 })

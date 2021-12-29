@@ -11,7 +11,7 @@ import {
   TLShape,
   TLPageModel,
   TLToolConstructor,
-  TLShapeFactory,
+  TLShapeClass,
 } from '~lib'
 import type {
   TLBounds,
@@ -42,7 +42,7 @@ export class TLApp<
 > extends TLRootState<S, K> {
   constructor(
     serializedApp?: TLDocumentModel,
-    Shapes?: TLShapeFactory[],
+    Shapes?: TLShapeClass[],
     Tools?: TLToolConstructor<S, K>[]
   ) {
     super()
@@ -535,17 +535,17 @@ export class TLApp<
 
   /* ------------------ Shape Classes ----------------- */
 
-  Shapes = new Map<string, TLShapeFactory>()
+  Shapes = new Map<string, TLShapeClass>()
 
-  registerShapes = (Shapes: TLShapeFactory[]) => {
+  registerShapes = (Shapes: TLShapeClass[]) => {
     Shapes.forEach(Shape => this.Shapes.set(Shape.id, Shape))
   }
 
-  deregisterShapes = (Shapes: TLShapeFactory[]) => {
+  deregisterShapes = (Shapes: TLShapeClass[]) => {
     Shapes.forEach(Shape => this.Shapes.delete(Shape.id))
   }
 
-  getShapeClass = (type: string): TLShapeFactory => {
+  getShapeClass = (type: string): TLShapeClass => {
     if (!type) throw Error('No shape type provided.')
     const Shape = this.Shapes.get(type)
     if (!Shape) throw Error(`Could not find shape class for ${type}`)

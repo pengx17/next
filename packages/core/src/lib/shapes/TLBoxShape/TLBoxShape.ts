@@ -1,4 +1,5 @@
-import { createShapeFactory, TLShape, TLShapeOptions, TLShapeProps } from '~lib'
+import { createShapeClass, TLShape, TLShapeOptions, TLShapeProps } from '~lib'
+import { BoundsUtils } from '~utils'
 
 export interface TLBoxShapeProps extends TLShapeProps {
   type: 'box'
@@ -10,14 +11,41 @@ export type TLBoxShape<
   C extends Record<string, unknown> = Record<string, unknown>
 > = TLShape<P, C>
 
-export type TLBoxShapeFactory<
+export type TLBoxShapeClass<
   P extends TLBoxShapeProps = TLBoxShapeProps,
   C extends Record<string, unknown> = Record<string, unknown>
-> = (props: P) => TLBoxShape<P, C>
+> = {
+  new (props: P): TLBoxShape<P, C>
+  id: P['id']
+}
 
-export function createBoxShapeFactory<
+export function createBoxShapeClass<
   P extends TLBoxShapeProps = TLBoxShapeProps,
   C extends Record<string, unknown> = Record<string, unknown>
->(options = {} as TLShapeOptions<P, C> & ThisType<TLShape<P, C>>): TLBoxShapeFactory<P, C> {
-  return createShapeFactory(options)
+>(options = {} as TLShapeOptions<P, C> & ThisType<TLShape<P, C>>): TLBoxShapeClass<P, C> {
+  return createShapeClass({
+    ...options,
+    bounds() {
+      const [x, y] = this.props.point
+      const [width, height] = this.props.size
+      return {
+        minX: x,
+        minY: y,
+        maxX: x + width,
+        maxY: y + height,
+        width,
+        height,
+      }
+    },
+    rotatedBounds() {
+      return BoundsUtils.getBoundsFromPoints(
+        BoundsUtils.getRotatedCorners(this.bounds, this.props.rotation)
+      )
+    },
+    center() {
+      const [x, y] = this.props.point
+      const [width, height] = this.props.size
+      return [x + width / 2, y + height / 2]
+    },
+  })
 }

@@ -1,14 +1,14 @@
 import type { TLBounds } from '~types'
 import { BoundsUtils } from '~utils'
-import { createShape, TLShapeProps } from './TLShape'
+import { createShapeClass, TLShapeProps } from './TLShape'
 
 interface BoxShape extends TLShapeProps {
   type: 'box'
   size: number[]
 }
 
-const boxFactory = createShape<BoxShape>({
-  type: 'test',
+const TLBoxShape = createShapeClass<BoxShape>({
+  type: 'box',
   defaultProps: {
     id: 'id',
     type: 'box',
@@ -16,7 +16,7 @@ const boxFactory = createShape<BoxShape>({
     point: [0, 0],
     size: [100, 100],
   },
-  get bounds(): TLBounds {
+  bounds(): TLBounds {
     return {
       minX: 0,
       minY: 0,
@@ -26,7 +26,7 @@ const boxFactory = createShape<BoxShape>({
       height: this.props.size[1],
     }
   },
-  get center() {
+  center() {
     return BoundsUtils.getBoundsCenter(this.bounds)
   },
   get rotatedBounds() {
@@ -37,8 +37,12 @@ const boxFactory = createShape<BoxShape>({
   },
 })
 
-const box = boxFactory({
+const box = new TLBoxShape({
   id: 'box1',
+  parentId: 'page',
+  type: 'box',
   point: [0, 0],
   size: [100, 100],
 })
+
+expect(box).toBeDefined()
