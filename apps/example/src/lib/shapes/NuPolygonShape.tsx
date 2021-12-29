@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import { TLShapeProps, assignOwnProps } from '@tldraw/core'
+import { TLShapeProps, assignOwnProps, TLPolygonShape, TLPolygonShapeProps } from '@tldraw/core'
 import { SVGContainer, TLComponentProps, TLIndicatorProps } from '@tldraw/react'
-import { TLPolygonShape, TLPolygonShapeProps } from '@tldraw/polygon-shape'
 import { observer } from 'mobx-react-lite'
 import { makeObservable, observable } from 'mobx'
 import { NuStyleProps, withClampedStyles } from './NuStyleProps'

@@ -3,6 +3,7 @@ import { observer } from 'mobx-react-lite'
 import { Container } from '~components'
 import type { TLReactShape } from '~lib'
 import { useShapeEvents } from '~hooks/useShapeEvents'
+import { autorun } from 'mobx'
 
 interface ShapeProps {
   shape: TLReactShape
@@ -25,7 +26,11 @@ export const Shape = observer(function Shape({
   isEditing = false,
   meta,
 }: ShapeProps) {
-  const { bounds, rotation, ReactComponent } = shape
+  const {
+    bounds,
+    props: { rotation },
+    ReactComponent,
+  } = shape
 
   const events = useShapeEvents(shape)
 

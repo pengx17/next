@@ -93,9 +93,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
   const onlySelectedShape = selectedShapes?.length === 1 && selectedShapes[0]
 
   const onlySelectedShapeWithHandles =
-    onlySelectedShape && 'handles' in onlySelectedShape
-      ? (selectedShapes[0] as S & { handles: TLHandle[] })
-      : undefined
+    onlySelectedShape && 'handles' in onlySelectedShape ? selectedShapes[0] : undefined
 
   const selectedShapesSet = React.useMemo(() => new Set(selectedShapes || []), [selectedShapes])
   const erasingShapesSet = React.useMemo(() => new Set(erasingShapes || []), [erasingShapes])
@@ -160,7 +158,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
               {showHandles && onlySelectedShapeWithHandles && components.Handle && (
                 <Container bounds={selectionBounds} zIndex={10003}>
                   <SVGContainer>
-                    {onlySelectedShapeWithHandles.handles.map((handle, i) =>
+                    {onlySelectedShapeWithHandles.props.handles!.map((handle, i) =>
                       React.createElement(components.Handle!, {
                         key: `${handle.id}_handle_${i}`,
                         shape: onlySelectedShapeWithHandles,
@@ -187,7 +185,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
                   shapes={selectedShapes}
                   hidden={!showContextBar}
                   bounds={selectedShapes.length === 1 ? selectedShapes[0].bounds : selectionBounds}
-                  rotation={selectedShapes.length === 1 ? selectedShapes[0].rotation : 0}
+                  rotation={selectedShapes.length === 1 ? selectedShapes[0].props.rotation : 0}
                 />
               )}
             </>

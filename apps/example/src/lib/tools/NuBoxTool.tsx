@@ -1,4 +1,4 @@
-import { TLBoxTool } from '@tldraw/box-tool'
+import { TLBoxTool } from '@tldraw/core'
 import type { TLReactEventMap } from '@tldraw/react'
 import { Shape, NuBoxShape } from '~lib'
 

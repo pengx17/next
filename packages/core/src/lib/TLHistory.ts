@@ -1,7 +1,7 @@
 import { TLApp, TLPage, TLDocumentModel, TLShape } from '~lib'
 import type { TLEventMap } from '~types'
 
-export class TLHistory<S extends TLShape, K extends TLEventMap> {
+export class TLHistory<S extends TLShape = TLShape, K extends TLEventMap = TLEventMap> {
   constructor(app: TLApp<S, K>) {
     this.app = app
   }
@@ -83,7 +83,7 @@ export class TLHistory<S extends TLShape, K extends TLEventMap> {
         if (page !== undefined) {
           // Update the page
           const shapesMap = new Map(page.shapes.map(shape => [shape.id, shape]))
-          const shapesToAdd: TLShape[] = []
+          const shapesToAdd: S[] = []
 
           for (const serializedShape of serializedPage.shapes) {
             const shape = shapesMap.get(serializedShape.id)

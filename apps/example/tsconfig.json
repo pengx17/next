@@ -13,19 +13,7 @@
     { "path": "../../packages/core" },
     { "path": "../../packages/react" },
     { "path": "../../packages/utils/vec" },
-    { "path": "../../packages/utils/intersect" },
-    { "path": "../../packages/shapes/box" },
-    { "path": "../../packages/shapes/dot" },
-    { "path": "../../packages/shapes/draw" },
-    { "path": "../../packages/shapes/polygon" },
-    { "path": "../../packages/shapes/polyline" },
-    { "path": "../../packages/shapes/line" },
-    { "path": "../../packages/shapes/star" },
-    { "path": "../../packages/tools/box" },
-    { "path": "../../packages/tools/dot" },
-    { "path": "../../packages/tools/draw" },
-    { "path": "../../packages/tools/erase" },
-    { "path": "../../packages/tools/line" }
+    { "path": "../../packages/utils/intersect" }
   ],
   "typedocOptions": {
     "entryPoints": ["src/index.ts"],

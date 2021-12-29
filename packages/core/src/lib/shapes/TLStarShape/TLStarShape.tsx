@@ -1,0 +1,42 @@
+import { makeObservable } from 'mobx'
+import { Vec } from '@tldraw/vec'
+import { TLPolygonShape, TLPolygonShapeProps } from '../TLPolygonShape'
+import { PolygonUtils } from '~utils'
+
+export interface TLStarShapeProps extends TLPolygonShapeProps {
+  points: number
+  ratio: number
+  isFlippedY: boolean
+}
+
+/**
+ * A star shape works just like a polygon shape, except it uses a different algorithm to find the
+ * location of its vertices.
+ */
+export class TLStarShape<
+  P extends TLStarShapeProps = TLStarShapeProps,
+  M = any
+> extends TLPolygonShape<P, M> {
+  constructor(props = {} as P) {
+    super(props)
+    this.props = { ...this.defaultProps, ...this.props }
+    makeObservable(this)
+  }
+
+  id = 'star'
+
+  getVertices(padding = 0): number[][] {
+    const { ratio, sides, size, isFlippedY } = this.props
+    const [w, h] = size
+    const vertices = PolygonUtils.getStarVertices(
+      Vec.div([w, h], 2),
+      [Math.max(1, w - padding), Math.max(1, h - padding)],
+      Math.round(sides),
+      ratio
+    )
+    if (isFlippedY) {
+      return vertices.map(point => [point[0], h - point[1]])
+    }
+    return vertices
+  }
+}

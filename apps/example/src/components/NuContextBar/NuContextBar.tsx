@@ -67,11 +67,11 @@ const _NuContextBar: TLContextBarComponent<Shape> = ({
   return (
     <HTMLContainer centered>
       <div ref={rContextBar} className="nu-contextbar">
-        <NuColorInput label="Stroke" value={shapes[0].stroke} onChange={updateStroke} />
-        <NuColorInput label="Fill" value={shapes[0].fill} onChange={updateFill} />
+        <NuColorInput label="Stroke" value={shapes[0].props.stroke} onChange={updateStroke} />
+        <NuColorInput label="Fill" value={shapes[0].props.fill} onChange={updateFill} />
         <NuNumberInput
           label="Width"
-          value={Math.max(...shapes.map(shape => shape.strokeWidth))}
+          value={Math.max(...shapes.map(shape => shape.props.strokeWidth))}
           onChange={updateStrokeWidth}
           style={{ width: 48 }}
         />
@@ -96,7 +96,7 @@ const _NuContextBar: TLContextBarComponent<Shape> = ({
         )}
         <NuNumberInput
           label="Opacity"
-          value={Math.max(...shapes.map(shape => shape.opacity))}
+          value={Math.max(...shapes.map(shape => shape.props.opacity))}
           onChange={updateOpacity}
           step={0.1}
           style={{ width: 48 }}

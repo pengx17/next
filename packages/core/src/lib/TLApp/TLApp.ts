@@ -379,7 +379,7 @@ export class TLApp<
     const newSelectedShapes = this.currentPage.shapes.filter(shape => selectedIds.has(shape.id))
     newSelectedShapes.forEach(s => selectedShapes.add(s))
     if (newSelectedShapes.length === 1) {
-      this.selectionRotation = newSelectedShapes[0].rotation ?? 0
+      this.selectionRotation = newSelectedShapes[0].props.rotation ?? 0
     } else {
       this.selectionRotation = 0
     }
@@ -458,7 +458,7 @@ export class TLApp<
 
     return currentPage.shapes.filter(shape => {
       return (
-        shape.parentId === currentPage.id &&
+        shape.props.parentId === currentPage.id &&
         (shape.stayMounted ||
           BoundsUtils.boundsContain(currentView, shape.rotatedBounds) ||
           BoundsUtils.boundsCollide(currentView, shape.rotatedBounds))
@@ -470,7 +470,7 @@ export class TLApp<
     const { selectedShapesArray } = this
     if (selectedShapesArray.length === 0) return undefined
     if (selectedShapesArray.length === 1) {
-      return { ...selectedShapesArray[0].bounds, rotation: selectedShapesArray[0].rotation }
+      return { ...selectedShapesArray[0].bounds, rotation: selectedShapesArray[0].props.rotation }
     }
     return BoundsUtils.getCommonBounds(this.selectedShapesArray.map(shape => shape.rotatedBounds))
   }

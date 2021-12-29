@@ -190,15 +190,16 @@ export enum TLTargetType {
 }
 
 export type TLEventCanvasInfo = { type: TLTargetType.Canvas; order?: number }
+
 export type TLEventShapeInfo<S extends TLShape> = {
   type: TLTargetType.Shape
   shape: S
   order?: number
 }
-export type TLEventHandleInfo<S extends TLShape, H extends TLHandle = TLHandle> = {
+export type TLEventHandleInfo<S extends TLShape = TLShape> = {
   type: TLTargetType.Handle
   shape: S
-  handle: H
+  handle: TLHandle
   index: number
   order?: number
 }
