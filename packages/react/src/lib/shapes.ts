@@ -66,14 +66,3 @@ export abstract class TLReactStarShape<P extends TLStarShapeProps, M = any> exte
   abstract ReactComponent: (props: TLComponentProps<M>) => JSX.Element | null
   abstract ReactIndicator: (props: TLIndicatorProps<M>) => JSX.Element | null
 }
-
-export {
-  TLBoxShapeProps as TLBoxReactShapeProps,
-  TLDotShapeProps as TLDotReactShapeProps,
-  TLDrawShapeProps as TLDrawReactShapeProps,
-  TLEllipseShapeProps as TLEllipseReactShapeProps,
-  TLLineShapeProps as TLLineReactShapeProps,
-  TLPolygonShapeProps as TLPolygonReactShapeProps,
-  TLPolylineShapeProps as TLPolylineReactShapeProps,
-  TLStarShapeProps as TLStarReactShapeProps,
-}
