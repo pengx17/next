@@ -11,9 +11,7 @@ import {
   TLShape,
   TLPageModel,
   TLToolConstructor,
-  TLShapeConstructor,
-  TLShapeModel,
-  TLCustomProps,
+  TLShapeFactory,
 } from '~lib'
 import type {
   TLBounds,
@@ -44,7 +42,7 @@ export class TLApp<
 > extends TLRootState<S, K> {
   constructor(
     serializedApp?: TLDocumentModel,
-    Shapes?: TLShapeConstructor<S>[],
+    Shapes?: TLShapeFactory[],
     Tools?: TLToolConstructor<S, K>[]
   ) {
     super()
@@ -269,12 +267,12 @@ export class TLApp<
     return shape
   }
 
-  @action readonly createShapes = (shapes: S[] | TLShapeModel[]): this => {
+  @action readonly createShapes = (shapes: S[] | TLShape[]): this => {
     this.currentPage.addShapes(...shapes)
     return this
   }
 
-  @action updateShapes = (shapes: ({ id: string } & Partial<TLCustomProps<S>>)[]): this => {
+  @action updateShapes = (shapes: ({ id: string } & Partial<S['props']>)[]): this => {
     shapes.forEach(shape => this.getShapeById(shape.id)?.update(shape))
     return this
   }
@@ -379,7 +377,7 @@ export class TLApp<
     const newSelectedShapes = this.currentPage.shapes.filter(shape => selectedIds.has(shape.id))
     newSelectedShapes.forEach(s => selectedShapes.add(s))
     if (newSelectedShapes.length === 1) {
-      this.selectionRotation = newSelectedShapes[0].rotation ?? 0
+      this.selectionRotation = newSelectedShapes[0].props.rotation ?? 0
     } else {
       this.selectionRotation = 0
     }
@@ -470,7 +468,7 @@ export class TLApp<
     const { selectedShapesArray } = this
     if (selectedShapesArray.length === 0) return undefined
     if (selectedShapesArray.length === 1) {
-      return { ...selectedShapesArray[0].bounds, rotation: selectedShapesArray[0].rotation }
+      return { ...selectedShapesArray[0].bounds, rotation: selectedShapesArray[0].props.rotation }
     }
     return BoundsUtils.getCommonBounds(this.selectedShapesArray.map(shape => shape.rotatedBounds))
   }
@@ -537,17 +535,17 @@ export class TLApp<
 
   /* ------------------ Shape Classes ----------------- */
 
-  Shapes = new Map<string, TLShapeConstructor<S>>()
+  Shapes = new Map<string, TLShapeFactory>()
 
-  registerShapes = (Shapes: TLShapeConstructor<S>[]) => {
+  registerShapes = (Shapes: TLShapeFactory[]) => {
     Shapes.forEach(Shape => this.Shapes.set(Shape.id, Shape))
   }
 
-  deregisterShapes = (Shapes: TLShapeConstructor<S>[]) => {
+  deregisterShapes = (Shapes: TLShapeFactory[]) => {
     Shapes.forEach(Shape => this.Shapes.delete(Shape.id))
   }
 
-  getShapeClass = (type: string): TLShapeConstructor<S> => {
+  getShapeClass = (type: string): TLShapeFactory => {
     if (!type) throw Error('No shape type provided.')
     const Shape = this.Shapes.get(type)
     if (!Shape) throw Error(`Could not find shape class for ${type}`)

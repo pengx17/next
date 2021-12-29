@@ -2,7 +2,7 @@
 import { action, observable, makeObservable, computed, observe } from 'mobx'
 import type { TLBinding, TLEventMap } from '~types'
 import type { TLApp, TLShape } from '~lib'
-import type { TLShapeModel } from '../TLShape'
+import type { TLShapeModel } from '../shapes/TLShape'
 
 export interface TLPageModel {
   id: string

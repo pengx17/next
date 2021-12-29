@@ -1,5 +1,5 @@
 // The order of these imports matters!
-export * from './TLShape'
+export * from './shapes/TLShape'
 export * from './TLState'
 export * from './TLToolState'
 export * from './TLTool'
@@ -10,3 +10,4 @@ export * from './TLInputs'
 export * from './TLBush'
 export * from './TLApp'
 export * from './TLApi'
+export * from './shapes'

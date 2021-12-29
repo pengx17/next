@@ -1,0 +1,5 @@
+export * from './TLBoxShape'
+export * from './TLDotShape'
+export * from './TLEllipseShape'
+export * from './TLShapeWithHandles'
+export * from './TLShape'
