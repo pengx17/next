@@ -1,22 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import { SVGContainer, TLComponentProps, TLIndicatorProps } from '@tldraw/react'
-import { TLBoxShape, TLBoxShapeProps } from '@tldraw/core'
+import { SVGContainer, TLComponentProps } from '@tldraw/react'
+import type { TLBoxShapeProps } from '@tldraw/core'
+import { TLReactBoxShape } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
-import { makeObservable } from 'mobx'
 import { NuStyleProps, withClampedStyles } from './NuStyleProps'
 
 export interface NuBoxShapeProps extends TLBoxShapeProps, NuStyleProps {
   borderRadius: number
 }
 
-export class NuBoxShape extends TLBoxShape<NuBoxShapeProps> {
-  constructor(props = {} as NuBoxShapeProps) {
-    super(props)
-    this.props = { ...this.defaultProps, ...props }
-    makeObservable(this)
-  }
-
+export class NuBoxShape extends TLReactBoxShape<NuBoxShapeProps> {
   static id = 'box'
 
   defaultProps = {
@@ -43,7 +37,6 @@ export class NuBoxShape extends TLBoxShape<NuBoxShapeProps> {
         opacity,
       },
     } = this
-
     return (
       <SVGContainer {...events} opacity={isErasing ? 0.2 : opacity}>
         <rect
@@ -72,7 +65,7 @@ export class NuBoxShape extends TLBoxShape<NuBoxShapeProps> {
     )
   })
 
-  ReactIndicator = observer((props: TLIndicatorProps) => {
+  ReactIndicator = observer(() => {
     const {
       props: {
         size: [w, h],

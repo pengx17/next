@@ -42,13 +42,10 @@ export interface TLResizeInfo {
   transformOrigin: number[]
 }
 
-export interface TLHandleChangeInfo<P extends TLShapeProps = TLShapeProps> {
+export interface TLHandleChangeInfo {
   index: number
   delta: number[]
-  initialShape: P
 }
-
-export type TLCustomProps<P extends AnyObject = any> = TLShapeProps & Partial<P>
 
 export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
   constructor(props: Partial<P>) {
@@ -188,7 +185,7 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
 
   onResizeStart?: () => void
 
-  onHandleChange = ({ index, initialShape, delta }: TLHandleChangeInfo<P>) => {
+  onHandleChange = (initialShape: any, { index, delta }: TLHandleChangeInfo) => {
     if (initialShape.handles === undefined) return
     const nextHandles = [...initialShape.handles]
     nextHandles[index] = {

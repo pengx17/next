@@ -1,5 +1,4 @@
-import type { TLPolylineShapeProps } from '.'
-import { TLPolylineShape } from './TLPolylineShape'
+import { TLPolylineShapeProps, TLPolylineShape } from './TLPolylineShape'
 
 describe('A minimal test', () => {
   it('Creates the shape', () => {

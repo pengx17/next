@@ -1,4 +1,4 @@
-// import { TLDrawTool } from '@tldraw/draw-tool'
+// import { TLDrawTool } from '@tldraw/core'
 // import type { TLReactEventMap } from '@tldraw/react'
 // import { NuPenShape, Shape } from '~lib'
 

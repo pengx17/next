@@ -46,7 +46,7 @@ export class CreatingState<
       }
     }
     const { initialShape } = this
-    this.creatingShape.onHandleChange({ index: 1, initialShape, delta })
+    this.creatingShape.onHandleChange(initialShape, { index: 1, delta })
   }
 
   onPointerUp: TLStateEvents<S, K>['onPointerUp'] = () => {

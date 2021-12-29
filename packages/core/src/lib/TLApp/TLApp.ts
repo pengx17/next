@@ -13,7 +13,6 @@ import {
   TLToolConstructor,
   TLShapeConstructor,
   TLShapeModel,
-  TLCustomProps,
 } from '~lib'
 import type {
   TLBounds,
@@ -274,7 +273,7 @@ export class TLApp<
     return this
   }
 
-  @action updateShapes = (shapes: ({ id: string } & Partial<TLCustomProps<S>>)[]): this => {
+  @action updateShapes = <T extends S>(shapes: ({ id: string } & Partial<T['props']>)[]): this => {
     shapes.forEach(shape => this.getShapeById(shape.id)?.update(shape))
     return this
   }

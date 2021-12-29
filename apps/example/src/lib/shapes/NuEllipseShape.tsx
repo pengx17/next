@@ -1,145 +1,84 @@
-// /* eslint-disable @typescript-eslint/no-explicit-any */
-// import * as React from 'react'
-// import {
-//   TLBounds,
-//   PointUtils,
-//   BoundsUtils,
-//   TLResizeInfo,
-//   TLShapeProps,
-//   assignOwnProps,
-//   TLCustomProps,
-//   TLBoxShape,
-// } from '@tldraw/core'
-// import { SVGContainer, TLComponentProps, TLIndicatorProps } from '@tldraw/react'
-// import { observer } from 'mobx-react-lite'
-// import { observable, makeObservable } from 'mobx'
-// import { intersectEllipseBounds, intersectLineSegmentEllipse } from '@tldraw/intersect'
-// import { NuStyleProps, withClampedStyles } from './NuStyleProps'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import * as React from 'react'
+import {
+  TLBounds,
+  PointUtils,
+  BoundsUtils,
+  TLResizeInfo,
+  TLShapeProps,
+  TLEllipseShapeProps,
+  TLEllipseShape,
+} from '@tldraw/core'
+import { SVGContainer, TLComponentProps, TLIndicatorProps } from '@tldraw/react'
+import { observer } from 'mobx-react-lite'
+import { observable } from 'mobx'
+import { intersectEllipseBounds, intersectLineSegmentEllipse } from '@tldraw/intersect'
+import { NuStyleProps, withClampedStyles } from './NuStyleProps'
 
-// export interface NuEllipseShapeProps extends NuStyleProps {
-//   size: number[]
-// }
+export interface NuEllipseShapeProps extends TLEllipseShapeProps, NuStyleProps {
+  size: number[]
+}
 
-// export class NuEllipseShape extends TLBoxShape<NuEllipseShapeProps> {
-//   constructor(props = {} as TLCustomProps<NuEllipseShapeProps>) {
-//     super(props)
-//     assignOwnProps(this, props)
-//     makeObservable(this)
-//   }
+export class NuEllipseShape extends TLEllipseShape<NuEllipseShapeProps> {
+  static id = 'ellipse'
 
-//   static id = 'ellipse'
+  defaultProps = {
+    id: 'ellipse',
+    parentId: 'page',
+    type: 'ellipse',
+    point: [0, 0],
+    size: [100, 100],
+    stroke: '#000000',
+    fill: '#ffffff',
+    strokeWidth: 2,
+    borderRadius: 0,
+    opacity: 1,
+  }
 
-//   @observable stroke = '#000000'
-//   @observable fill = '#ffffff'
-//   @observable strokeWidth = 2
-//   @observable opacity = 1
+  ReactComponent = observer(({ isSelected, isErasing, events }: TLComponentProps) => {
+    const {
+      size: [w, h],
+      stroke,
+      fill,
+      strokeWidth,
+      opacity,
+    } = this.props
+    return (
+      <SVGContainer {...events} opacity={isErasing ? 0.2 : opacity}>
+        <ellipse
+          className={isSelected ? 'tl-hitarea-fill' : 'tl-hitarea-stroke'}
+          cx={w / 2}
+          cy={h / 2}
+          rx={Math.max(0.01, (w - strokeWidth) / 2)}
+          ry={Math.max(0.01, (h - strokeWidth) / 2)}
+        />
+        <ellipse
+          cx={w / 2}
+          cy={h / 2}
+          rx={Math.max(0.01, (w - strokeWidth) / 2)}
+          ry={Math.max(0.01, (h - strokeWidth) / 2)}
+          strokeWidth={strokeWidth}
+          stroke={stroke}
+          fill={fill}
+        />
+      </SVGContainer>
+    )
+  })
 
-//   ReactComponent = observer(({ isSelected, isErasing, events }: TLComponentProps) => {
-//     const {
-//       size: [w, h],
-//       stroke,
-//       fill,
-//       strokeWidth,
-//       opacity,
-//     } = this
+  ReactIndicator = observer(() => {
+    const {
+      size: [w, h],
+    } = this.props
+    return (
+      <ellipse cx={w / 2} cy={h / 2} rx={w / 2} ry={h / 2} strokeWidth={2} fill="transparent" />
+    )
+  })
 
-//     return (
-//       <SVGContainer {...events} opacity={isErasing ? 0.2 : opacity}>
-//         <ellipse
-//           className={isSelected ? 'tl-hitarea-fill' : 'tl-hitarea-stroke'}
-//           cx={w / 2}
-//           cy={h / 2}
-//           rx={Math.max(0.01, (w - strokeWidth) / 2)}
-//           ry={Math.max(0.01, (h - strokeWidth) / 2)}
-//         />
-//         <ellipse
-//           cx={w / 2}
-//           cy={h / 2}
-//           rx={Math.max(0.01, (w - strokeWidth) / 2)}
-//           ry={Math.max(0.01, (h - strokeWidth) / 2)}
-//           strokeWidth={strokeWidth}
-//           stroke={stroke}
-//           fill={fill}
-//         />
-//       </SVGContainer>
-//     )
-//   })
-
-//   ReactIndicator = observer((props: TLIndicatorProps) => {
-//     return (
-//       <ellipse
-//         cx={this.size[0] / 2}
-//         cy={this.size[1] / 2}
-//         rx={this.size[0] / 2}
-//         ry={this.size[1] / 2}
-//         strokeWidth={2}
-//         fill="transparent"
-//       />
-//     )
-//   })
-
-//   getBounds = (): TLBounds => {
-//     const [x, y] = this.point
-//     const [width, height] = this.size
-//     return BoundsUtils.getRotatedEllipseBounds(x, y, width / 2, height / 2, 0)
-//   }
-
-//   getRotatedBounds = (): TLBounds => {
-//     const [x, y] = this.point
-//     const [width, height] = this.size
-//     return BoundsUtils.getRotatedEllipseBounds(x, y, width / 2, height / 2, this.rotation)
-//   }
-
-//   hitTestPoint = (point: number[]) => {
-//     return PointUtils.pointInEllipse(
-//       point,
-//       this.center,
-//       this.size[0],
-//       this.size[1],
-//       this.rotation || 0
-//     )
-//   }
-
-//   hitTestLineSegment = (A: number[], B: number[]): boolean => {
-//     return intersectLineSegmentEllipse(
-//       A,
-//       B,
-//       this.center,
-//       this.size[0],
-//       this.size[1],
-//       this.rotation || 0
-//     ).didIntersect
-//   }
-
-//   hitTestBounds = (bounds: TLBounds): boolean => {
-//     const { rotatedBounds } = this
-
-//     return (
-//       BoundsUtils.boundsContain(bounds, rotatedBounds) ||
-//       intersectEllipseBounds(
-//         this.center,
-//         this.size[0] / 2,
-//         this.size[1] / 2,
-//         this.rotation || 0,
-//         bounds
-//       ).length > 0
-//     )
-//   }
-
-//   onResize = (bounds: TLBounds, info: TLResizeInfo<NuEllipseShapeProps>) => {
-//     return this.update({
-//       point: [bounds.minX, bounds.minY],
-//       size: [Math.max(1, bounds.width), Math.max(1, bounds.height)],
-//     })
-//   }
-
-//   validateProps = (props: Partial<TLShapeProps & NuEllipseShapeProps>) => {
-//     if (props.size !== undefined) {
-//       props.size[0] = Math.max(props.size[0], 1)
-//       props.size[1] = Math.max(props.size[1], 1)
-//     }
-//     return withClampedStyles(props)
-//   }
-// }
-
-export {}
+  validateProps = (props: Partial<NuEllipseShapeProps>) => {
+    if (props.size !== undefined) {
+      props.size[0] = Math.max(props.size[0], 1)
+      props.size[1] = Math.max(props.size[1], 1)
+    }
+    return withClampedStyles(props)
+  }
+}

@@ -58,7 +58,7 @@ export class TranslatingHandleState<
       }
     }
     const { shape, initialShape, index } = this
-    shape.onHandleChange({ index, initialShape, delta })
+    shape.onHandleChange(initialShape, { index, delta })
   }
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
