@@ -5,7 +5,9 @@ import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { NuStyleProps, withClampedStyles } from './style-props'
 
-interface PolygonShapeProps extends TLPolygonShapeProps, NuStyleProps {}
+interface PolygonShapeProps extends TLPolygonShapeProps, NuStyleProps {
+  type: 'polygon'
+}
 
 export class PolygonShape extends TLPolygonShape<PolygonShapeProps> {
   static id = 'polygon'

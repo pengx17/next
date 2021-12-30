@@ -5,7 +5,9 @@ import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { NuStyleProps, withClampedStyles } from './style-props'
 
-interface StarShapeProps extends NuStyleProps, TLStarShapeProps {}
+interface StarShapeProps extends NuStyleProps, TLStarShapeProps {
+  type: 'star'
+}
 
 export class StarShape extends TLStarShape<StarShapeProps> {
   static id = 'star'

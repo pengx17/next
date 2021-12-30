@@ -7,6 +7,7 @@ import { NuStyleProps, withClampedStyles } from './style-props'
 
 export interface BoxShapeProps extends TLBoxShapeProps, NuStyleProps {
   borderRadius: number
+  type: 'box'
 }
 
 export class BoxShape extends TLBoxShape<BoxShapeProps> {

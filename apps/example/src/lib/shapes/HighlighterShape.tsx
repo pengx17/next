@@ -6,7 +6,9 @@ import { observer } from 'mobx-react-lite'
 import { computed, makeObservable } from 'mobx'
 import { NuStyleProps, withClampedStyles } from './style-props'
 
-export interface HighlighterShapeProps extends TLDrawShapeProps, NuStyleProps {}
+export interface HighlighterShapeProps extends TLDrawShapeProps, NuStyleProps {
+  type: 'highlighter'
+}
 
 export class HighlighterShape extends TLDrawShape<HighlighterShapeProps> {
   constructor(props = {} as Partial<HighlighterShapeProps>) {

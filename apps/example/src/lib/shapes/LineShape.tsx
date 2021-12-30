@@ -6,6 +6,7 @@ import { observer } from 'mobx-react-lite'
 import { NuStyleProps, withClampedStyles } from './style-props'
 
 interface LineShapeProps extends NuStyleProps, TLLineShapeProps {
+  type: 'line'
   handles: TLHandle[]
 }
 

@@ -7,6 +7,7 @@ import { makeObservable } from 'mobx'
 import { NuStyleProps, withClampedStyles } from './style-props'
 
 export interface YouTubeShapeProps extends TLBoxShapeProps, NuStyleProps {
+  type: 'youtube'
   embedId: string
 }
 
@@ -19,8 +20,8 @@ export class YouTubeShape extends TLBoxShape<YouTubeShapeProps> {
   static id = 'youtube'
 
   static defaultProps: YouTubeShapeProps = {
-    id: 'code',
-    type: 'code',
+    id: 'youtube',
+    type: 'youtube',
     parentId: 'page',
     point: [0, 0],
     size: [600, 320],

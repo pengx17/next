@@ -20,7 +20,7 @@ export interface TLShapeConstructor<S extends TLShape = TLShape> {
 
 export interface TLShapeProps {
   id: string
-  type: string
+  type: any
   parentId: string
   point: number[]
   rotation?: number

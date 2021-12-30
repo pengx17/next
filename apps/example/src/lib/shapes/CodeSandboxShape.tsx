@@ -7,6 +7,7 @@ import { NuStyleProps, withClampedStyles } from './style-props'
 
 export interface CodeSandboxShapeProps extends TLBoxShapeProps, NuStyleProps {
   embedId: string
+  type: 'code'
 }
 
 export class CodeSandboxShape extends TLReactBoxShape<CodeSandboxShapeProps> {

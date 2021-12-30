@@ -6,6 +6,7 @@ import { observer } from 'mobx-react-lite'
 import { NuStyleProps, withClampedStyles } from './style-props'
 
 export interface EllipseShapeProps extends TLEllipseShapeProps, NuStyleProps {
+  type: 'ellipse'
   size: number[]
 }
 

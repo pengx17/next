@@ -31,10 +31,10 @@ import { TLRootState } from '../TLState'
 import { TLApi } from '~lib/TLApi'
 import { TLCursors } from '~lib/TLCursors'
 
-export interface TLDocumentModel {
+export interface TLDocumentModel<S extends TLShape = TLShape> {
   currentPageId: string
   selectedIds: string[]
-  pages: TLPageModel[]
+  pages: TLPageModel<S>[]
 }
 
 export class TLApp<
@@ -42,7 +42,7 @@ export class TLApp<
   K extends TLEventMap = TLEventMap
 > extends TLRootState<S, K> {
   constructor(
-    serializedApp?: TLDocumentModel,
+    serializedApp?: TLDocumentModel<S>,
     Shapes?: TLShapeConstructor<S>[],
     Tools?: TLToolConstructor<S, K>[]
   ) {
@@ -194,7 +194,7 @@ export class TLApp<
   /*                      Document                      */
   /* -------------------------------------------------- */
 
-  loadDocumentModel(state: TLDocumentModel): this {
+  loadDocumentModel(state: TLDocumentModel<S>): this {
     this.history.deserialize(state)
     return this
   }
@@ -217,7 +217,7 @@ export class TLApp<
     return this
   }
 
-  @computed get serialized(): TLDocumentModel {
+  @computed get serialized(): TLDocumentModel<S> {
     return {
       currentPageId: this.currentPageId,
       selectedIds: Array.from(this.selectedIds.values()),

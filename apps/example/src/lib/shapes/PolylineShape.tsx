@@ -5,7 +5,9 @@ import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { NuStyleProps, withClampedStyles } from './style-props'
 
-interface PolylineShapeProps extends NuStyleProps, TLPolylineShapeProps {}
+interface PolylineShapeProps extends NuStyleProps, TLPolylineShapeProps {
+  type: 'polyline'
+}
 
 export class PolylineShape extends TLPolylineShape<PolylineShapeProps> {
   hideSelection = true

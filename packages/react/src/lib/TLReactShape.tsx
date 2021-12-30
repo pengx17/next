@@ -24,7 +24,7 @@ export interface TLComponentProps<M = unknown> extends TLCommonShapeProps<M> {
 }
 
 export interface TLReactShapeConstructor<S extends TLReactShape = TLReactShape> {
-  new (props: Partial<S['props']>): S
+  new (props: any): S
   id: string
 }
 

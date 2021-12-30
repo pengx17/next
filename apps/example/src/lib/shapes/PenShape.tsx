@@ -7,7 +7,9 @@ import { observer } from 'mobx-react-lite'
 import { computed, makeObservable } from 'mobx'
 import { NuStyleProps, withClampedStyles } from './style-props'
 
-export interface PenShapeProps extends TLDrawShapeProps, NuStyleProps {}
+export interface PenShapeProps extends TLDrawShapeProps, NuStyleProps {
+  type: 'draw'
+}
 
 export class PenShape extends TLDrawShape<PenShapeProps> {
   constructor(props = {} as Partial<PenShapeProps>) {

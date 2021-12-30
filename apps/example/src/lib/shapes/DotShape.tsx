@@ -4,7 +4,9 @@ import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { NuStyleProps, withClampedStyles } from './style-props'
 
-export interface DotShapeProps extends TLDotShapeProps, NuStyleProps {}
+export interface DotShapeProps extends TLDotShapeProps, NuStyleProps {
+  type: 'dot'
+}
 
 export class DotShape extends TLDotShape<DotShapeProps> {
   static id = 'dot'

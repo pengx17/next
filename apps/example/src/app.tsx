@@ -75,7 +75,7 @@ function App(): JSX.Element {
     YouTubeTool,
   ])
 
-  const [model] = React.useState<TLDocumentModel>({
+  const [model] = React.useState<TLDocumentModel<Shape>>({
     currentPageId: 'page1',
     selectedIds: [],
     pages: [
@@ -114,27 +114,27 @@ function App(): JSX.Element {
           //   point: [300, 400],
           //   size: [100, 100],
           // },
-          // {
-          //   id: 'polyline1',
-          //   type: 'polyline',
-          //   parentId: 'page1',
-          //   point: [100, 100],
-          //   handles: [{ point: [0, 0] }, { point: [30, 70] }, { point: [100, 100] }],
-          // },
-          // {
-          //   id: 'line1',
-          //   type: 'line',
-          //   parentId: 'page1',
-          //   point: [300, 100],
-          //   handles: [{ point: [0, 0] }, { point: [230, 270] }],
-          // },
-          // {
-          //   id: 'dot1',
-          //   type: 'dot',
-          //   parentId: 'page1',
-          //   point: [500, 300],
-          //   radius: 3,
-          // },
+          {
+            id: 'polyline1',
+            type: 'polyline',
+            parentId: 'page1',
+            point: [100, 100],
+            handles: [{ point: [0, 0] }, { point: [30, 70] }, { point: [100, 100] }],
+          },
+          {
+            id: 'line1',
+            type: 'line',
+            parentId: 'page1',
+            point: [300, 100],
+            handles: [{ point: [0, 0] }, { point: [230, 270] }],
+          },
+          {
+            id: 'dot1',
+            type: 'dot',
+            parentId: 'page1',
+            point: [500, 300],
+            radius: 3,
+          },
           // {
           //   id: 'ellipse1',
           //   type: 'ellipse',
@@ -143,15 +143,15 @@ function App(): JSX.Element {
           //   size: [100, 200],
           //   rotation: Math.PI / 6,
           // },
-          // {
-          //   id: 'polygon2',
-          //   type: 'polygon',
-          //   parentId: 'page1',
-          //   point: [100, 300],
-          //   size: [150, 150],
-          //   sides: 5,
-          //   ratio: 1,
-          // },
+          {
+            id: 'polygon2',
+            type: 'polygon',
+            parentId: 'page1',
+            point: [100, 300],
+            size: [150, 150],
+            sides: 5,
+            ratio: 1,
+          },
           // {
           //   id: 'draw1',
           //   type: 'draw',
