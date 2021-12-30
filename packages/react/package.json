@@ -96,7 +96,7 @@
     ],
     "moduleNameMapper": {
       "@tldraw/react": "<rootDir>/src",
-      "@tldraw/core": "<rootDir>/../core/src",
+      "@tldraw/core": "<rootDir>/../core",
       "\\~(.*)": "<rootDir>/src/$1"
     }
   },
