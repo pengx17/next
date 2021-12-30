@@ -6,7 +6,7 @@ import {
   getContextBarTranslation,
 } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
-import type { NuStarShape, NuPolygonShape, Shape } from '~lib/shapes'
+import type { StarShape, PolygonShape, Shape } from '~lib/shapes'
 import { NuNumberInput } from '~components/inputs/NuNumberInput'
 import { NuColorInput } from '~components/inputs/NuColorInput'
 
@@ -62,7 +62,7 @@ const _NuContextBar: TLContextBarComponent<Shape> = ({
 
   if (!app) return null
 
-  const sidesShapes = shapes.filter(shape => 'sides' in shape) as (NuPolygonShape | NuStarShape)[]
+  const sidesShapes = shapes.filter(shape => 'sides' in shape) as (PolygonShape | StarShape)[]
 
   return (
     <HTMLContainer centered>

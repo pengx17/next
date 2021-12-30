@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import { TLShapeProps, TLHandle, TLLineShapeProps, TLLineShape } from '@tldraw/core'
+import { TLHandle, TLLineShapeProps, TLLineShape } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
-import { NuStyleProps, withClampedStyles } from './NuStyleProps'
+import { NuStyleProps, withClampedStyles } from './style-props'
 
-interface NuLineShapeProps extends NuStyleProps, TLLineShapeProps {
+interface LineShapeProps extends NuStyleProps, TLLineShapeProps {
   handles: TLHandle[]
 }
 
-export class NuLineShape extends TLLineShape<NuLineShapeProps> {
+export class LineShape extends TLLineShape<LineShapeProps> {
   static id = 'line'
 
-  defaultProps = {
+  static defaultProps = {
     id: 'line',
     parentId: 'page',
     type: 'line',
@@ -58,7 +58,7 @@ export class NuLineShape extends TLLineShape<NuLineShapeProps> {
     return <polygon points={path} />
   })
 
-  validateProps = (props: Partial<NuLineShapeProps>) => {
+  validateProps = (props: Partial<LineShapeProps>) => {
     return withClampedStyles(props)
   }
 }

@@ -13,13 +13,12 @@ export class TLLineShape<
 > extends TLPolylineShape<P, M> {
   constructor(props = {} as Partial<P>) {
     super(props)
-    this.props = { ...this.defaultProps, ...this.props }
     makeObservable(this)
   }
 
   static id = 'line'
 
-  validateProps = (props: Partial<TLShapeProps> & Partial<P>) => {
+  validateProps = (props: Partial<P>) => {
     if (props.point) props.point = [0, 0]
     if (props.handles !== undefined && props.handles.length < 1) props.handles = [{ point: [0, 0] }]
     return props

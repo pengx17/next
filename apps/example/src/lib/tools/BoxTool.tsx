@@ -1,9 +1,9 @@
 import { TLBoxTool } from '@tldraw/core'
 import type { TLReactEventMap } from '@tldraw/react'
-import { Shape, NuBoxShape } from '~lib'
+import { Shape, BoxShape } from '~lib'
 
-export class NuBoxTool extends TLBoxTool<NuBoxShape, Shape, TLReactEventMap> {
+export class BoxTool extends TLBoxTool<BoxShape, Shape, TLReactEventMap> {
   static id = 'box'
   static shortcut = ['r']
-  Shape = NuBoxShape
+  Shape = BoxShape
 }

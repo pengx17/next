@@ -1,11 +1,11 @@
 import { TLDrawTool } from '@tldraw/core'
 import type { TLReactEventMap } from '@tldraw/react'
-import { NuHighlighterShape, Shape } from '~lib'
+import { HighlighterShape, Shape } from '~lib'
 
-export class NuHighlighterTool extends TLDrawTool<NuHighlighterShape, Shape, TLReactEventMap> {
+export class HighlighterTool extends TLDrawTool<HighlighterShape, Shape, TLReactEventMap> {
   static id = 'highlighter'
   static shortcut = ['h']
-  Shape = NuHighlighterShape
+  Shape = HighlighterShape
   simplify = true
   simplifyTolerance = 0.618
 }

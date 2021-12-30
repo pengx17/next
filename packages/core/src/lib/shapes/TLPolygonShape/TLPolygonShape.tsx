@@ -15,9 +15,8 @@ export class TLPolygonShape<
   P extends TLPolygonShapeProps = TLPolygonShapeProps,
   M = any
 > extends TLBoxShape<P, M> {
-  constructor(props = {} as P) {
+  constructor(props = {} as Partial<P>) {
     super(props)
-    this.props = { ...this.defaultProps, ...this.props }
     makeObservable(this)
   }
 
@@ -129,7 +128,7 @@ export class TLPolygonShape<
     )
   }
 
-  validateProps = (props: Partial<TLShapeProps> & Partial<P>) => {
+  validateProps = (props: Partial<P>) => {
     if (props.point) props.point = [0, 0]
     if (props.sides !== undefined && props.sides < 3) props.sides = 3
     return props

@@ -1,28 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import {
-  TLBounds,
-  PointUtils,
-  BoundsUtils,
-  TLResizeInfo,
-  TLShapeProps,
-  TLEllipseShapeProps,
-  TLEllipseShape,
-} from '@tldraw/core'
-import { SVGContainer, TLComponentProps, TLIndicatorProps } from '@tldraw/react'
+import { TLEllipseShapeProps, TLEllipseShape } from '@tldraw/core'
+import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
-import { observable } from 'mobx'
-import { intersectEllipseBounds, intersectLineSegmentEllipse } from '@tldraw/intersect'
-import { NuStyleProps, withClampedStyles } from './NuStyleProps'
+import { NuStyleProps, withClampedStyles } from './style-props'
 
-export interface NuEllipseShapeProps extends TLEllipseShapeProps, NuStyleProps {
+export interface EllipseShapeProps extends TLEllipseShapeProps, NuStyleProps {
   size: number[]
 }
 
-export class NuEllipseShape extends TLEllipseShape<NuEllipseShapeProps> {
+export class EllipseShape extends TLEllipseShape<EllipseShapeProps> {
   static id = 'ellipse'
 
-  defaultProps = {
+  static defaultProps: EllipseShapeProps = {
     id: 'ellipse',
     parentId: 'page',
     type: 'ellipse',
@@ -31,7 +21,6 @@ export class NuEllipseShape extends TLEllipseShape<NuEllipseShapeProps> {
     stroke: '#000000',
     fill: '#ffffff',
     strokeWidth: 2,
-    borderRadius: 0,
     opacity: 1,
   }
 
@@ -74,7 +63,7 @@ export class NuEllipseShape extends TLEllipseShape<NuEllipseShapeProps> {
     )
   })
 
-  validateProps = (props: Partial<NuEllipseShapeProps>) => {
+  validateProps = (props: Partial<EllipseShapeProps>) => {
     if (props.size !== undefined) {
       props.size[0] = Math.max(props.size[0], 1)
       props.size[1] = Math.max(props.size[1], 1)

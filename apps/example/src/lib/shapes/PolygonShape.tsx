@@ -1,38 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import { TLShapeProps, assignOwnProps, TLPolygonShape, TLPolygonShapeProps } from '@tldraw/core'
-import { SVGContainer, TLComponentProps, TLIndicatorProps } from '@tldraw/react'
+import { TLPolygonShape, TLPolygonShapeProps } from '@tldraw/core'
+import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
-import { makeObservable, observable } from 'mobx'
-import { NuStyleProps, withClampedStyles } from './NuStyleProps'
+import { NuStyleProps, withClampedStyles } from './style-props'
 
-interface NuPolygonShapeProps extends NuStyleProps, TLPolygonShapeProps {}
+interface PolygonShapeProps extends TLPolygonShapeProps, NuStyleProps {}
 
-export class NuPolygonShape extends TLPolygonShape<NuPolygonShapeProps> {
-  constructor(props = {} as TLShapeProps & Partial<NuPolygonShapeProps>) {
-    super(props)
-    assignOwnProps(this, props)
-    makeObservable(this)
-  }
-
-  @observable stroke = '#000000'
-  @observable fill = '#ffffff'
-  @observable strokeWidth = 2
-  @observable opacity = 1
-
+export class PolygonShape extends TLPolygonShape<PolygonShapeProps> {
   static id = 'polygon'
+
+  static defaultProps: PolygonShapeProps = {
+    id: 'polygon',
+    parentId: 'page',
+    type: 'polygon',
+    point: [0, 0],
+    size: [100, 100],
+    sides: 5,
+    ratio: 0.5,
+    isFlippedY: false,
+    stroke: '#000000',
+    fill: '#ffffff',
+    strokeWidth: 2,
+    opacity: 1,
+  }
 
   ReactComponent = observer(({ events, isErasing, isSelected }: TLComponentProps) => {
     const {
       offset: [x, y],
-      stroke,
-      fill,
-      strokeWidth,
-      opacity,
+      props: { stroke, fill, strokeWidth, opacity },
     } = this
-
     const path = this.getVertices(strokeWidth / 2).join()
-
     return (
       <SVGContainer {...events} opacity={isErasing ? 0.2 : opacity}>
         <g transform={`translate(${x}, ${y})`}>
@@ -49,12 +47,11 @@ export class NuPolygonShape extends TLPolygonShape<NuPolygonShapeProps> {
     )
   })
 
-  ReactIndicator = observer((props: TLIndicatorProps) => {
+  ReactIndicator = observer(() => {
     const {
       offset: [x, y],
-      strokeWidth,
+      props: { strokeWidth },
     } = this
-
     return (
       <polygon
         transform={`translate(${x}, ${y})`}
@@ -63,7 +60,7 @@ export class NuPolygonShape extends TLPolygonShape<NuPolygonShapeProps> {
     )
   })
 
-  validateProps = (props: Partial<NuPolygonShapeProps & TLShapeProps>) => {
+  validateProps = (props: Partial<PolygonShapeProps>) => {
     if (props.sides !== undefined) props.sides = Math.max(props.sides, 3)
     return withClampedStyles(props)
   }

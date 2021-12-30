@@ -4,7 +4,7 @@ import { TLPolygonShape, TLPolygonShapeProps } from '../TLPolygonShape'
 import { PolygonUtils } from '~utils'
 
 export interface TLStarShapeProps extends TLPolygonShapeProps {
-  points: number
+  sides: number
   ratio: number
   isFlippedY: boolean
 }
@@ -17,9 +17,8 @@ export class TLStarShape<
   P extends TLStarShapeProps = TLStarShapeProps,
   M = any
 > extends TLPolygonShape<P, M> {
-  constructor(props = {} as P) {
+  constructor(props = {} as Partial<P>) {
     super(props)
-    this.props = { ...this.defaultProps, ...this.props }
     makeObservable(this)
   }
 

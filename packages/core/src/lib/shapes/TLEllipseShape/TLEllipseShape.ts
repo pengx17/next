@@ -14,7 +14,6 @@ export class TLEllipseShape<
 > extends TLBoxShape<P, M> {
   constructor(props = {} as Partial<P>) {
     super(props)
-    this.props = { ...this.defaultProps, ...this.props }
     makeObservable(this)
   }
 

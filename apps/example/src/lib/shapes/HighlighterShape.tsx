@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import { SvgPathUtils, TLDrawShape, TLDrawShapeProps, TLShapeProps } from '@tldraw/core'
+import { SvgPathUtils, TLDrawShape, TLDrawShapeProps } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
-import { observable, computed, makeObservable } from 'mobx'
-import { NuStyleProps, withClampedStyles } from './NuStyleProps'
+import { computed, makeObservable } from 'mobx'
+import { NuStyleProps, withClampedStyles } from './style-props'
 
-export interface NuHighlighterShapeProps extends TLDrawShapeProps, NuStyleProps {}
+export interface HighlighterShapeProps extends TLDrawShapeProps, NuStyleProps {}
 
-export class NuHighlighterShape extends TLDrawShape<NuHighlighterShapeProps> {
-  constructor(props = {} as Partial<NuHighlighterShapeProps>) {
+export class HighlighterShape extends TLDrawShape<HighlighterShapeProps> {
+  constructor(props = {} as Partial<HighlighterShapeProps>) {
     super(props)
     makeObservable(this)
   }
 
   static id = 'highlighter'
 
-  defaultProps = {
+  static defaultProps: HighlighterShapeProps = {
     id: 'highlighter',
     parentId: 'page',
     type: 'highlighter',
@@ -26,14 +26,8 @@ export class NuHighlighterShape extends TLDrawShape<NuHighlighterShapeProps> {
     stroke: '#000000',
     fill: '#ffffff',
     strokeWidth: 2,
-    borderRadius: 0,
     opacity: 1,
   }
-
-  @observable stroke = '#e9ff32'
-  @observable fill = '#000000'
-  @observable strokeWidth = 2
-  @observable opacity = 1
 
   @computed get pointsPath() {
     const { points } = this.props
@@ -67,7 +61,7 @@ export class NuHighlighterShape extends TLDrawShape<NuHighlighterShapeProps> {
     return <path d={pointsPath} fill="none" />
   })
 
-  validateProps = (props: Partial<NuHighlighterShapeProps>) => {
+  validateProps = (props: Partial<HighlighterShapeProps>) => {
     props = withClampedStyles(props)
     if (props.strokeWidth !== undefined) props.strokeWidth = Math.max(props.strokeWidth, 1)
     return props

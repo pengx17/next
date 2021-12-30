@@ -2,14 +2,14 @@ import * as React from 'react'
 import { TLDotShape, TLDotShapeProps } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
-import { NuStyleProps, withClampedStyles } from './NuStyleProps'
+import { NuStyleProps, withClampedStyles } from './style-props'
 
-export interface NuDotShapeProps extends TLDotShapeProps, NuStyleProps {}
+export interface DotShapeProps extends TLDotShapeProps, NuStyleProps {}
 
-export class NuDotShape extends TLDotShape<NuDotShapeProps> {
+export class DotShape extends TLDotShape<DotShapeProps> {
   static id = 'dot'
 
-  defaultProps = {
+  static defaultProps: DotShapeProps = {
     id: 'dot',
     parentId: 'page',
     type: 'dot',
@@ -18,7 +18,6 @@ export class NuDotShape extends TLDotShape<NuDotShapeProps> {
     stroke: '#000000',
     fill: '#ffffff',
     strokeWidth: 2,
-    borderRadius: 0,
     opacity: 1,
   }
 
@@ -50,7 +49,7 @@ export class NuDotShape extends TLDotShape<NuDotShapeProps> {
     return <circle cx={radius} cy={radius} r={radius} pointerEvents="all" />
   })
 
-  validateProps = (props: Partial<NuDotShapeProps>) => {
+  validateProps = (props: Partial<DotShapeProps>) => {
     if (props.radius !== undefined) props.radius = Math.max(props.radius, 1)
     return withClampedStyles(props)
   }

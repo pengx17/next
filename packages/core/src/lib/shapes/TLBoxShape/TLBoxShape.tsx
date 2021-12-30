@@ -13,7 +13,6 @@ export class TLBoxShape<P extends TLBoxShapeProps = TLBoxShapeProps, M = any> ex
 > {
   constructor(props = {} as Partial<P>) {
     super(props)
-    this.props = { ...this.defaultProps, ...this.props }
     makeObservable(this)
   }
 

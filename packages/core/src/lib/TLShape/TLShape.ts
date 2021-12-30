@@ -6,7 +6,7 @@ import {
 } from '@tldraw/intersect'
 import Vec from '@tldraw/vec'
 import { action, computed, makeObservable, observable } from 'mobx'
-import type { TLBounds, AnyObject, TLResizeEdge, TLResizeCorner } from '~types'
+import type { TLBounds, TLResizeEdge, TLResizeCorner } from '~types'
 import type { TLHandle } from '~types/TLHandle'
 import { BoundsUtils, PointUtils } from '~utils'
 import { deepCopy } from '~utils/DataUtils'
@@ -52,16 +52,18 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const type = this.constructor['id']
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const defaultProps = this.constructor['defaultProps']
     this.type = type
-    this.props = { ...this.defaultProps, ...props }
+    this.id = props.id ?? 'id'
+    this.props = { ...defaultProps, ...props }
     makeObservable(this)
   }
 
   static type: string
 
   private version = 1
-
-  defaultProps = {} as P
 
   @observable props: P
 

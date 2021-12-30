@@ -3,25 +3,18 @@ import * as React from 'react'
 import type { TLBoxShapeProps } from '@tldraw/core'
 import { HTMLContainer, TLComponentProps, TLReactBoxShape } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
-import { makeObservable } from 'mobx'
-import { NuStyleProps, withClampedStyles } from './NuStyleProps'
+import { NuStyleProps, withClampedStyles } from './style-props'
 
-export interface NuCodeSandboxShapeProps extends TLBoxShapeProps, NuStyleProps {
+export interface CodeSandboxShapeProps extends TLBoxShapeProps, NuStyleProps {
   embedId: string
 }
 
-export class NuCodeSandboxShape extends TLReactBoxShape<NuCodeSandboxShapeProps> {
-  constructor(props = {} as Partial<NuCodeSandboxShapeProps>) {
-    super(props)
-    props.size = props.size ?? [600, 320]
-    makeObservable(this)
-  }
-
+export class CodeSandboxShape extends TLReactBoxShape<CodeSandboxShapeProps> {
   static id = 'code'
 
   isEditable = true
 
-  defaultProps = {
+  static defaultProps: CodeSandboxShapeProps = {
     id: 'code',
     type: 'code',
     parentId: 'page',
@@ -30,7 +23,6 @@ export class NuCodeSandboxShape extends TLReactBoxShape<NuCodeSandboxShapeProps>
     stroke: '#000000',
     fill: '#ffffff',
     strokeWidth: 2,
-    borderRadius: 0,
     opacity: 1,
     embedId: '',
   }
@@ -106,7 +98,7 @@ export class NuCodeSandboxShape extends TLReactBoxShape<NuCodeSandboxShapeProps>
     return <rect width={w} height={h} fill="transparent" />
   })
 
-  validateProps = (props: Partial<NuCodeSandboxShapeProps>) => {
+  validateProps = (props: Partial<CodeSandboxShapeProps>) => {
     if (props.size !== undefined) {
       props.size[0] = Math.max(props.size[0], 1)
       props.size[1] = Math.max(props.size[1], 1)

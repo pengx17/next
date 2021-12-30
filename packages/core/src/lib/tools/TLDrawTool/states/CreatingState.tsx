@@ -36,7 +36,6 @@ export class CreatingState<
 
     this.creatingShape = shape
     this.app.currentPage.addShapes(shape)
-
     this.points = [[0, 0, originPoint[2]]]
     this.rawPoints = [[0, 0, originPoint[2]]]
     this.offset = [0, 0, originPoint[2]]

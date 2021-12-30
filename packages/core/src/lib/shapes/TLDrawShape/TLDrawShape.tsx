@@ -17,7 +17,6 @@ export interface TLDrawShapeProps extends TLShapeProps {
 export class TLDrawShape<P extends TLDrawShapeProps = any, M = any> extends TLShape<P, M> {
   constructor(props = {} as Partial<P>) {
     super(props)
-    this.props = { ...this.defaultProps, ...this.props }
     makeObservable(this)
   }
 

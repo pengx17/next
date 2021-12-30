@@ -1,28 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
-import type { TLBoxShapeProps } from '@tldraw/core'
-import { TLReactBoxShape } from '@tldraw/react'
+import { TLBoxShape, TLBoxShapeProps } from '@tldraw/core'
 import { observer } from 'mobx-react-lite'
-import { NuStyleProps, withClampedStyles } from './NuStyleProps'
+import { NuStyleProps, withClampedStyles } from './style-props'
 
-export interface NuBoxShapeProps extends TLBoxShapeProps, NuStyleProps {
+export interface BoxShapeProps extends TLBoxShapeProps, NuStyleProps {
   borderRadius: number
 }
 
-export class NuBoxShape extends TLReactBoxShape<NuBoxShapeProps> {
+export class BoxShape extends TLBoxShape<BoxShapeProps> {
   static id = 'box'
 
-  defaultProps = {
+  static defaultProps: BoxShapeProps = {
     id: 'box',
     parentId: 'page',
     type: 'box',
     point: [0, 0],
     size: [100, 100],
+    borderRadius: 0,
     stroke: '#000000',
     fill: '#ffffff',
     strokeWidth: 2,
-    borderRadius: 0,
     opacity: 1,
   }
 
@@ -75,7 +74,7 @@ export class NuBoxShape extends TLReactBoxShape<NuBoxShapeProps> {
     return <rect width={w} height={h} rx={borderRadius} ry={borderRadius} fill="transparent" />
   })
 
-  validateProps = (props: Partial<NuBoxShapeProps>) => {
+  validateProps = (props: Partial<BoxShapeProps>) => {
     if (props.size !== undefined) {
       props.size[0] = Math.max(props.size[0], 1)
       props.size[1] = Math.max(props.size[1], 1)

@@ -1,20 +1,20 @@
 // import { TLApp } from '@tldraw/core'
 // import {
-//   NuBoxShape,
-//   NuDotShape,
-//   NuPenShape,
-//   NuPolygonShape,
-//   NuEllipseShape,
-//   NuHighlighterShape,
+//   BoxShape,
+//   DotShape,
+//   PenShape,
+//   PolygonShape,
+//   EllipseShape,
+//   HighlighterShape,
 //   Shape,
 // } from '~lib/shapes'
 // import {
-//   NuDotTool,
-//   NuPenTool,
-//   NuPolygonTool,
-//   NuBoxTool,
-//   NuEllipseTool,
-//   NuHighlighterTool,
+//   DotTool,
+//   PenTool,
+//   PolygonTool,
+//   BoxTool,
+//   EllipseTool,
+//   HighlighterTool,
 //   NuEraseTool,
 // } from '~lib/tools'
 
@@ -24,20 +24,20 @@
 //   constructor() {
 //     super()
 //     this.registerShapes(
-//       NuBoxShape,
-//       NuEllipseShape,
-//       NuPolygonShape,
-//       NuPenShape,
-//       NuHighlighterShape,
-//       NuDotShape
+//       BoxShape,
+//       EllipseShape,
+//       PolygonShape,
+//       PenShape,
+//       HighlighterShape,
+//       DotShape
 //     )
 //     this.registerTools(
-//       NuBoxTool,
-//       NuEllipseTool,
-//       NuPolygonTool,
-//       NuPenTool,
-//       NuHighlighterTool,
-//       NuDotTool,
+//       BoxTool,
+//       EllipseTool,
+//       PolygonTool,
+//       PenTool,
+//       HighlighterTool,
+//       DotTool,
 //       NuEraseTool
 //     )
 //     this.selectTool('select')
