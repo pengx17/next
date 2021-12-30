@@ -18,6 +18,17 @@ export class TLLineShape<
 
   static id = 'line'
 
+  static defaultProps: TLLineShapeProps = {
+    id: 'line',
+    type: 'line',
+    parentId: 'page',
+    point: [0, 0],
+    handles: [
+      { id: 'start', point: [0, 0] },
+      { id: 'end', point: [1, 1] },
+    ],
+  }
+
   validateProps = (props: Partial<P>) => {
     if (props.point) props.point = [0, 0]
     if (props.handles !== undefined && props.handles.length < 1) props.handles = [{ point: [0, 0] }]

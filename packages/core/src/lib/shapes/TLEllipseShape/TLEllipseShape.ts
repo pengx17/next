@@ -19,6 +19,14 @@ export class TLEllipseShape<
 
   static id = 'ellipse'
 
+  static defaultProps: TLEllipseShapeProps = {
+    id: 'ellipse',
+    type: 'ellipse',
+    parentId: 'page',
+    point: [0, 0],
+    size: [100, 100],
+  }
+
   getBounds = (): TLBounds => {
     const {
       props: {

@@ -1,6 +1,6 @@
 import { Vec } from '@tldraw/vec'
 import { computed, makeObservable } from 'mobx'
-import type { TLShapeProps, TLResizeInfo, TLShape } from '~lib'
+import type { TLResizeInfo } from '~lib'
 import { intersectLineSegmentPolyline, intersectPolygonBounds, TLBounds } from '@tldraw/intersect'
 import { BoundsUtils, PointUtils, PolygonUtils } from '~utils'
 import { TLBoxShape, TLBoxShapeProps } from '../TLBoxShape'
@@ -21,6 +21,17 @@ export class TLPolygonShape<
   }
 
   static id = 'polygon'
+
+  static defaultProps: TLPolygonShapeProps = {
+    id: 'polygon',
+    type: 'polygon',
+    parentId: 'page',
+    point: [0, 0],
+    size: [100, 100],
+    sides: 5,
+    ratio: 1,
+    isFlippedY: false,
+  }
 
   @computed get vertices() {
     return this.getVertices()

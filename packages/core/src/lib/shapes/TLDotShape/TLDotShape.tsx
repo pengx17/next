@@ -18,10 +18,18 @@ export class TLDotShape<P extends TLDotShapeProps = TLDotShapeProps, M = any> ex
 
   static id = 'dot'
 
-  readonly hideSelection = true
-  readonly hideResizeHandles = true
-  readonly hideRotateHandle = true
-  readonly hideSelectionDetail = true
+  static defaultProps: TLDotShapeProps = {
+    id: 'dot',
+    type: 'dot',
+    parentId: 'page',
+    point: [0, 0],
+    radius: 6,
+  }
+
+  hideSelection = true
+  hideResizeHandles = true
+  hideRotateHandle = true
+  hideSelectionDetail = true
 
   getBounds = (): TLBounds => {
     const {

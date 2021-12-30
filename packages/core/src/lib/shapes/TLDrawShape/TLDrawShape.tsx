@@ -22,6 +22,15 @@ export class TLDrawShape<P extends TLDrawShapeProps = any, M = any> extends TLSh
 
   static id = 'draw'
 
+  static defaultProps: TLDrawShapeProps = {
+    id: 'draw',
+    type: 'draw',
+    parentId: 'page',
+    point: [0, 0],
+    points: [],
+    isComplete: false,
+  }
+
   /** The shape's bounds in "shape space". */
   @computed get pointBounds(): TLBounds {
     const {

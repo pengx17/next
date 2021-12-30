@@ -31,7 +31,7 @@ export class TLStarShape<
     point: [0, 0],
     size: [100, 100],
     sides: 3,
-    ratio: 0.5,
+    ratio: 1,
     isFlippedY: false,
   }
 

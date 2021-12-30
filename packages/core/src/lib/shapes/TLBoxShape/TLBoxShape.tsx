@@ -18,6 +18,14 @@ export class TLBoxShape<P extends TLBoxShapeProps = TLBoxShapeProps, M = any> ex
 
   static id = 'box'
 
+  static defaultProps: TLBoxShapeProps = {
+    id: 'box',
+    type: 'box',
+    parentId: 'page',
+    point: [0, 0],
+    size: [100, 100],
+  }
+
   getBounds = (): TLBounds => {
     const [x, y] = this.props.point
     const [width, height] = this.props.size

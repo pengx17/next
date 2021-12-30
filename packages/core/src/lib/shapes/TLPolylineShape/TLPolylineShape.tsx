@@ -25,6 +25,14 @@ export class TLPolylineShape<
 
   static id = 'polyline'
 
+  static defaultProps: TLPolylineShapeProps = {
+    id: 'polyline',
+    type: 'polyline',
+    parentId: 'page',
+    point: [0, 0],
+    handles: [{ id: '0', point: [0, 0] }],
+  }
+
   @computed get points() {
     return this.props.handles.map(h => h.point)
   }
