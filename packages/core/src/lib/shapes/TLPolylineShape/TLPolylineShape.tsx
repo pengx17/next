@@ -1,5 +1,4 @@
 import { computed, makeObservable } from 'mobx'
-import { TLShapeProps, TLResizeInfo, TLShape } from '~lib'
 import { Vec } from '@tldraw/vec'
 import {
   intersectBoundsLineSegment,
@@ -9,6 +8,7 @@ import {
 } from '@tldraw/intersect'
 import type { TLHandle } from '~types'
 import { BoundsUtils, PointUtils, PolygonUtils } from '~utils'
+import { TLShapeProps, TLResizeInfo, TLShape } from '../TLShape'
 
 export interface TLPolylineShapeProps extends TLShapeProps {
   handles: TLHandle[]

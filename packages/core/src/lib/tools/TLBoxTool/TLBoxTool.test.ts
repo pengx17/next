@@ -1,5 +1,6 @@
-import { TLApp, TLBoxShape } from '~lib'
 import { TLBoxTool } from './TLBoxTool'
+import { TLBoxShape } from '~lib/shapes/TLBoxShape'
+import { TLApp } from '~lib/TLApp'
 
 describe('A minimal test', () => {
   it('Creates the shape', () => {

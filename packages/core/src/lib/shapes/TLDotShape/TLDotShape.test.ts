@@ -8,7 +8,7 @@ describe('A minimal test', () => {
     }
 
     class Shape extends TLDotShape<DotShapeProps> {
-      defaultProps = {
+      static defaultProps: DotShapeProps = {
         id: 'dot',
         type: 'dot',
         parentId: 'page',

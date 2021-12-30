@@ -8,7 +8,7 @@ describe('A minimal test', () => {
     }
 
     class Shape extends TLPolygonShape<PolygonShapeProps> {
-      defaultProps = {
+      static defaultProps: PolygonShapeProps = {
         id: 'dot',
         type: 'dot',
         parentId: 'page',

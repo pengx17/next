@@ -8,7 +8,7 @@ describe('A minimal test', () => {
     }
 
     class DrawShape extends TLDrawShape<DrawShapeProps> {
-      defaultProps = {
+      static defaultProps: DrawShapeProps = {
         id: 'draw',
         type: 'draw',
         parentId: 'page',

@@ -1,5 +1,5 @@
 import { makeObservable } from 'mobx'
-import type { TLResizeInfo, TLShape } from '~lib'
+import type { TLResizeInfo } from '~lib'
 import { intersectLineSegmentEllipse, intersectEllipseBounds, TLBounds } from '@tldraw/intersect'
 import { BoundsUtils, PointUtils } from '~utils'
 import { TLBoxShape, TLBoxShapeProps } from '../TLBoxShape'

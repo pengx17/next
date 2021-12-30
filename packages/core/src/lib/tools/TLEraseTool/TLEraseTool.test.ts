@@ -1,5 +1,5 @@
-import { TLApp } from '~lib'
 import { TLEraseTool } from './TLEraseTool'
+import { TLApp } from '~lib'
 
 describe('A minimal test', () => {
   it('Creates the shape', () => {

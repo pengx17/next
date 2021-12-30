@@ -8,7 +8,7 @@ describe('A minimal test', () => {
     }
 
     class Shape extends TLEllipseShape<EllipseShapeProps> {
-      defaultProps = {
+      static defaultProps: EllipseShapeProps = {
         id: 'ellipse',
         type: 'ellipse',
         parentId: 'page',

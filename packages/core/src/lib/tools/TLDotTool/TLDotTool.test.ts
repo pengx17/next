@@ -1,5 +1,6 @@
-import { TLApp, TLDotShape } from '~lib'
 import { TLDotTool } from './TLDotTool'
+import { TLDotShape } from '~lib/shapes/TLDotShape'
+import { TLApp } from '~lib/TLApp'
 
 describe('A minimal test', () => {
   it('Creates the shape', () => {

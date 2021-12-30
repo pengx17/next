@@ -1,5 +1,5 @@
 import { computed, makeObservable } from 'mobx'
-import { TLShape, TLResizeInfo, TLShapeProps } from '~lib'
+import { TLShape, TLResizeInfo, TLShapeProps } from '../TLShape'
 import { Vec } from '@tldraw/vec'
 import {
   intersectBoundsLineSegment,

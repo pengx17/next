@@ -7,7 +7,7 @@ describe('A minimal test', () => {
     }
 
     class Shape extends TLPolylineShape<PolylineShapeProps> {
-      defaultProps = {
+      static defaultProps: PolylineShapeProps = {
         id: 'dot',
         type: 'dot',
         parentId: 'page',

@@ -8,7 +8,7 @@ describe('A minimal test', () => {
     }
 
     class Shape extends TLLineShape<LineShapeProps> {
-      defaultProps = {
+      static defaultProps: LineShapeProps = {
         id: 'dot',
         type: 'dot',
         parentId: 'page',

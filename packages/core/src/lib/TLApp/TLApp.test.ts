@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { TLTestApp } from '~test/TLTestApp'
-import { TLTestBox } from '~test/TLTestBox'
 import { TLResizeCorner, TLRotateCorner, TLTargetType } from '~types'
+import { TLTestBox } from '~test/TLTestBox'
+import { TLTestApp } from '~test/TLTestApp'
 
 describe('TLTestApp', () => {
   it('creates a new app', () => {

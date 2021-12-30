@@ -1,5 +1,5 @@
 import type { TLTargetType, TLSelectionHandle } from '~types'
-import type { TLShape } from '../../TLShape'
+import type { TLShape } from '../../shapes/TLShape'
 
 export type TLEventInfo<S extends TLShape> =
   | { type: TLTargetType.Canvas; target: 'canvas'; order: number }

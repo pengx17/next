@@ -11,20 +11,6 @@ export const FIT_TO_SCREEN_PADDING = 100
 export const EMPTY_OBJECT: any = {}
 export const EMPTY_ARRAY: any[] = []
 
-// export const CURSORS = {
-//   canvas: 'default',
-//   grab: 'grab',
-//   grabbing: 'grabbing',
-//   [TLResizeCorner.TopLeft]: 'resize-nwse',
-//   [TLResizeCorner.TopRight]: 'resize-nesw',
-//   [TLResizeCorner.BottomRight]: 'resize-nwse',
-//   [TLResizeCorner.BottomLeft]: 'resize-nesw',
-//   [TLResizeEdge.Top]: 'resize-ns',
-//   [TLResizeEdge.Right]: 'resize-ew',
-//   [TLResizeEdge.Bottom]: 'resize-ns',
-//   [TLResizeEdge.Left]: 'resize-ew',
-// }
-
 export const CURSORS: Record<TLSelectionHandle, TLCursor> = {
   [TLResizeEdge.Bottom]: TLCursor.NsResize,
   [TLResizeEdge.Top]: TLCursor.NsResize,

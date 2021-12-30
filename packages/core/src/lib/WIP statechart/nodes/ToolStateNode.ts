@@ -1,4 +1,4 @@
-import type { TLShape } from '../../TLShape'
+import type { TLShape } from '../../shapes/TLShape'
 import type { AppNode } from './AppNode'
 import type { TLShortcut, TLStateEvents } from './shared'
 import { TLStateNode } from './TLStateNode'

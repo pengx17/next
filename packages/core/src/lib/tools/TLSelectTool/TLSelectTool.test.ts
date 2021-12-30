@@ -1,6 +1,6 @@
 import { TLTestApp } from '~test/TLTestApp'
 import { TLTargetType } from '~types'
-import { TLApp } from '../../TLApp'
+import { TLApp } from '~lib/TLApp'
 import { TLSelectTool } from './TLSelectTool'
 
 describe('A minimal test', () => {

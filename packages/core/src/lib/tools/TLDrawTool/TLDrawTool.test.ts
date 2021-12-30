@@ -1,5 +1,5 @@
-import { TLApp, TLDrawShape } from '~lib'
 import { TLDrawTool } from './TLDrawTool'
+import { TLApp, TLDrawShape } from '~lib'
 
 describe('A minimal test', () => {
   it('Creates the shape', () => {

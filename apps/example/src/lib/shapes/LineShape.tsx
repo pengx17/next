@@ -12,7 +12,7 @@ interface LineShapeProps extends NuStyleProps, TLLineShapeProps {
 export class LineShape extends TLLineShape<LineShapeProps> {
   static id = 'line'
 
-  static defaultProps = {
+  static defaultProps: LineShapeProps = {
     id: 'line',
     parentId: 'page',
     type: 'line',
@@ -24,7 +24,6 @@ export class LineShape extends TLLineShape<LineShapeProps> {
     stroke: '#000000',
     fill: '#ffffff',
     strokeWidth: 2,
-    borderRadius: 0,
     opacity: 1,
   }
 

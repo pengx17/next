@@ -1,4 +1,4 @@
-import type { TLShape, TLShapeConstructor } from '../TLShape'
+import type { TLShape, TLShapeConstructor } from '../shapes/TLShape'
 import { AppNode } from './nodes/AppNode'
 import type { TLToolNodeConstructor } from './nodes/ToolNode'
 import type { TLShortcut, TLStateEvents } from './nodes/shared'

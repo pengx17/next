@@ -1,4 +1,4 @@
-import type { TLShape } from '../TLShape'
+import type { TLShape } from '../shapes/TLShape'
 import { AppNode } from './nodes/AppNode'
 import { createTool } from './nodes/ToolNode'
 import { createToolState } from './nodes/ToolStateNode'

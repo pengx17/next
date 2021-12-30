@@ -6,10 +6,8 @@ import {
 } from '@tldraw/intersect'
 import Vec from '@tldraw/vec'
 import { action, computed, makeObservable, observable } from 'mobx'
-import type { TLBounds, TLResizeEdge, TLResizeCorner } from '~types'
-import type { TLHandle } from '~types/TLHandle'
-import { BoundsUtils, PointUtils } from '~utils'
-import { deepCopy } from '~utils/DataUtils'
+import type { TLHandle, TLBounds, TLResizeEdge, TLResizeCorner } from '~types'
+import { deepCopy, BoundsUtils, PointUtils } from '~utils'
 
 export type TLShapeModel<P extends TLShapeProps = TLShapeProps> = {
   nonce?: number

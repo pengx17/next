@@ -8,7 +8,7 @@ describe('A minimal test', () => {
     }
 
     class BoxShape extends TLBoxShape<BoxShapeProps> {
-      defaultProps = {
+      static defaultProps: BoxShapeProps = {
         id: 'box',
         parentId: 'page',
         type: 'box',
