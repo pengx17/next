@@ -54,7 +54,6 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
     // @ts-ignore
     const defaultProps = this.constructor['defaultProps']
     this.type = type
-    this.id = props.id ?? 'id'
     this.props = { ...defaultProps, ...props }
     makeObservable(this)
   }
@@ -76,7 +75,6 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
   readonly isStateful: boolean = false
   readonly aspectRatio?: number
   readonly type: string
-  readonly id: string = 'id'
 
   nonce = 0
 
@@ -85,6 +83,10 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
   private lastSerialized = {} as TLShapeModel<P>
 
   abstract getBounds: () => TLBounds
+
+  @computed get id() {
+    return this.props.id
+  }
 
   getCenter = () => {
     return BoundsUtils.getBoundsCenter(this.bounds)

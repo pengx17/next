@@ -17,7 +17,6 @@ const _NuContextBar: TLContextBarComponent<Shape> = ({
   // rotation,
 }) => {
   const app = useApp()
-
   const rSize = React.useRef([0, 0])
   const rContextBar = React.useRef<HTMLDivElement>(null)
 
@@ -62,7 +61,7 @@ const _NuContextBar: TLContextBarComponent<Shape> = ({
 
   if (!app) return null
 
-  const sidesShapes = shapes.filter(shape => 'sides' in shape) as (PolygonShape | StarShape)[]
+  const sidesShapes = shapes.filter(shape => 'sides' in shape.props) as (PolygonShape | StarShape)[]
 
   return (
     <HTMLContainer centered>
@@ -78,7 +77,7 @@ const _NuContextBar: TLContextBarComponent<Shape> = ({
         {sidesShapes.length > 0 && (
           <NuNumberInput
             label="Sides"
-            value={Math.max(...sidesShapes.map(shape => shape.sides))}
+            value={Math.max(...sidesShapes.map(shape => shape.props.sides))}
             onChange={updateSides}
             style={{ width: 40 }}
           />
@@ -86,7 +85,7 @@ const _NuContextBar: TLContextBarComponent<Shape> = ({
         {sidesShapes.length > 0 && (
           <NuNumberInput
             label="Ratio"
-            value={Math.max(...sidesShapes.map(shape => shape.ratio))}
+            value={Math.max(...sidesShapes.map(shape => shape.props.ratio))}
             onChange={updateRatio}
             step={0.1}
             min={0}

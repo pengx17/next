@@ -22,7 +22,18 @@ export class TLStarShape<
     makeObservable(this)
   }
 
-  id = 'star'
+  static id = 'star'
+
+  static defaultProps: TLStarShapeProps = {
+    id: 'star',
+    parentId: 'page',
+    type: 'star',
+    point: [0, 0],
+    size: [100, 100],
+    sides: 3,
+    ratio: 0.5,
+    isFlippedY: false,
+  }
 
   getVertices(padding = 0): number[][] {
     const { ratio, sides, size, isFlippedY } = this.props
