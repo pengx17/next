@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
 import { observer } from 'mobx-react-lite'
-import type { TLReactShape, TLReactShapeConstructor } from '~lib'
+import type { TLReactApp, TLReactShape, TLReactShapeConstructor } from '~lib'
 import { AppContext, Renderer } from '~components'
 import { useApp } from '~hooks'
 import type {
@@ -12,7 +12,7 @@ import type {
   TLToolConstructor,
 } from '@tldraw/core'
 import type { TLReactComponents } from '~types/component-props'
-import type { TLReactApp, TLReactEventMap } from '~types'
+import type { TLReactEventMap } from '~types'
 
 export interface TLCommonAppProps<
   S extends TLReactShape = TLReactShape,

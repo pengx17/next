@@ -1,7 +1,6 @@
 import * as React from 'react'
 import type { TLAppPropsWithApp, TLAppPropsWithoutApp } from '~components'
-import type { TLReactShape } from '~lib'
-import type { TLReactApp } from '~types'
+import type { TLReactShape, TLReactApp } from '~lib'
 
 export function usePropControl<S extends TLReactShape, R extends TLReactApp<S> = TLReactApp<S>>(
   app: R,

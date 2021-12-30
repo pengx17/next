@@ -1,7 +1,6 @@
 import * as React from 'react'
 import type { TLAppPropsWithoutApp, TLAppPropsWithApp } from '~components'
-import type { TLReactShape } from '~lib'
-import type { TLReactApp } from '~types'
+import type { TLReactShape, TLReactApp } from '~lib'
 
 declare const window: Window & { tln: TLReactApp<any> }
 

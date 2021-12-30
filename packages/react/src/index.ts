@@ -1,6 +1,5 @@
 import type { TLOffset } from '@tldraw/core'
 
-export * from '@tldraw/core'
 export * from './types'
 export * from './lib'
 export * from './hooks/useApp'
