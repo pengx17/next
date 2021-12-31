@@ -27,6 +27,7 @@ export class CodeSandboxShape extends TLReactBoxShape<CodeSandboxShapeProps> {
   }
 
   isEditable = true
+  isAspectRatioLocked = true
 
   ReactComponent = observer(({ events, isEditing, isErasing }: TLComponentProps) => {
     const { opacity, embedId } = this.props

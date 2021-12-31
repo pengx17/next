@@ -107,13 +107,14 @@ function App(): JSX.Element {
           //   size: [100, 100],
           //   rotation: Math.PI / 6,
           // },
-          // {
-          //   id: 'code1',
-          //   type: 'code',
-          //   parentId: 'page1',
-          //   point: [300, 400],
-          //   size: [100, 100],
-          // },
+          {
+            id: 'code1',
+            type: 'youtube',
+            parentId: 'page1',
+            point: [300, 400],
+            size: [100, 100],
+            embedId: 'IYqlz66t218',
+          },
           {
             id: 'polyline1',
             type: 'polyline',
@@ -237,7 +238,7 @@ function App(): JSX.Element {
         Shapes={Shapes}
         Tools={Tools}
       >
-        <AppUI />
+        {/* <AppUI /> */}
       </TLDrawApp>
     </div>
   )
