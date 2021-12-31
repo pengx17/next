@@ -193,7 +193,7 @@ export class TLTestApp extends TLApp<S> {
 
 const defaultModel: TLDocumentModel = {
   currentPageId: 'page1',
-  selectedIds: ['box1'],
+  selectedIds: [],
   pages: [
     {
       name: 'Page',
