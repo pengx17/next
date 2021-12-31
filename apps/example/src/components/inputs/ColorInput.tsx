@@ -1,10 +1,10 @@
 import * as React from 'react'
 
-interface NuColorInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface ColorInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string
 }
 
-export function NuColorInput({ label, ...rest }: NuColorInputProps) {
+export function ColorInput({ label, ...rest }: ColorInputProps) {
   return (
     <div className="nu-input">
       <label htmlFor={`#color-${label}`}>{label}</label>

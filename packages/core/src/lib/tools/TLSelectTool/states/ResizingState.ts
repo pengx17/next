@@ -54,7 +54,10 @@ export class ResizingState<
       selectedShapesArray.map(shape => BoundsUtils.getBoundsCenter(shape.bounds))
     )
     this.isSingle = selectedShapesArray.length === 1
-    this.isAspectRatioLocked = this.isSingle && !!selectedShapesArray[0].props.isAspectRatioLocked
+    this.isAspectRatioLocked =
+      this.isSingle &&
+      (selectedShapesArray[0].isAspectRatioLocked ||
+        !!selectedShapesArray[0].props.isAspectRatioLocked)
     this.selectionRotation = this.isSingle ? selectedShapesArray[0].props.rotation ?? 0 : 0
     this.initialCommonBounds = { ...selectionBounds }
     this.initialCommonCenter = BoundsUtils.getBoundsCenter(this.initialCommonBounds)

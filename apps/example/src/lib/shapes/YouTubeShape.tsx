@@ -3,7 +3,6 @@ import * as React from 'react'
 import { TLBoxShape, TLBoxShapeProps } from '@tldraw/core'
 import { HTMLContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
-import { makeObservable } from 'mobx'
 import { NuStyleProps, withClampedStyles } from './style-props'
 
 export interface YouTubeShapeProps extends TLBoxShapeProps, NuStyleProps {
@@ -12,11 +11,6 @@ export interface YouTubeShapeProps extends TLBoxShapeProps, NuStyleProps {
 }
 
 export class YouTubeShape extends TLBoxShape<YouTubeShapeProps> {
-  constructor(props = {} as Partial<YouTubeShapeProps>) {
-    super(props)
-    makeObservable(this)
-  }
-
   static id = 'youtube'
 
   static defaultProps: YouTubeShapeProps = {
@@ -33,6 +27,8 @@ export class YouTubeShape extends TLBoxShape<YouTubeShapeProps> {
   }
 
   aspectRatio = 480 / 853
+
+  isAspectRatioLocked = true
 
   isEditable = true
 

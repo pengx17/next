@@ -451,6 +451,7 @@ export class TLApp<
 
   @computed get shapesInViewport(): S[] {
     const {
+      selectedShapes,
       currentPage,
       viewport: { currentView },
     } = this
@@ -458,6 +459,7 @@ export class TLApp<
       return (
         shape.props.parentId === currentPage.id &&
         (shape.stayMounted ||
+          selectedShapes.has(shape) ||
           BoundsUtils.boundsContain(currentView, shape.rotatedBounds) ||
           BoundsUtils.boundsCollide(currentView, shape.rotatedBounds))
       )

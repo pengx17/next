@@ -1,10 +1,10 @@
 import * as React from 'react'
 
-interface NuNumberInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface NumberInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string
 }
 
-export function NuNumberInput({ label, ...rest }: NuNumberInputProps) {
+export function NumberInput({ label, ...rest }: NumberInputProps) {
   return (
     <div className="nu-input">
       <label htmlFor={`#number-${label}`}>{label}</label>

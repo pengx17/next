@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite'
 import { useApp } from '@tldraw/react'
 import type { Shape } from '~lib'
 
-export const NuStatusBar = observer(function StatusBar() {
+export const StatusBar = observer(function StatusBar() {
   const app = useApp<Shape>()
   return (
     <div className="nu-statusbar">

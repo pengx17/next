@@ -55,7 +55,9 @@ export class CreatingState<
       TLResizeCorner.BottomRight,
       Vec.sub(currentPoint, originPoint),
       0,
-      shiftKey || this.creatingShape.props.isAspectRatioLocked
+      shiftKey ||
+        this.creatingShape.props.isAspectRatioLocked ||
+        this.creatingShape.isAspectRatioLocked
     )
 
     this.creatingShape.update({

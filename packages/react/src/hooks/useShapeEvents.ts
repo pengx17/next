@@ -77,3 +77,8 @@ export function useShapeEvents<S extends TLReactShape>(shape: S) {
 
   return events
 }
+
+function setCaptureOnAncestorDiv(elm: Element, pointerId: number): void {
+  if (elm.tagName === 'DIV') elm.setPointerCapture(pointerId)
+  else if (elm.parentElement) setCaptureOnAncestorDiv(elm.parentElement, pointerId)
+}

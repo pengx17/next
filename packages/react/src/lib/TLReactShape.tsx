@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TLShape, TLShapeProps } from '@tldraw/core'
 
 export interface TLCommonShapeProps<M = unknown> {
@@ -24,7 +25,7 @@ export interface TLComponentProps<M = unknown> extends TLCommonShapeProps<M> {
 }
 
 export interface TLReactShapeConstructor<S extends TLReactShape = TLReactShape> {
-  new (props: S['props']): S
+  new (props: S['props'] & { type: any }): S
   id: string
 }
 

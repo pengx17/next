@@ -6,14 +6,12 @@ import { observer } from 'mobx-react-lite'
 import { NuStyleProps, withClampedStyles } from './style-props'
 
 export interface CodeSandboxShapeProps extends TLBoxShapeProps, NuStyleProps {
-  embedId: string
   type: 'code'
+  embedId: string
 }
 
 export class CodeSandboxShape extends TLReactBoxShape<CodeSandboxShapeProps> {
   static id = 'code'
-
-  isEditable = true
 
   static defaultProps: CodeSandboxShapeProps = {
     id: 'code',
@@ -27,6 +25,8 @@ export class CodeSandboxShape extends TLReactBoxShape<CodeSandboxShapeProps> {
     opacity: 1,
     embedId: '',
   }
+
+  isEditable = true
 
   ReactComponent = observer(({ events, isEditing, isErasing }: TLComponentProps) => {
     const { opacity, embedId } = this.props

@@ -75,6 +75,7 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
   readonly hideSelection: boolean = false
   readonly isEditable: boolean = false
   readonly isStateful: boolean = false
+  readonly isAspectRatioLocked: boolean = false
   readonly aspectRatio?: number
   readonly type: string
 

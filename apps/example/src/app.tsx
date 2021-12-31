@@ -38,10 +38,10 @@ import {
   YouTubeTool,
 } from '~lib/tools'
 import { AppUI } from '~components/AppUI'
-import { NuContextBar } from '~components/NuContextBar/NuContextBar'
+import { ContextBar } from '~components/ContextBar/ContextBar'
 
 const components: TLReactComponents<Shape> = {
-  ContextBar: NuContextBar,
+  ContextBar: ContextBar,
 }
 
 function App(): JSX.Element {
@@ -203,15 +203,15 @@ function App(): JSX.Element {
           //   points: 5,
           //   ratio: 0.5,
           // },
-          // {
-          //   id: 'star3',
-          //   type: 'star',
-          //   parentId: 'page1',
-          //   point: [500, 500],
-          //   size: [150, 150],
-          //   points: 5,
-          //   ratio: 1,
-          // },
+          {
+            id: 'star3',
+            type: 'star',
+            parentId: 'page1',
+            point: [500, 500],
+            size: [150, 150],
+            sides: 5,
+            ratio: 1,
+          },
         ],
         bindings: [],
       },

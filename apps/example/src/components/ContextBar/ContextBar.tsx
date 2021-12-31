@@ -7,10 +7,10 @@ import {
 } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import type { StarShape, PolygonShape, Shape } from '~lib/shapes'
-import { NuNumberInput } from '~components/inputs/NuNumberInput'
-import { NuColorInput } from '~components/inputs/NuColorInput'
+import { NumberInput } from '~components/inputs/NumberInput'
+import { ColorInput } from '~components/inputs/ColorInput'
 
-const _NuContextBar: TLContextBarComponent<Shape> = ({
+const _ContextBar: TLContextBarComponent<Shape> = ({
   shapes,
   offset,
   scaledBounds,
@@ -66,16 +66,16 @@ const _NuContextBar: TLContextBarComponent<Shape> = ({
   return (
     <HTMLContainer centered>
       <div ref={rContextBar} className="nu-contextbar">
-        <NuColorInput label="Stroke" value={shapes[0].props.stroke} onChange={updateStroke} />
-        <NuColorInput label="Fill" value={shapes[0].props.fill} onChange={updateFill} />
-        <NuNumberInput
+        <ColorInput label="Stroke" value={shapes[0].props.stroke} onChange={updateStroke} />
+        <ColorInput label="Fill" value={shapes[0].props.fill} onChange={updateFill} />
+        <NumberInput
           label="Width"
           value={Math.max(...shapes.map(shape => shape.props.strokeWidth))}
           onChange={updateStrokeWidth}
           style={{ width: 48 }}
         />
         {sidesShapes.length > 0 && (
-          <NuNumberInput
+          <NumberInput
             label="Sides"
             value={Math.max(...sidesShapes.map(shape => shape.props.sides))}
             onChange={updateSides}
@@ -83,7 +83,7 @@ const _NuContextBar: TLContextBarComponent<Shape> = ({
           />
         )}
         {sidesShapes.length > 0 && (
-          <NuNumberInput
+          <NumberInput
             label="Ratio"
             value={Math.max(...sidesShapes.map(shape => shape.props.ratio))}
             onChange={updateRatio}
@@ -93,7 +93,7 @@ const _NuContextBar: TLContextBarComponent<Shape> = ({
             style={{ width: 40 }}
           />
         )}
-        <NuNumberInput
+        <NumberInput
           label="Opacity"
           value={Math.max(...shapes.map(shape => shape.props.opacity))}
           onChange={updateOpacity}
@@ -105,4 +105,4 @@ const _NuContextBar: TLContextBarComponent<Shape> = ({
   )
 }
 
-export const NuContextBar = observer(_NuContextBar)
+export const ContextBar = observer(_ContextBar)
