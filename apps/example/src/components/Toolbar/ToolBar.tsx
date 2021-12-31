@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite'
 import type { Shape } from '~lib'
 import { useApp } from '@tldraw/react'
 
-export const NuToolBar = observer(function ToolBar(): JSX.Element {
+export const ToolBar = observer(function ToolBar(): JSX.Element {
   const app = useApp<Shape>()
 
   const zoomIn = React.useCallback(() => {
@@ -45,7 +45,7 @@ export const NuToolBar = observer(function ToolBar(): JSX.Element {
   }, [app])
 
   return (
-    <div className="nu-toolbar">
+    <div className="toolbar">
       <button onClick={sendToBack}>Send to Back</button>
       <button onClick={sendBackward}>Send Backward</button>
       <button onClick={bringForward}>Bring Forward</button>

@@ -28,6 +28,7 @@ import { DirectionIndicator } from '~components/ui/DirectionIndicator'
 
 export interface TLCanvasProps<S extends TLReactShape> {
   id?: string
+  className?: string
   bindings?: TLBinding[]
   brush?: TLBounds
   shapes?: S[]
@@ -56,6 +57,7 @@ export interface TLCanvasProps<S extends TLReactShape> {
 
 export const Canvas = observer(function Renderer<S extends TLReactShape>({
   id,
+  className,
   brush,
   shapes,
   bindingShape,
@@ -102,7 +104,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
   const erasingShapesSet = React.useMemo(() => new Set(erasingShapes || []), [erasingShapes])
 
   return (
-    <div ref={rContainer} className="tl-container">
+    <div ref={rContainer} className={`tl-container ${className}`}>
       <div tabIndex={-1} className="tl-absolute tl-canvas" {...events}>
         {showGrid && components.Grid && <components.Grid size={gridSize} />}
         <HTMLLayer>

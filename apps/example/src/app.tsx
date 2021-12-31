@@ -229,8 +229,9 @@ function App(): JSX.Element {
   }, [])
 
   return (
-    <div className="tl-app">
+    <div className="wrapper">
       <TLDrawApp
+        className="app"
         onMount={onMount}
         onPersist={onPersist}
         model={model}
@@ -238,7 +239,7 @@ function App(): JSX.Element {
         Shapes={Shapes}
         Tools={Tools}
       >
-        {/* <AppUI /> */}
+        <AppUI />
       </TLDrawApp>
     </div>
   )

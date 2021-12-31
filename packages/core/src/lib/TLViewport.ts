@@ -60,8 +60,8 @@ export class TLViewport {
   }
 
   getPagePoint = (point: number[]): number[] => {
-    const { camera } = this
-    return Vec.sub(Vec.div(point, camera.zoom), camera.point)
+    const { camera, bounds } = this
+    return Vec.sub(Vec.div(Vec.sub(point, [bounds.minX, bounds.minY]), camera.zoom), camera.point)
   }
 
   getScreenPoint = (point: number[]): number[] => {

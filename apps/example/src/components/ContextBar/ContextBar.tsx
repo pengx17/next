@@ -65,7 +65,7 @@ const _ContextBar: TLContextBarComponent<Shape> = ({
 
   return (
     <HTMLContainer centered>
-      <div ref={rContextBar} className="nu-contextbar">
+      <div ref={rContextBar} className="contextbar">
         <ColorInput label="Stroke" value={shapes[0].props.stroke} onChange={updateStroke} />
         <ColorInput label="Fill" value={shapes[0].props.fill} onChange={updateFill} />
         <NumberInput

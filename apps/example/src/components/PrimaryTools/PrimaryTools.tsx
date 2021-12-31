@@ -38,9 +38,9 @@ export const PrimaryTools = observer(function PrimaryTools() {
   const selectedToolId = app.selectedTool.id
 
   return (
-    <div className="nu-primary-tools">
-      <button className="nu-floating-button"></button>
-      <div className="nu-panel nu-floating-panel" data-tool-locked={app.settings.isToolLocked}>
+    <div className="primary-tools">
+      <button className="floating-button"></button>
+      <div className="panel floating-panel" data-tool-locked={app.settings.isToolLocked}>
         <Button
           data-tool="select"
           data-selected={selectedToolId === 'select'}
@@ -122,7 +122,7 @@ export const PrimaryTools = observer(function PrimaryTools() {
           <VideoIcon />
         </Button>
       </div>
-      <button className="nu-floating-button"></button>
+      <button className="floating-button"></button>
     </div>
   )
 })

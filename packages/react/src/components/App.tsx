@@ -19,6 +19,7 @@ export interface TLCommonAppProps<
   R extends TLReactApp<S> = TLReactApp<S>
 > {
   id?: string
+  className?: string
   meta?: AnyObject
   theme?: Partial<TLTheme>
   components?: TLReactComponents<S>

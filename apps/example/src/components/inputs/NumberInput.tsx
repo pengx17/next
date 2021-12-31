@@ -6,9 +6,9 @@ interface NumberInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 export function NumberInput({ label, ...rest }: NumberInputProps) {
   return (
-    <div className="nu-input">
+    <div className="input">
       <label htmlFor={`#number-${label}`}>{label}</label>
-      <input className="nu-number-input" name={`#number-${label}`} type="number" {...rest} />
+      <input className="number-input" name={`#number-${label}`} type="number" {...rest} />
     </div>
   )
 }

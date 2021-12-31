@@ -8,7 +8,7 @@ import type { Shape } from '~lib'
 export const StatusBar = observer(function StatusBar() {
   const app = useApp<Shape>()
   return (
-    <div className="nu-statusbar">
+    <div className="statusbar">
       {app.selectedTool.id} | {app.selectedTool.currentState.id}
     </div>
   )

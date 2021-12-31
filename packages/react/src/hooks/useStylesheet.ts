@@ -130,7 +130,7 @@ const tlcss = css`
       0.6px 10.3px 13.2px -1px hsl(var(--tl-shadow-color) / 0.08),
       0.9px 16px 20.6px -1.2px hsl(var(--tl-shadow-color) / 0.09),
       1.3px 24.3px 31.2px -1.4px hsl(var(--tl-shadow-color) / 0.1);
-
+    box-sizing: border-box;
     position: relative;
     top: 0px;
     left: 0px;
@@ -147,11 +147,6 @@ const tlcss = css`
     background-color: var(--tl-background);
     cursor: var(--tl-cursor) !important;
     box-sizing: border-box;
-  }
-
-  .tl-container {
-    box-sizing: border-box;
-    cursor: inherit;
   }
 
   .tl-overlay {
