@@ -21,9 +21,10 @@ import {
   useCursor,
   useZoom,
 } from '~hooks'
-import { TLBinding, TLBounds, TLCursor, TLHandle, TLTheme } from '@tldraw/core'
+import { TLBinding, TLBounds, TLCursor, TLTheme } from '@tldraw/core'
 import { EMPTY_OBJECT } from '~constants'
 import type { TLReactShape } from '~lib'
+import { DirectionIndicator } from '~components/ui/DirectionIndicator'
 
 export interface TLCanvasProps<S extends TLReactShape> {
   id?: string
@@ -34,6 +35,7 @@ export interface TLCanvasProps<S extends TLReactShape> {
   hoveredShape?: S
   editingShape?: S
   bindingShape?: S
+  selectionDirectionHint?: number[]
   selectionBounds?: TLBounds
   selectedShapes?: S[]
   erasingShapes?: S[]
@@ -62,6 +64,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
   selectionBounds,
   selectedShapes,
   erasingShapes,
+  selectionDirectionHint,
   cursor = TLCursor.Default,
   cursorRotation = 0,
   selectionRotation = 0,
@@ -93,7 +96,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
   const onlySelectedShape = selectedShapes?.length === 1 && selectedShapes[0]
 
   const onlySelectedShapeWithHandles =
-    onlySelectedShape && 'handles' in onlySelectedShape ? selectedShapes[0] : undefined
+    onlySelectedShape && 'handles' in onlySelectedShape.props ? selectedShapes[0] : undefined
 
   const selectedShapesSet = React.useMemo(() => new Set(selectedShapes || []), [selectedShapes])
   const erasingShapesSet = React.useMemo(() => new Set(erasingShapes || []), [erasingShapes])
@@ -191,6 +194,13 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
             </>
           )}
         </HTMLLayer>
+        {selectionDirectionHint && selectionBounds && selectedShapes && (
+          <DirectionIndicator
+            direction={selectionDirectionHint}
+            bounds={selectionBounds}
+            shapes={selectedShapes}
+          />
+        )}
       </div>
       {children}
     </div>

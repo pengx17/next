@@ -7,6 +7,7 @@ export const PI2 = PI * 2
 export const EPSILON = Math.PI / 180
 export const FIT_TO_SCREEN_PADDING = 100
 export const DOUBLE_CLICK_DURATION = 450
+export const CARDINAL_DIRECTIONS = ['north', 'east', 'south', 'west']
 
 export const EMPTY_OBJECT: any = {}
 export const EMPTY_ARRAY: any[] = []

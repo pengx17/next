@@ -23,9 +23,11 @@ export interface TLShapeProps {
   type: any
   parentId: string
   point: number[]
-  rotation?: number
   name?: string
+  rotation?: number
   handles?: TLHandle[]
+  label?: string
+  labelPosition?: number[]
   children?: string[]
   isGhost?: boolean
   isHidden?: boolean

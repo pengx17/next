@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
 import { getStroke } from 'perfect-freehand'
-import { assignOwnProps, SvgPathUtils, TLDrawShape, TLDrawShapeProps } from '@tldraw/core'
+import { SvgPathUtils, TLDrawShape, TLDrawShapeProps } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { computed, makeObservable } from 'mobx'
@@ -14,7 +14,6 @@ export interface PenShapeProps extends TLDrawShapeProps, NuStyleProps {
 export class PenShape extends TLDrawShape<PenShapeProps> {
   constructor(props = {} as Partial<PenShapeProps>) {
     super(props)
-    assignOwnProps(this, props)
     makeObservable(this)
   }
 

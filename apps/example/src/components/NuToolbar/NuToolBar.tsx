@@ -8,27 +8,6 @@ import { useApp } from '@tldraw/react'
 export const NuToolBar = observer(function ToolBar(): JSX.Element {
   const app = useApp<Shape>()
 
-  const handleToolClick = React.useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      const tool = e.currentTarget.dataset.tool
-      if (tool) app.selectTool(tool)
-    },
-    [app]
-  )
-
-  const handleToolDoubleClick = React.useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      const tool = e.currentTarget.dataset.tool
-      if (tool) app.selectTool(tool)
-      app.settings.update({ isToolLocked: true })
-    },
-    [app]
-  )
-
-  const handleToolLockClick = React.useCallback(() => {
-    app.settings.update({ isToolLocked: !app.settings.isToolLocked })
-  }, [app])
-
   const zoomIn = React.useCallback(() => {
     app.api.zoomIn()
   }, [app])

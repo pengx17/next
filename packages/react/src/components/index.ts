@@ -1,6 +1,5 @@
 export * from './Container'
 export * from './ContextBarContainer'
-export * from './ui/Cursor'
 export * from './HTMLContainer'
 export * from './HTMLLayer'
 export * from './Indicator'

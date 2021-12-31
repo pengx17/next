@@ -3,7 +3,6 @@ import { observer } from 'mobx-react-lite'
 import { Container } from '~components'
 import type { TLReactShape } from '~lib'
 import { useShapeEvents } from '~hooks/useShapeEvents'
-import { autorun } from 'mobx'
 
 interface ShapeProps {
   shape: TLReactShape

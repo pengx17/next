@@ -76,6 +76,7 @@ const InnerApp = observer(function InnerApp<S extends TLReactShape>(
       brush={app.brush}
       editingShape={app.editingShape}
       hoveredShape={app.hoveredShape}
+      selectionDirectionHint={app.selectionDirectionHint}
       selectionBounds={app.selectionBounds}
       selectedShapes={app.selectedShapesArray}
       erasingShapes={app.erasingShapesArray}

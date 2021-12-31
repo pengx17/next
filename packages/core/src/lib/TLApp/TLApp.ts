@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Vec } from '@tldraw/vec'
 import { action, computed, makeObservable, observable } from 'mobx'
-import { BoundsUtils, KeyUtils } from '~utils'
+import { BoundsUtils, GeomUtils, KeyUtils, modulate } from '~utils'
 import {
   TLSelectTool,
   TLInputs,
@@ -454,7 +454,6 @@ export class TLApp<
       currentPage,
       viewport: { currentView },
     } = this
-
     return currentPage.shapes.filter(shape => {
       return (
         shape.props.parentId === currentPage.id &&
@@ -463,6 +462,25 @@ export class TLApp<
           BoundsUtils.boundsCollide(currentView, shape.rotatedBounds))
       )
     })
+  }
+
+  @computed get selectionDirectionHint(): number[] | undefined {
+    const {
+      selectionBounds,
+      viewport: { currentView },
+    } = this
+    if (!selectionBounds) return
+    if (
+      BoundsUtils.boundsContain(currentView, selectionBounds) ||
+      BoundsUtils.boundsCollide(currentView, selectionBounds)
+    )
+      return
+    return Vec.uni(
+      Vec.sub(
+        BoundsUtils.getBoundsCenter(selectionBounds),
+        BoundsUtils.getBoundsCenter(currentView)
+      )
+    )
   }
 
   @computed get selectionBounds(): TLBounds | undefined {

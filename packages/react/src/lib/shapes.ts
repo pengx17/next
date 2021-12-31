@@ -16,6 +16,7 @@ import {
   TLPolylineShapeProps,
   TLStarShapeProps,
 } from '@tldraw/core'
+
 import type { TLComponentProps, TLIndicatorProps } from './TLReactShape'
 
 export abstract class TLReactBoxShape<P extends TLBoxShapeProps, M = any> extends TLBoxShape<P> {

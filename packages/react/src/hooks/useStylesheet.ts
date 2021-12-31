@@ -508,6 +508,14 @@ const tlcss = css`
     pointer-events: none;
     border: 2px solid red;
   }
+
+  .tl-direction-indicator {
+    z-index: 100000;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    fill: var(--tl-selectStroke);
+  }
 `
 
 export function useStylesheet(theme?: Partial<TLTheme>, selector?: string) {

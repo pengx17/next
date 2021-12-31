@@ -23,16 +23,11 @@ export class DotShape extends TLDotShape<DotShapeProps> {
     opacity: 1,
   }
 
-  ReactComponent = observer(({ events, isErasing, isSelected }: TLComponentProps) => {
+  ReactComponent = observer(({ events, isErasing }: TLComponentProps) => {
     const { radius, stroke, fill, strokeWidth, opacity } = this.props
     return (
       <SVGContainer {...events} opacity={isErasing ? 0.2 : opacity}>
-        <circle
-          className={isSelected ? 'tl-hitarea-fill' : 'tl-hitarea-stroke'}
-          cx={radius}
-          cy={radius}
-          r={radius}
-        />
+        <circle className="tl-hitarea-fill" cx={radius} cy={radius} r={radius} />
         <circle
           cx={radius}
           cy={radius}
@@ -40,7 +35,7 @@ export class DotShape extends TLDotShape<DotShapeProps> {
           stroke={stroke}
           fill={fill}
           strokeWidth={strokeWidth}
-          pointerEvents="all"
+          pointerEvents="none"
         />
       </SVGContainer>
     )
