@@ -13,8 +13,6 @@
     "packages/core",
     "packages/react",
     "packages/utils/*",
-    "packages/shapes/*",
-    "packages/tools/*",
     "apps/*"
   ],
   "scripts": {

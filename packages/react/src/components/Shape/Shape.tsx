@@ -25,7 +25,11 @@ export const Shape = observer(function Shape({
   isEditing = false,
   meta,
 }: ShapeProps) {
-  const { bounds, rotation, ReactComponent } = shape
+  const {
+    bounds,
+    props: { rotation },
+    ReactComponent,
+  } = shape
 
   const events = useShapeEvents(shape)
 

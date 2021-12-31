@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Vec } from '@tldraw/vec'
 import { action, computed, makeObservable, observable } from 'mobx'
-import { BoundsUtils, KeyUtils } from '~utils'
+import { BoundsUtils, GeomUtils, KeyUtils, modulate } from '~utils'
 import {
   TLSelectTool,
   TLInputs,
@@ -13,7 +13,6 @@ import {
   TLToolConstructor,
   TLShapeConstructor,
   TLShapeModel,
-  TLCustomProps,
 } from '~lib'
 import type {
   TLBounds,
@@ -32,10 +31,10 @@ import { TLRootState } from '../TLState'
 import { TLApi } from '~lib/TLApi'
 import { TLCursors } from '~lib/TLCursors'
 
-export interface TLDocumentModel {
+export interface TLDocumentModel<S extends TLShape = TLShape> {
   currentPageId: string
   selectedIds: string[]
-  pages: TLPageModel[]
+  pages: TLPageModel<S>[]
 }
 
 export class TLApp<
@@ -43,7 +42,7 @@ export class TLApp<
   K extends TLEventMap = TLEventMap
 > extends TLRootState<S, K> {
   constructor(
-    serializedApp?: TLDocumentModel,
+    serializedApp?: TLDocumentModel<S>,
     Shapes?: TLShapeConstructor<S>[],
     Tools?: TLToolConstructor<S, K>[]
   ) {
@@ -195,7 +194,7 @@ export class TLApp<
   /*                      Document                      */
   /* -------------------------------------------------- */
 
-  loadDocumentModel(state: TLDocumentModel): this {
+  loadDocumentModel(state: TLDocumentModel<S>): this {
     this.history.deserialize(state)
     return this
   }
@@ -218,7 +217,7 @@ export class TLApp<
     return this
   }
 
-  @computed get serialized(): TLDocumentModel {
+  @computed get serialized(): TLDocumentModel<S> {
     return {
       currentPageId: this.currentPageId,
       selectedIds: Array.from(this.selectedIds.values()),
@@ -274,7 +273,7 @@ export class TLApp<
     return this
   }
 
-  @action updateShapes = (shapes: ({ id: string } & Partial<TLCustomProps<S>>)[]): this => {
+  @action updateShapes = <T extends S>(shapes: ({ id: string } & Partial<T['props']>)[]): this => {
     shapes.forEach(shape => this.getShapeById(shape.id)?.update(shape))
     return this
   }
@@ -379,7 +378,7 @@ export class TLApp<
     const newSelectedShapes = this.currentPage.shapes.filter(shape => selectedIds.has(shape.id))
     newSelectedShapes.forEach(s => selectedShapes.add(s))
     if (newSelectedShapes.length === 1) {
-      this.selectionRotation = newSelectedShapes[0].rotation ?? 0
+      this.selectionRotation = newSelectedShapes[0].props.rotation ?? 0
     } else {
       this.selectionRotation = 0
     }
@@ -452,25 +451,45 @@ export class TLApp<
 
   @computed get shapesInViewport(): S[] {
     const {
+      selectedShapes,
       currentPage,
       viewport: { currentView },
     } = this
-
     return currentPage.shapes.filter(shape => {
       return (
-        shape.parentId === currentPage.id &&
+        shape.props.parentId === currentPage.id &&
         (shape.stayMounted ||
+          selectedShapes.has(shape) ||
           BoundsUtils.boundsContain(currentView, shape.rotatedBounds) ||
           BoundsUtils.boundsCollide(currentView, shape.rotatedBounds))
       )
     })
   }
 
+  @computed get selectionDirectionHint(): number[] | undefined {
+    const {
+      selectionBounds,
+      viewport: { currentView },
+    } = this
+    if (!selectionBounds) return
+    if (
+      BoundsUtils.boundsContain(currentView, selectionBounds) ||
+      BoundsUtils.boundsCollide(currentView, selectionBounds)
+    )
+      return
+    return Vec.uni(
+      Vec.sub(
+        BoundsUtils.getBoundsCenter(selectionBounds),
+        BoundsUtils.getBoundsCenter(currentView)
+      )
+    )
+  }
+
   @computed get selectionBounds(): TLBounds | undefined {
     const { selectedShapesArray } = this
     if (selectedShapesArray.length === 0) return undefined
     if (selectedShapesArray.length === 1) {
-      return { ...selectedShapesArray[0].bounds, rotation: selectedShapesArray[0].rotation }
+      return { ...selectedShapesArray[0].bounds, rotation: selectedShapesArray[0].props.rotation }
     }
     return BoundsUtils.getCommonBounds(this.selectedShapesArray.map(shape => shape.rotatedBounds))
   }

@@ -42,6 +42,16 @@ export type TLSelectionDetailComponent<S extends TLReactShape = TLReactShape> = 
   props: TLSelectionDetailProps<S>
 ) => JSX.Element | null
 
+export type TLDirectionIndicatorProps<S extends TLReactShape = TLReactShape> = {
+  shapes: S[]
+  bounds: TLBounds
+  direction: number[]
+}
+
+export type TLDirectionIndicatorComponent<S extends TLReactShape = TLReactShape> = (
+  props: TLDirectionIndicatorProps<S>
+) => JSX.Element
+
 export interface TLBrushProps {
   bounds: TLBounds
 }
@@ -72,6 +82,7 @@ export type TLReactComponents<S extends TLReactShape = TLReactShape> = {
   SelectionBackground?: TLBoundsComponent<S> | null
   SelectionForeground?: TLBoundsComponent<S> | null
   SelectionDetail?: TLSelectionDetailComponent<S> | null
+  DirectionIndicator?: TLDirectionIndicatorComponent<S> | null
   Handle?: TLHandleComponent<S> | null
   ContextBar?: TLContextBarComponent<S> | null
   Brush?: TLBrushComponent | null

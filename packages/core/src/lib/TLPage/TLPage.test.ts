@@ -1,5 +1,5 @@
-import type { TLDocumentModel } from '~lib'
 import { TLTestApp } from '~test/TLTestApp'
+import type { TLDocumentModel } from '~lib'
 
 const documentModel: TLDocumentModel = {
   currentPageId: 'page1',

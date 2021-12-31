@@ -205,4 +205,19 @@ export class GeomUtils {
     const c = PI2 * A[2]
     return -c / 2 + -step
   }
+
+  /** Convert radians to a cardinal direction */
+  static radiansToCardinalDirection(radians: number) {
+    if (radians < Math.PI * 0.25) {
+      return 'north'
+    } else if (radians < Math.PI * 0.75) {
+      return 'east'
+    } else if (radians < Math.PI * 1.25) {
+      return 'south'
+    } else if (radians < Math.PI * 1.75) {
+      return 'west'
+    } else {
+      return 'north'
+    }
+  }
 }

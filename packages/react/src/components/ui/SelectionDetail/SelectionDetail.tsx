@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as React from 'react'
 import { observer } from 'mobx-react-lite'
 import { HTMLContainer } from '~components'
 import { TAU } from '~constants'
-import { GeomUtils, TLShapeWithHandles } from '@tldraw/core'
+import { GeomUtils } from '@tldraw/core'
 import type { TLReactShape } from '~lib'
 import type { TLSelectionDetailProps } from '~types/component-props'
 import Vec from '@tldraw/vec'
@@ -35,8 +36,8 @@ export const SelectionDetail = observer(function SelectionDetail<S extends TLRea
       >
         {isLine
           ? `${Vec.dist(
-              (shapes[0] as unknown as TLShapeWithHandles).handles[0].point,
-              (shapes[0] as unknown as TLShapeWithHandles).handles[1].point
+              shapes[0].props.handles![0].point,
+              shapes[0].props.handles![1].point
             ).toFixed()}`
           : detail === 'size'
           ? `${bounds.width.toFixed()} × ${bounds.height.toFixed()}`

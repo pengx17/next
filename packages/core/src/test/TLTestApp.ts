@@ -164,17 +164,22 @@ export class TLTestApp extends TLApp<S> {
 
   expectShapesToBeAtPoints = (shapes: Record<string, number[]>, pageId?: string) => {
     Object.entries(shapes).forEach(([id, point]) => {
-      expect(this.getShapeById(id, pageId)?.point).toEqual(point)
+      expect(this.getShapeById(id, pageId)?.props.point).toEqual(point)
     })
     return this
   }
 
-  expectShapesToHaveProps = <T extends S>(shapes: Record<string, Partial<T>>, pageId?: string) => {
+  expectShapesToHaveProps = <T extends S>(
+    shapes: Record<string, Partial<T['props']>>,
+    pageId?: string
+  ) => {
     Object.entries(shapes).forEach(([id, props]) => {
       const shape = this.getShapeById<T>(id, pageId)
       if (!shape) throw Error('That shape does not exist.')
       Object.entries(props).forEach(([key, value]) => {
-        expect(shape[key as keyof T]).toEqual(value)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        expect(shape.props[key]).toEqual(value)
       })
     })
     return this
@@ -188,7 +193,7 @@ export class TLTestApp extends TLApp<S> {
 
 const defaultModel: TLDocumentModel = {
   currentPageId: 'page1',
-  selectedIds: ['box1'],
+  selectedIds: [],
   pages: [
     {
       name: 'Page',

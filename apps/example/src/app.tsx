@@ -11,71 +11,71 @@ import {
   TLReactToolConstructor,
 } from '@tldraw/react'
 import {
-  NuBoxShape,
-  NuEllipseShape,
-  NuPolygonShape,
-  NuPenShape,
-  NuHighlighterShape,
-  NuDotShape,
-  NuStarShape,
-  NuLineShape,
-  NuPolylineShape,
-  NuCodeSandboxShape,
-  NuYouTubeShape,
+  BoxShape,
+  CodeSandboxShape,
+  DotShape,
+  EllipseShape,
+  HighlighterShape,
+  LineShape,
+  PenShape,
+  PolygonShape,
+  PolylineShape,
+  StarShape,
+  YouTubeShape,
   Shape,
 } from '~lib/shapes'
 import {
-  NuBoxTool,
-  NuEllipseTool,
-  NuPolygonTool,
-  NuPenTool,
-  NuHighlighterTool,
-  NuDotTool,
+  BoxTool,
+  CodeSandboxTool,
+  DotTool,
+  EllipseTool,
   NuEraseTool,
-  NuStarTool,
-  NuLineTool,
-  NuCodeSandboxTool,
-  NuYouTubeTool,
+  HighlighterTool,
+  LineTool,
+  PenTool,
+  PolygonTool,
+  StarTool,
+  YouTubeTool,
 } from '~lib/tools'
 import { AppUI } from '~components/AppUI'
-import { NuContextBar } from '~components/NuContextBar/NuContextBar'
+import { ContextBar } from '~components/ContextBar/ContextBar'
 
 const components: TLReactComponents<Shape> = {
-  ContextBar: NuContextBar,
+  ContextBar: ContextBar,
 }
 
 function App(): JSX.Element {
   const [app, setApp] = React.useState<TLReactApp<Shape>>()
 
   const [Shapes] = React.useState<TLReactShapeConstructor<Shape>[]>(() => [
-    NuBoxShape,
-    NuEllipseShape,
-    NuPolygonShape,
-    NuPenShape,
-    NuHighlighterShape,
-    NuDotShape,
-    NuStarShape,
-    NuPolylineShape,
-    NuLineShape,
-    NuCodeSandboxShape,
-    NuYouTubeShape,
+    BoxShape,
+    CodeSandboxShape,
+    DotShape,
+    EllipseShape,
+    HighlighterShape,
+    LineShape,
+    PenShape,
+    PolygonShape,
+    PolylineShape,
+    StarShape,
+    YouTubeShape,
   ])
 
   const [Tools] = React.useState<TLReactToolConstructor<Shape>[]>(() => [
-    NuBoxTool,
-    NuEllipseTool,
-    NuPolygonTool,
-    NuPenTool,
-    NuHighlighterTool,
-    NuDotTool,
-    NuStarTool,
+    BoxTool,
+    CodeSandboxTool,
+    DotTool,
+    EllipseTool,
     NuEraseTool,
-    NuLineTool,
-    NuCodeSandboxTool,
-    NuYouTubeTool,
+    HighlighterTool,
+    LineTool,
+    PenTool,
+    PolygonTool,
+    StarTool,
+    YouTubeTool,
   ])
 
-  const [model] = React.useState<TLDocumentModel>({
+  const [model] = React.useState<TLDocumentModel<Shape>>({
     currentPageId: 'page1',
     selectedIds: [],
     pages: [
@@ -109,32 +109,33 @@ function App(): JSX.Element {
           // },
           // {
           //   id: 'code1',
-          //   type: 'code',
+          //   type: 'youtube',
           //   parentId: 'page1',
           //   point: [300, 400],
           //   size: [100, 100],
+          //   embedId: 'IYqlz66t218',
           // },
-          // {
-          //   id: 'polyline1',
-          //   type: 'polyline',
-          //   parentId: 'page1',
-          //   point: [100, 100],
-          //   handles: [{ point: [0, 0] }, { point: [30, 70] }, { point: [100, 100] }],
-          // },
-          // {
-          //   id: 'line1',
-          //   type: 'line',
-          //   parentId: 'page1',
-          //   point: [300, 100],
-          //   handles: [{ point: [0, 0] }, { point: [230, 270] }],
-          // },
-          // {
-          //   id: 'dot1',
-          //   type: 'dot',
-          //   parentId: 'page1',
-          //   point: [500, 300],
-          //   radius: 3,
-          // },
+          {
+            id: 'polyline1',
+            type: 'polyline',
+            parentId: 'page1',
+            point: [100, 100],
+            handles: [{ point: [0, 0] }, { point: [30, 70] }, { point: [100, 100] }],
+          },
+          {
+            id: 'line1',
+            type: 'line',
+            parentId: 'page1',
+            point: [300, 100],
+            handles: [{ point: [0, 0] }, { point: [230, 270] }],
+          },
+          {
+            id: 'dot1',
+            type: 'dot',
+            parentId: 'page1',
+            point: [500, 300],
+            radius: 3,
+          },
           // {
           //   id: 'ellipse1',
           //   type: 'ellipse',
@@ -143,30 +144,30 @@ function App(): JSX.Element {
           //   size: [100, 200],
           //   rotation: Math.PI / 6,
           // },
-          // {
-          //   id: 'polygon2',
-          //   type: 'polygon',
-          //   parentId: 'page1',
-          //   point: [100, 300],
-          //   size: [150, 150],
-          //   sides: 5,
-          //   ratio: 1,
-          // },
-          // {
-          //   id: 'draw1',
-          //   type: 'draw',
-          //   parentId: 'page1',
-          //   point: [100, 100],
-          //   points: [
-          //     [0, 0, 0.5],
-          //     [10, 10, 0.5],
-          //     [20, 20, 0.5],
-          //     [30, 20, 0.5],
-          //     [40, 20, 0.5],
-          //     [20, 60, 0.5],
-          //   ],
-          //   isComplete: true,
-          // },
+          {
+            id: 'polygon2',
+            type: 'polygon',
+            parentId: 'page1',
+            point: [100, 300],
+            size: [150, 150],
+            sides: 5,
+            ratio: 1,
+          },
+          {
+            id: 'draw1',
+            type: 'draw',
+            parentId: 'page1',
+            point: [100, 100],
+            points: [
+              [0, 0, 0.5],
+              [10, 10, 0.5],
+              [20, 20, 0.5],
+              [30, 20, 0.5],
+              [40, 20, 0.5],
+              [20, 60, 0.5],
+            ],
+            isComplete: true,
+          },
           // {
           //   id: 'polygon3',
           //   type: 'polygon',
@@ -203,15 +204,15 @@ function App(): JSX.Element {
           //   points: 5,
           //   ratio: 0.5,
           // },
-          // {
-          //   id: 'star3',
-          //   type: 'star',
-          //   parentId: 'page1',
-          //   point: [500, 500],
-          //   size: [150, 150],
-          //   points: 5,
-          //   ratio: 1,
-          // },
+          {
+            id: 'star3',
+            type: 'star',
+            parentId: 'page1',
+            point: [500, 500],
+            size: [150, 150],
+            sides: 5,
+            ratio: 1,
+          },
         ],
         bindings: [],
       },
@@ -228,8 +229,9 @@ function App(): JSX.Element {
   }, [])
 
   return (
-    <div className="tl-app">
+    <div className="wrapper">
       <TLDrawApp
+        className="app"
         onMount={onMount}
         onPersist={onPersist}
         model={model}

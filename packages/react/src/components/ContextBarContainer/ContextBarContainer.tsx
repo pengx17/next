@@ -1,9 +1,8 @@
 import * as React from 'react'
 import { observer } from 'mobx-react-lite'
-import { useRendererContext } from '~hooks'
-import { BoundsUtils, TLOffset } from '@tldraw/core'
+import { useRendererContext } from '~hooks/useRendererContext'
+import { TLBounds, BoundsUtils, TLOffset } from '@tldraw/core'
 import { useCounterScaledPosition } from '~hooks'
-import type { TLBounds } from '@tldraw/core'
 import type { TLReactShape } from '~lib'
 
 const stopEventPropagation = (e: React.PointerEvent) => e.stopPropagation()

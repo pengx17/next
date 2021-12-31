@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
 import { observer } from 'mobx-react-lite'
-import type { TLReactShape, TLReactShapeConstructor } from '~lib'
+import type { TLReactApp, TLReactShape, TLReactShapeConstructor } from '~lib'
 import { AppContext, Renderer } from '~components'
 import { useApp } from '~hooks'
 import type {
@@ -12,13 +12,14 @@ import type {
   TLToolConstructor,
 } from '@tldraw/core'
 import type { TLReactComponents } from '~types/component-props'
-import type { TLReactApp, TLReactEventMap } from '~types'
+import type { TLReactEventMap } from '~types'
 
 export interface TLCommonAppProps<
   S extends TLReactShape = TLReactShape,
   R extends TLReactApp<S> = TLReactApp<S>
 > {
   id?: string
+  className?: string
   meta?: AnyObject
   theme?: Partial<TLTheme>
   components?: TLReactComponents<S>
@@ -76,6 +77,7 @@ const InnerApp = observer(function InnerApp<S extends TLReactShape>(
       brush={app.brush}
       editingShape={app.editingShape}
       hoveredShape={app.hoveredShape}
+      selectionDirectionHint={app.selectionDirectionHint}
       selectionBounds={app.selectionBounds}
       selectedShapes={app.selectedShapesArray}
       erasingShapes={app.erasingShapesArray}

@@ -11,10 +11,6 @@ export function uniqueId() {
   return nanoid()
 }
 
-export function assignOwnProps(obj: { [key: string]: any }, props: { [key: string]: any }) {
-  Object.assign(obj, Object.fromEntries(Object.entries(props).filter(([key]) => key in obj)))
-}
-
 // via https://github.com/bameyrick/throttle-typescript
 export function throttle<T extends (...args: any) => any>(
   func: T,

@@ -1,4 +1,5 @@
-import { TLHandle, TLShape, TLShapeWithHandles } from '@tldraw/core'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { TLShape, TLShapeProps } from '@tldraw/core'
 
 export interface TLCommonShapeProps<M = unknown> {
   meta: M
@@ -24,20 +25,14 @@ export interface TLComponentProps<M = unknown> extends TLCommonShapeProps<M> {
 }
 
 export interface TLReactShapeConstructor<S extends TLReactShape = TLReactShape> {
-  new (props: any): S
+  new (props: S['props'] & { type: any }): S
   id: string
 }
 
-export abstract class TLReactShape<P = any, M = any> extends TLShape<P, M> {
-  abstract ReactComponent: (props: TLComponentProps<M>) => JSX.Element | null
-  abstract ReactIndicator: (props: TLIndicatorProps<M>) => JSX.Element | null
-}
-
-export abstract class TLReactShapeWithHandles<
-  P extends { handles: TLHandle[] } = any,
-  H extends TLHandle = TLHandle,
-  M = any
-> extends TLShapeWithHandles<P, H, M> {
+export abstract class TLReactShape<P extends TLShapeProps = TLShapeProps, M = any> extends TLShape<
+  P,
+  M
+> {
   abstract ReactComponent: (props: TLComponentProps<M>) => JSX.Element | null
   abstract ReactIndicator: (props: TLIndicatorProps<M>) => JSX.Element | null
 }

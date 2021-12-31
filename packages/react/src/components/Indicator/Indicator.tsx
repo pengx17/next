@@ -21,7 +21,11 @@ export const Indicator = observer(function Shape({
   isEditing = false,
   meta,
 }: IndicatorProps) {
-  const { bounds, rotation = 0, ReactIndicator } = shape
+  const {
+    bounds,
+    props: { rotation = 0 },
+    ReactIndicator,
+  } = shape
 
   return (
     <Container bounds={bounds} rotation={rotation} zIndex={10000}>

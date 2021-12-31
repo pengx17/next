@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx'
-import type { TLShape } from '../../TLShape'
+import type { TLShape } from '../../shapes/TLShape'
 import type { TLShortcut, TLStateEvents } from './shared'
 import { TLBranchStateNode, TLStateNode } from './TLStateNode'
 import type { TLToolNodeConstructor } from './ToolNode'
@@ -30,10 +30,7 @@ export class AppNode<
     this.initial = options.initial
     this.states = options.states
       ? Object.fromEntries(
-          options.states.map((stateConstructor) => [
-            stateConstructor.id,
-            new stateConstructor(this),
-          ])
+          options.states.map(stateConstructor => [stateConstructor.id, new stateConstructor(this)])
         )
       : {}
     this.currentState = this.states[options.initial]
@@ -56,11 +53,11 @@ export class AppNode<
   }
 
   registerStates = (...stateClasses: TLToolNodeConstructor<S, AppNode<S>>[]): void => {
-    stateClasses.forEach((StateClass) => (this.states[StateClass.id] = new StateClass(this)))
+    stateClasses.forEach(StateClass => (this.states[StateClass.id] = new StateClass(this)))
   }
 
   deregisterStates = (...states: TLToolNodeConstructor<S, AppNode<S>>[]): void => {
-    states.forEach((StateClass) => {
+    states.forEach(StateClass => {
       this.states[StateClass.id]?.dispose()
       delete this.states[StateClass.id]
     })

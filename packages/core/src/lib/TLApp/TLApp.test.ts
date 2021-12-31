@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { TLTestApp } from '~test/TLTestApp'
-import { TLTestBox } from '~test/TLTestBox'
 import { TLResizeCorner, TLRotateCorner, TLTargetType } from '~types'
+import { TLTestBox } from '~test/TLTestBox'
+import { TLTestApp } from '~test/TLTestApp'
+import Vec from '@tldraw/vec'
 
 describe('TLTestApp', () => {
   it('creates a new app', () => {
@@ -425,6 +426,15 @@ describe('app.shapesInViewport', () => {
   it.todo('Updates shapes in viewport when viewport bounds change')
 })
 
+describe('app.selectionDirectionHint', () => {
+  it('Is undefined when the selection is on screen', () => {
+    const app = new TLTestApp().setSelectedShapes(['box1'])
+    expect(app.selectionDirectionHint).toBeUndefined()
+    app.setCamera([-150, 0], 1)
+    expect(Vec.toFixed(app.selectionDirectionHint!, 2)).toMatchObject([-0.9, -0.44])
+  })
+})
+
 describe('app.showSelection', () => {
   it('Shows selection only if the select tool is active and there are selected shapes', () => {
     const app = new TLTestApp()
@@ -536,7 +546,6 @@ describe('app.showResizeHandles', () => {
     const app = new TLTestApp()
     app.setSelectedShapes(['box1'])
     expect(app.showResizeHandles).toBe(true)
-
     class TLNoHandlesBoxShape extends TLTestBox {
       static id = 'noresizehandlesbox'
       hideResizeHandles = true

@@ -9,6 +9,7 @@ import {
   Grid as _Grid,
   Brush as _Brush,
   Handle as _Handle,
+  DirectionIndicator as _DirectionIndicator,
 } from '~components'
 import { autorun } from 'mobx'
 import { getRendererContext } from '~hooks'
@@ -48,12 +49,13 @@ export const RendererContext = observer(function App<S extends TLReactShape>({
   const [currentContext, setCurrentContext] = React.useState<TLRendererContext<S>>(() => {
     const {
       Brush,
-      Handle,
-      Grid,
       ContextBar,
+      DirectionIndicator,
+      Grid,
+      Handle,
       SelectionBackground,
-      SelectionForeground,
       SelectionDetail,
+      SelectionForeground,
     } = components
 
     return {
@@ -63,13 +65,14 @@ export const RendererContext = observer(function App<S extends TLReactShape>({
       callbacks,
       meta,
       components: {
-        SelectionBackground: SelectionBackground === null ? undefined : _SelectionBackground,
-        SelectionForeground: SelectionForeground === null ? undefined : _SelectionForeground,
-        SelectionDetail: SelectionDetail === null ? undefined : _SelectionDetail,
         Brush: Brush === null ? undefined : _Brush,
+        ContextBar,
+        DirectionIndicator: DirectionIndicator === null ? undefined : _DirectionIndicator,
         Grid: Grid === null ? undefined : _Grid,
         Handle: Handle === null ? undefined : _Handle,
-        ContextBar,
+        SelectionBackground: SelectionBackground === null ? undefined : _SelectionBackground,
+        SelectionDetail: SelectionDetail === null ? undefined : _SelectionDetail,
+        SelectionForeground: SelectionForeground === null ? undefined : _SelectionForeground,
       },
     }
   })
@@ -77,12 +80,13 @@ export const RendererContext = observer(function App<S extends TLReactShape>({
   React.useLayoutEffect(() => {
     const {
       Brush,
-      Handle,
-      Grid,
       ContextBar,
+      DirectionIndicator,
+      Grid,
+      Handle,
       SelectionBackground,
-      SelectionForeground,
       SelectionDetail,
+      SelectionForeground,
     } = components
 
     return autorun(() => {
@@ -93,13 +97,14 @@ export const RendererContext = observer(function App<S extends TLReactShape>({
         callbacks,
         meta,
         components: {
-          SelectionBackground: SelectionBackground === null ? undefined : _SelectionBackground,
-          SelectionForeground: SelectionForeground === null ? undefined : _SelectionForeground,
-          SelectionDetail: SelectionDetail === null ? undefined : _SelectionDetail,
           Brush: Brush === null ? undefined : _Brush,
+          ContextBar,
+          DirectionIndicator: DirectionIndicator === null ? undefined : _DirectionIndicator,
           Grid: Grid === null ? undefined : _Grid,
           Handle: Handle === null ? undefined : _Handle,
-          ContextBar,
+          SelectionBackground: SelectionBackground === null ? undefined : _SelectionBackground,
+          SelectionDetail: SelectionDetail === null ? undefined : _SelectionDetail,
+          SelectionForeground: SelectionForeground === null ? undefined : _SelectionForeground,
         },
       })
     })

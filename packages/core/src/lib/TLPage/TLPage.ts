@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { action, observable, makeObservable, computed, observe } from 'mobx'
 import type { TLBinding, TLEventMap } from '~types'
-import type { TLApp, TLShape } from '~lib'
-import type { TLShapeModel } from '../TLShape'
+import type { TLApp, TLShape, TLShapeModel } from '~lib'
 
-export interface TLPageModel {
+export interface TLPageModel<S extends TLShape = TLShape> {
   id: string
   name: string
-  shapes: TLShapeModel[]
+  shapes: TLShapeModel<S['props']>[]
   bindings: TLBinding[]
   nonce?: number
 }
@@ -115,7 +114,7 @@ export class TLPage<S extends TLShape = TLShape, E extends TLEventMap = TLEventM
   }
 
   // TODO: How to avoid making deep copies when shapes have not changed?
-  @computed get serialized(): TLPageModel {
+  @computed get serialized(): TLPageModel<S> {
     return {
       id: this.id,
       name: this.name,

@@ -20,7 +20,7 @@ export class Vec {
   static clampV(A: number[], min: number): number[]
   static clampV(A: number[], min: number, max: number): number[]
   static clampV(A: number[], min: number, max?: number): number[] {
-    return A.map((n) => (max ? Vec.clamp(n, min, max) : Vec.clamp(n, min)))
+    return A.map(n => (max ? Vec.clamp(n, min, max) : Vec.clamp(n, min)))
   }
 
   /**
@@ -407,7 +407,7 @@ export class Vec {
    * @param d
    */
   static toFixed = (a: number[], d = 2): number[] => {
-    return a.map((v) => +v.toFixed(d))
+    return a.map(v => +v.toFixed(d))
   }
 
   /**
@@ -548,6 +548,17 @@ export class Vec {
   static slope = (A: number[], B: number[]) => {
     if (A[0] === B[0]) return NaN
     return (A[1] - B[1]) / (A[0] - B[0])
+  }
+
+  /**
+   * Get the angle of a vector.
+   *
+   * @param A
+   */
+  static toAngle = (A: number[]) => {
+    const angle = Math.atan2(A[1], A[0])
+    if (angle < 0) return angle + Math.PI * 2
+    return angle
   }
 }
 

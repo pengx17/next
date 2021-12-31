@@ -5,25 +5,11 @@ export const PI = Math.PI
 export const TAU = PI / 2
 export const PI2 = PI * 2
 export const EPSILON = Math.PI / 180
-
+export const CARDINAL_DIRECTIONS = ['north', 'east', 'south', 'west'] as const
 export const FIT_TO_SCREEN_PADDING = 100
 
 export const EMPTY_OBJECT: any = {}
 export const EMPTY_ARRAY: any[] = []
-
-// export const CURSORS = {
-//   canvas: 'default',
-//   grab: 'grab',
-//   grabbing: 'grabbing',
-//   [TLResizeCorner.TopLeft]: 'resize-nwse',
-//   [TLResizeCorner.TopRight]: 'resize-nesw',
-//   [TLResizeCorner.BottomRight]: 'resize-nwse',
-//   [TLResizeCorner.BottomLeft]: 'resize-nesw',
-//   [TLResizeEdge.Top]: 'resize-ns',
-//   [TLResizeEdge.Right]: 'resize-ew',
-//   [TLResizeEdge.Bottom]: 'resize-ns',
-//   [TLResizeEdge.Left]: 'resize-ew',
-// }
 
 export const CURSORS: Record<TLSelectionHandle, TLCursor> = {
   [TLResizeEdge.Bottom]: TLCursor.NsResize,

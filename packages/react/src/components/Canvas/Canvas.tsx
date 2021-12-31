@@ -21,12 +21,14 @@ import {
   useCursor,
   useZoom,
 } from '~hooks'
-import { TLBinding, TLBounds, TLCursor, TLHandle, TLTheme } from '@tldraw/core'
+import { TLBinding, TLBounds, TLCursor, TLTheme } from '@tldraw/core'
 import { EMPTY_OBJECT } from '~constants'
 import type { TLReactShape } from '~lib'
+import { DirectionIndicator } from '~components/ui/DirectionIndicator'
 
 export interface TLCanvasProps<S extends TLReactShape> {
   id?: string
+  className?: string
   bindings?: TLBinding[]
   brush?: TLBounds
   shapes?: S[]
@@ -34,6 +36,7 @@ export interface TLCanvasProps<S extends TLReactShape> {
   hoveredShape?: S
   editingShape?: S
   bindingShape?: S
+  selectionDirectionHint?: number[]
   selectionBounds?: TLBounds
   selectedShapes?: S[]
   erasingShapes?: S[]
@@ -54,6 +57,7 @@ export interface TLCanvasProps<S extends TLReactShape> {
 
 export const Canvas = observer(function Renderer<S extends TLReactShape>({
   id,
+  className,
   brush,
   shapes,
   bindingShape,
@@ -62,6 +66,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
   selectionBounds,
   selectedShapes,
   erasingShapes,
+  selectionDirectionHint,
   cursor = TLCursor.Default,
   cursorRotation = 0,
   selectionRotation = 0,
@@ -93,15 +98,13 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
   const onlySelectedShape = selectedShapes?.length === 1 && selectedShapes[0]
 
   const onlySelectedShapeWithHandles =
-    onlySelectedShape && 'handles' in onlySelectedShape
-      ? (selectedShapes[0] as S & { handles: TLHandle[] })
-      : undefined
+    onlySelectedShape && 'handles' in onlySelectedShape.props ? selectedShapes[0] : undefined
 
   const selectedShapesSet = React.useMemo(() => new Set(selectedShapes || []), [selectedShapes])
   const erasingShapesSet = React.useMemo(() => new Set(erasingShapes || []), [erasingShapes])
 
   return (
-    <div ref={rContainer} className="tl-container">
+    <div ref={rContainer} className={`tl-container ${className}`}>
       <div tabIndex={-1} className="tl-absolute tl-canvas" {...events}>
         {showGrid && components.Grid && <components.Grid size={gridSize} />}
         <HTMLLayer>
@@ -160,7 +163,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
               {showHandles && onlySelectedShapeWithHandles && components.Handle && (
                 <Container bounds={selectionBounds} zIndex={10003}>
                   <SVGContainer>
-                    {onlySelectedShapeWithHandles.handles.map((handle, i) =>
+                    {onlySelectedShapeWithHandles.props.handles!.map((handle, i) =>
                       React.createElement(components.Handle!, {
                         key: `${handle.id}_handle_${i}`,
                         shape: onlySelectedShapeWithHandles,
@@ -187,12 +190,19 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
                   shapes={selectedShapes}
                   hidden={!showContextBar}
                   bounds={selectedShapes.length === 1 ? selectedShapes[0].bounds : selectionBounds}
-                  rotation={selectedShapes.length === 1 ? selectedShapes[0].rotation : 0}
+                  rotation={selectedShapes.length === 1 ? selectedShapes[0].props.rotation : 0}
                 />
               )}
             </>
           )}
         </HTMLLayer>
+        {selectionDirectionHint && selectionBounds && selectedShapes && (
+          <DirectionIndicator
+            direction={selectionDirectionHint}
+            bounds={selectionBounds}
+            shapes={selectedShapes}
+          />
+        )}
       </div>
       {children}
     </div>
