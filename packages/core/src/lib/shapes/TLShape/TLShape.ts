@@ -11,7 +11,7 @@ import { deepCopy, BoundsUtils, PointUtils } from '~utils'
 
 export type TLShapeModel<P extends TLShapeProps = TLShapeProps> = {
   nonce?: number
-} & P
+} & Partial<P> & { id: string; type: P['type'] }
 
 export interface TLShapeConstructor<S extends TLShape = TLShape> {
   new (props: any): S

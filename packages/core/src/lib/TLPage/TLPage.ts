@@ -6,7 +6,7 @@ import type { TLApp, TLShape, TLShapeModel } from '~lib'
 export interface TLPageModel<S extends TLShape = TLShape> {
   id: string
   name: string
-  shapes: Partial<TLShapeModel<S['props']>>[]
+  shapes: TLShapeModel<S['props']>[]
   bindings: TLBinding[]
   nonce?: number
 }
