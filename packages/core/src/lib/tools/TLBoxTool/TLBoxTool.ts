@@ -25,5 +25,7 @@ export abstract class TLBoxTool<
 
   cursor = TLCursor.Cross
 
+  isLocked = false
+
   abstract Shape: TLBoxShapeClass<T>
 }

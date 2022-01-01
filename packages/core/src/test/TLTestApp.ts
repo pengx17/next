@@ -19,6 +19,8 @@ interface PointerOptions {
 
 type S = TLTestBox
 
+const CANVAS_INFO_TYPE: TLEventInfo = { type: TLTargetType.Canvas }
+
 export class TLTestApp extends TLApp<S> {
   constructor(serializedApp: TLDocumentModel = defaultModel) {
     super(serializedApp, [TLTestBox, TLTestEditableBox], [])
@@ -34,50 +36,78 @@ export class TLTestApp extends TLApp<S> {
 
   // Inputs
 
-  pointerMove = (point: number[], info: string | TLEventInfo<S>, options?: PointerOptions) => {
+  pointerMove = (
+    point: number[],
+    info: string | TLEventInfo<S> = CANVAS_INFO_TYPE,
+    options?: PointerOptions
+  ) => {
     this._events.onPointerMove?.(this.getInfo(info), this.getPointerEvent(point, options))
     return this
   }
 
-  pointerDown = (point: number[], info: string | TLEventInfo<S>, options?: PointerOptions) => {
+  pointerDown = (
+    point: number[],
+    info: string | TLEventInfo<S> = CANVAS_INFO_TYPE,
+    options?: PointerOptions
+  ) => {
     this._events.onPointerDown?.(this.getInfo(info), this.getPointerEvent(point, options))
     return this
   }
 
-  pointerUp = (point: number[], info: string | TLEventInfo<S>, options?: PointerOptions) => {
+  pointerUp = (
+    point: number[],
+    info: string | TLEventInfo<S> = CANVAS_INFO_TYPE,
+    options?: PointerOptions
+  ) => {
     this._events.onPointerUp?.(this.getInfo(info), this.getPointerEvent(point, options))
     return this
   }
 
-  click = (point: number[], info: string | TLEventInfo<S>, options?: PointerOptions) => {
+  click = (
+    point: number[],
+    info: string | TLEventInfo<S> = CANVAS_INFO_TYPE,
+    options?: PointerOptions
+  ) => {
     this.pointerDown(point, info, options)
     this.pointerUp(point, info, options)
     return this
   }
 
-  doubleClick = (point: number[], info: string | TLEventInfo<S>, options?: PointerOptions) => {
+  doubleClick = (
+    point: number[],
+    info: string | TLEventInfo<S> = CANVAS_INFO_TYPE,
+    options?: PointerOptions
+  ) => {
     this.click(point, info, options)
     this.click(point, info, options)
     this._events.onDoubleClick?.(this.getInfo(info), this.getPointerEvent(point, options))
     return this
   }
 
-  pointerEnter = (point: number[], info: string | TLEventInfo<S>, options?: PointerOptions) => {
+  pointerEnter = (
+    point: number[],
+    info: string | TLEventInfo<S> = CANVAS_INFO_TYPE,
+    options?: PointerOptions
+  ) => {
     this._events.onPointerEnter?.(this.getInfo(info), this.getPointerEvent(point, options))
     return this
   }
 
-  pointerLeave = (point: number[], info: string | TLEventInfo<S>, options?: PointerOptions) => {
+  pointerLeave = (
+    point: number[],
+    info: string | TLEventInfo<S> = CANVAS_INFO_TYPE,
+    options?: PointerOptions
+  ) => {
     this._events.onPointerLeave?.(this.getInfo(info), this.getPointerEvent(point, options))
     return this
   }
 
-  keyDown = (key: string, info: TLEventInfo<S>, options?: KeyboardOptions) => {
+  keyDown = (key: string, info: TLEventInfo<S> = CANVAS_INFO_TYPE, options?: KeyboardOptions) => {
     this._events.onKeyDown?.(info, this.getKeyboardEvent(key, options))
     return this
   }
 
-  keyUp = (key: string, info: TLEventInfo<S>, options?: KeyboardOptions) => {
+  keyUp = (key: string, info: TLEventInfo<S> = CANVAS_INFO_TYPE, options?: KeyboardOptions) => {
     this._events.onKeyUp?.(info, this.getKeyboardEvent(key, options))
     return this
   }

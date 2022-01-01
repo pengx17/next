@@ -1,6 +1,6 @@
 import { Vec } from '@tldraw/vec'
 import { TLApp, TLSelectTool, TLToolState, TLShape } from '~lib'
-import { TLCursor, TLEventMap, TLEvents, TLEventShapeInfo } from '~types'
+import type { TLEventMap, TLEvents, TLEventShapeInfo } from '~types'
 
 export class PointingSelectedShapeState<
   S extends TLShape,
@@ -9,7 +9,6 @@ export class PointingSelectedShapeState<
   P extends TLSelectTool<S, K, R>
 > extends TLToolState<S, K, R, P> {
   static id = 'pointingSelectedShape'
-  cursor = TLCursor.Move
 
   private pointedSelectedShape?: S
 
@@ -34,7 +33,6 @@ export class PointingSelectedShapeState<
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
     const { shiftKey } = this.app.inputs
-
     if (!this.pointedSelectedShape) throw Error('Expected a pointed selected shape')
     if (shiftKey) {
       const { selectedIds } = this.app

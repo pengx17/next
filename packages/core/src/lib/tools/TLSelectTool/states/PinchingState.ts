@@ -36,9 +36,6 @@ export class PinchingState<
   }
 
   onPinch: TLEvents<S>['pinch'] = info => {
-    // const delta = Vec.sub(this.origin, gesture.origin)
-    // const trueDelta = Vec.sub(delta, this.prevDelta)
-    // this.prevDelta = gesture.delta
     this.pinchCamera(info.point, [0, 0], info.offset[0])
   }
 

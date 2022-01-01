@@ -431,7 +431,21 @@ describe('app.selectionDirectionHint', () => {
     const app = new TLTestApp().setSelectedShapes(['box1'])
     expect(app.selectionDirectionHint).toBeUndefined()
     app.setCamera([-150, 0], 1)
-    expect(Vec.toFixed(app.selectionDirectionHint!, 2)).toMatchObject([-0.9, -0.44])
+    expect(Vec.toFixed(app.selectionDirectionHint!, 2)).toMatchObject([-0.59, -0.43])
+  })
+
+  it('Is positioned correctly when the bounds are non-zero', () => {
+    const app = new TLTestApp().setSelectedShapes(['box1'])
+    app.viewport.updateBounds({
+      minX: 100,
+      minY: 100,
+      maxX: 1180,
+      maxY: 820,
+      width: 1080,
+      height: 720,
+    })
+    app.setCamera([-150, 0], 1)
+    expect(Vec.toFixed(app.selectionDirectionHint!, 2)).toMatchObject([-0.59, -0.43])
   })
 })
 

@@ -16,6 +16,13 @@ describe('A minimal test', () => {
 })
 
 describe('When in the idle state', () => {
+  it('Clears selected shapes when Escape is pressed', () => {
+    new TLTestApp()
+      .setSelectedShapes(['box1'])
+      .keyDown('Escape', { type: TLTargetType.Canvas })
+      .expectSelectedIdsToBe([])
+  })
+
   it('Sets hovered shape when entering a shape', () => {
     const app = new TLTestApp()
     app.pointerEnter([10, 10], 'box1')

@@ -137,4 +137,15 @@ export class IdleState<
       }
     }
   }
+
+  onKeyDown: TLEvents<S>['keyboard'] = (info, e) => {
+    switch (e.key) {
+      case 'Escape': {
+        if (this.app.selectedIds.size) {
+          this.app.setSelectedShapes([])
+        }
+        break
+      }
+    }
+  }
 }

@@ -17,11 +17,18 @@ export abstract class TLTool<
   K extends TLEventMap = TLEventMap,
   R extends TLApp<S, K> = TLApp<S, K>
 > extends TLState<S, K, R, R> {
+  // When locked, the shape will not return to the selection state when completing
+  isLocked = false
+
+  // The ID of the sibling state that was previously active before this one became active
+  previous?: string
+
   get app() {
     return this.root
   }
 
-  onEnter = () => {
+  onEnter = ({ fromId }: { fromId: string }) => {
+    this.previous = fromId
     if (this.cursor) this.app.cursors.setCursor(this.cursor)
   }
 
@@ -32,7 +39,7 @@ export abstract class TLTool<
     if (toState.cursor) {
       this.app.cursors.setCursor(toState.cursor)
     } else if (this.cursor) {
-      if (this.cursor) this.app.cursors.setCursor(this.cursor)
+      this.app.cursors.setCursor(this.cursor)
     }
   }
 }

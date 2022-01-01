@@ -187,6 +187,7 @@ const tlcss = css`
     touch-action: none;
     pointer-events: all;
     overflow: clip;
+    outline: none;
   }
 
   .tl-layer {

@@ -41,24 +41,4 @@ export class EditingShapeState<
       }
     }
   }
-
-  // onWheel: TLEvents<S>['wheel'] = (info, e) => {
-  //   this.onPointerMove(info, e)
-  // }
-
-  // onPointerMove: TLEvents<S>['pointer'] = () => {
-  //   const { currentPoint, originPoint } = this.app.inputs
-  //   if (Vec.dist(currentPoint, originPoint) > 5) {
-  //     this.tool.transition('translating')
-  //   }
-  // }
-
-  // onPointerUp: TLEvents<S>['pointer'] = () => {
-  //   this.app.setSelectedShapes([])
-  //   this.tool.transition('idle')
-  // }
-
-  // onPinchStart: TLEvents<S>['pinch'] = (info, event) => {
-  //   this.tool.transition('pinching', { info, event })
-  // }
 }

@@ -37,13 +37,11 @@ export class HoveringSelectionHandleState<
     const {
       inputs: { ctrlKey },
     } = this.app
-
     // Holding ctrlKey should ignore shapes
     if (ctrlKey) {
       this.tool.transition('pointingCanvas')
       return
     }
-
     switch (info.type) {
       case TLTargetType.Selection: {
         switch (info.handle) {
@@ -74,12 +72,9 @@ export class HoveringSelectionHandleState<
   }
 
   onDoubleClick: TLEvents<S>['pointer'] = info => {
-    if (info.order) return
-
-    if (this.app.selectedShapesArray.length !== 1) return
+    if (info.order || this.app.selectedShapesArray.length !== 1) return
     const selectedShape = this.app.selectedShapesArray[0]
     if (!selectedShape.isEditable) return
-
     switch (info.type) {
       case TLTargetType.Shape: {
         this.tool.transition('editingShape', info)
