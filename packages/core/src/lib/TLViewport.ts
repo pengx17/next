@@ -1,6 +1,5 @@
 import { Vec } from '@tldraw/vec'
 import { action, computed, makeObservable, observable } from 'mobx'
-import { BoundsUtils } from '~utils'
 import type { TLBounds } from '~types'
 import { FIT_TO_SCREEN_PADDING } from '~constants'
 
@@ -48,15 +47,30 @@ export class TLViewport {
     return this
   }
 
+  private _currentView = {
+    minX: 0,
+    minY: 0,
+    maxX: 1,
+    maxY: 1,
+    width: 1,
+    height: 1,
+  }
+
   @computed get currentView(): TLBounds {
     const {
       bounds,
       camera: { point, zoom },
     } = this
-    return BoundsUtils.getBoundsFromPoints([
-      Vec.sub(Vec.div([bounds.minX, bounds.minY], zoom), point),
-      Vec.sub(Vec.div([bounds.maxX, bounds.maxY], zoom), point),
-    ])
+    const w = bounds.width / zoom
+    const h = bounds.height / zoom
+    return {
+      minX: -point[0],
+      minY: -point[1],
+      maxX: w - point[0],
+      maxY: h - point[1],
+      width: w,
+      height: h,
+    }
   }
 
   getPagePoint = (point: number[]): number[] => {

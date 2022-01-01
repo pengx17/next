@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import Vec from '@tldraw/vec'
 import { BoundsUtils } from '@tldraw/core'
 import { intersectRayLineSegment } from '@tldraw/intersect'
-import Vec from '@tldraw/vec'
 import { observer } from 'mobx-react-lite'
 import * as React from 'react'
 import { useRendererContext } from '~hooks'
@@ -18,12 +18,13 @@ export const DirectionIndicator = observer(function DirectionIndicator<
   React.useLayoutEffect(() => {
     const elm = rIndicator.current
     if (!elm) return
-    const center = [bounds.minX + bounds.width / 2, bounds.height / 2 - bounds.minY]
+    // Find the center of the bounds, offset by its point
+    const center = [bounds.width / 2, bounds.height / 2]
     const insetBoundSides = BoundsUtils.getRectangleSides(
       [12, 12],
       [bounds.width - 24, bounds.height - 24]
     )
-    for (const [_name, [A, B]] of insetBoundSides) {
+    for (const [A, B] of insetBoundSides) {
       const int = intersectRayLineSegment(center, direction, A, B)
       if (!int.didIntersect) continue
       const point = int.points[0]

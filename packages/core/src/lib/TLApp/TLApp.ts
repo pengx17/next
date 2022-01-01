@@ -445,7 +445,6 @@ export class TLApp<
     const {
       currentPage: { shapes },
     } = this
-
     return Array.from(shapes.values())
   }
 
@@ -471,17 +470,21 @@ export class TLApp<
       selectionBounds,
       viewport: { currentView },
     } = this
-    if (!selectionBounds) return
     if (
+      !selectionBounds ||
       BoundsUtils.boundsContain(currentView, selectionBounds) ||
       BoundsUtils.boundsCollide(currentView, selectionBounds)
-    )
+    ) {
       return
-    return Vec.uni(
-      Vec.sub(
-        BoundsUtils.getBoundsCenter(selectionBounds),
-        BoundsUtils.getBoundsCenter(currentView)
-      )
+    }
+    const center = BoundsUtils.getBoundsCenter(selectionBounds)
+    return Vec.clampV(
+      [
+        (center[0] - currentView.minX - currentView.width / 2) / currentView.width,
+        (center[1] - currentView.minY - currentView.height / 2) / currentView.height,
+      ],
+      -1,
+      1
     )
   }
 

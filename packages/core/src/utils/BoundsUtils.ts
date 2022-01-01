@@ -11,22 +11,21 @@ import {
 } from '~types'
 
 export class BoundsUtils {
-  static getRectangleSides(point: number[], size: number[], rotation = 0): [string, number[][]][] {
+  static getRectangleSides(point: number[], size: number[], rotation = 0): number[][][] {
     const center = [point[0] + size[0] / 2, point[1] + size[1] / 2]
     const tl = Vec.rotWith(point, center, rotation)
     const tr = Vec.rotWith(Vec.add(point, [size[0], 0]), center, rotation)
     const br = Vec.rotWith(Vec.add(point, size), center, rotation)
     const bl = Vec.rotWith(Vec.add(point, [0, size[1]]), center, rotation)
-
     return [
-      ['top', [tl, tr]],
-      ['right', [tr, br]],
-      ['bottom', [br, bl]],
-      ['left', [bl, tl]],
+      [tl, tr],
+      [tr, br],
+      [br, bl],
+      [bl, tl],
     ]
   }
 
-  static getBoundsSides(bounds: TLBounds): [string, number[][]][] {
+  static getBoundsSides(bounds: TLBounds): number[][][] {
     return BoundsUtils.getRectangleSides([bounds.minX, bounds.minY], [bounds.width, bounds.height])
   }
 
@@ -105,7 +104,6 @@ export class BoundsUtils {
     let minY = Infinity
     let maxX = -Infinity
     let maxY = -Infinity
-
     if (points.length < 2) {
       minX = 0
       minY = 0
@@ -119,13 +117,11 @@ export class BoundsUtils {
         maxY = Math.max(point[1], maxY)
       }
     }
-
     if (rotation !== 0) {
       return BoundsUtils.getBoundsFromPoints(
         points.map(pt => Vec.rotWith(pt, [(minX + maxX) / 2, (minY + maxY) / 2], rotation))
       )
     }
-
     return {
       minX,
       minY,
@@ -227,19 +223,16 @@ export class BoundsUtils {
    */
   static getRotatedBounds(bounds: TLBounds, rotation = 0): TLBounds {
     const corners = BoundsUtils.getRotatedCorners(bounds, rotation)
-
     let minX = Infinity
     let minY = Infinity
     let maxX = -Infinity
     let maxY = -Infinity
-
     for (const point of corners) {
       minX = Math.min(point[0], minX)
       minY = Math.min(point[1], minY)
       maxX = Math.max(point[0], maxX)
       maxY = Math.max(point[1], maxY)
     }
-
     return {
       minX,
       minY,
@@ -271,7 +264,6 @@ export class BoundsUtils {
     const s = Math.sin(rotation)
     const w = Math.hypot(rx * c, ry * s)
     const h = Math.hypot(rx * s, ry * c)
-
     return {
       minX: x + rx - w,
       minY: y + ry - h,
@@ -296,7 +288,6 @@ export class BoundsUtils {
     const maxY = Math.max(a.maxY, b.maxY)
     const width = Math.abs(maxX - minX)
     const height = Math.abs(maxY - minY)
-
     return { minX, minY, maxX, maxY, width, height }
   }
 
@@ -322,7 +313,6 @@ export class BoundsUtils {
       [b.maxX, b.maxY],
       [b.minX, b.maxY],
     ]
-
     if (rotation) return corners.map(point => Vec.rotWith(point, center, rotation))
     return corners
   }
@@ -337,11 +327,9 @@ export class BoundsUtils {
     // Create top left and bottom right corners.
     const [ax0, ay0] = [bounds.minX, bounds.minY]
     const [ax1, ay1] = [bounds.maxX, bounds.maxY]
-
     // Create a second set of corners for the new box.
     let [bx0, by0] = [bounds.minX, bounds.minY]
     let [bx1, by1] = [bounds.maxX, bounds.maxY]
-
     // If the drag is on the center, just translate the bounds.
     if (handle === 'center') {
       return {
@@ -355,14 +343,11 @@ export class BoundsUtils {
         scaleY: 1,
       }
     }
-
     // Counter rotate the delta. This lets us make changes as if
     // the (possibly rotated) boxes were axis aligned.
     const [dx, dy] = Vec.rot(delta, -rotation)
-
     /*
 1. Delta
-
 Use the delta to adjust the new box by changing its corners.
 The dragging handle (corner or edge) will determine which 
 corners should change.
@@ -381,7 +366,6 @@ corners should change.
         break
       }
     }
-
     switch (handle) {
       case TLResizeEdge.Left:
       case TLResizeCorner.TopLeft:
@@ -396,32 +380,24 @@ corners should change.
         break
       }
     }
-
     const aw = ax1 - ax0
     const ah = ay1 - ay0
-
     const scaleX = (bx1 - bx0) / aw
     const scaleY = (by1 - by0) / ah
-
     const flipX = scaleX < 0
     const flipY = scaleY < 0
-
     const bw = Math.abs(bx1 - bx0)
     const bh = Math.abs(by1 - by0)
-
     /*
 2. Aspect ratio
-
 If the aspect ratio is locked, adjust the corners so that the
 new box's aspect ratio matches the original aspect ratio.
 */
-
     if (isAspectRatioLocked) {
       const ar = aw / ah
       const isTall = ar < bw / bh
       const tw = bw * (scaleY < 0 ? 1 : -1) * (1 / ar)
       const th = bh * (scaleX < 0 ? 1 : -1) * ar
-
       switch (handle) {
         case TLResizeCorner.TopLeft: {
           if (isTall) by0 = by1 + tw
@@ -461,22 +437,17 @@ new box's aspect ratio matches the original aspect ratio.
         }
       }
     }
-
     /*
 3. Rotation
-
 If the bounds are rotated, get a Vector from the rotated anchor
 corner in the inital bounds to the rotated anchor corner in the
 result's bounds. Subtract this Vector from the result's corners,
 so that the two anchor points (initial and result) will be equal.
 */
-
     if (rotation % (Math.PI * 2) !== 0) {
       let cv = [0, 0]
-
       const c0 = Vec.med([ax0, ay0], [ax1, ay1])
       const c1 = Vec.med([bx0, by0], [bx1, by1])
-
       switch (handle) {
         case TLResizeCorner.TopLeft: {
           cv = Vec.sub(Vec.rotWith([bx1, by1], c1, rotation), Vec.rotWith([ax1, ay1], c0, rotation))
@@ -523,26 +494,16 @@ so that the two anchor points (initial and result) will be equal.
           break
         }
       }
-
       ;[bx0, by0] = Vec.sub([bx0, by0], cv)
       ;[bx1, by1] = Vec.sub([bx1, by1], cv)
     }
-
     /*
 4. Flips
-
 If the axes are flipped (e.g. if the right edge has been dragged
 left past the initial left edge) then swap points on that axis.
 */
-
-    if (bx1 < bx0) {
-      ;[bx1, bx0] = [bx0, bx1]
-    }
-
-    if (by1 < by0) {
-      ;[by1, by0] = [by0, by1]
-    }
-
+    if (bx1 < bx0) [bx1, bx0] = [bx0, bx1]
+    if (by1 < by0) [by1, by0] = [by0, by1]
     return {
       minX: bx0,
       minY: by0,
@@ -561,7 +522,6 @@ left past the initial left edge) then swap points on that axis.
     isFlippedY: boolean
   ): TLResizeCorner | TLResizeEdge {
     let anchor: TLResizeCorner | TLResizeEdge = type
-
     // Change corner anchors if flipped
     switch (type) {
       case TLResizeCorner.TopLeft: {
@@ -613,7 +573,6 @@ left past the initial left edge) then swap points on that axis.
         break
       }
     }
-
     return anchor
   }
 

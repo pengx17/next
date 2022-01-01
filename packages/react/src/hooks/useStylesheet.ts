@@ -141,7 +141,9 @@ const tlcss = css`
     box-sizing: border-box;
     padding: 0px;
     margin: 0px;
+    outline: none;
     z-index: 100;
+    user-select: none;
     touch-action: none;
     overscroll-behavior: none;
     background-color: var(--tl-background);
