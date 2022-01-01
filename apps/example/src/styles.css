@@ -46,15 +46,12 @@ button {
   bottom: 0px;
   width: 100vw;
   height: 100vh;
-}
-
-.app {
-  width: 100%;
-  height: 100%;
+  display: grid;
+  grid-template-rows: 40px 1fr 40px;
 }
 
 .toolbar {
-  position: absolute;
+  grid-row: 1;
   display: flex;
   align-items: center;
   padding: 8px;
@@ -64,6 +61,12 @@ button {
   background: white;
   border-bottom: 1px solid black;
   font-size: inherit;
+}
+
+.app {
+  grid-row: 2;
+  width: 100%;
+  height: 100%;
 }
 
 .contextbar {
@@ -82,10 +85,7 @@ button {
 }
 
 .statusbar {
-  position: fixed;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
+  grid-row: 3;
   width: 100%;
   display: flex;
   align-items: center;

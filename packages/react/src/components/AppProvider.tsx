@@ -5,7 +5,7 @@ import type { TLReactShape } from '~lib'
 import { useSetup, getAppContext, usePropControl, useAppSetup } from '~hooks'
 import type { TLAppPropsWithApp, TLAppPropsWithoutApp } from './App'
 
-export const AppContext = observer(function App<S extends TLReactShape>(
+export const AppProvider = observer(function App<S extends TLReactShape>(
   props: TLAppPropsWithoutApp<S> | TLAppPropsWithApp<S>
 ): JSX.Element {
   const app = useAppSetup(props)

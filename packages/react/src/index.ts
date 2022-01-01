@@ -7,6 +7,8 @@ export * from './hooks/useRendererContext'
 export * from './components/HTMLContainer'
 export * from './components/SVGContainer'
 export * from './components/App'
+export * from './components/AppProvider'
+export * from './components/AppCanvas'
 
 export function getContextBarTranslation(barSize: number[], offset: TLOffset) {
   let x = 0

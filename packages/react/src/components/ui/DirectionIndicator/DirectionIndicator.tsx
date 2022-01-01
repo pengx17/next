@@ -18,8 +18,11 @@ export const DirectionIndicator = observer(function DirectionIndicator<
   React.useLayoutEffect(() => {
     const elm = rIndicator.current
     if (!elm) return
-    const center = [bounds.width / 2, bounds.height / 2]
-    const insetBoundSides = BoundsUtils.getBoundsSides(BoundsUtils.expandBounds(bounds, -12))
+    const center = [bounds.minX + bounds.width / 2, bounds.height / 2 - bounds.minY]
+    const insetBoundSides = BoundsUtils.getRectangleSides(
+      [12, 12],
+      [bounds.width - 24, bounds.height - 24]
+    )
     for (const [_name, [A, B]] of insetBoundSides) {
       const int = intersectRayLineSegment(center, direction, A, B)
       if (!int.didIntersect) continue

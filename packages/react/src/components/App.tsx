@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import { observer } from 'mobx-react-lite'
 import type { TLReactApp, TLReactShape, TLReactShapeConstructor } from '~lib'
-import { AppContext, Renderer } from '~components'
-import { useApp } from '~hooks'
+import { AppProvider } from '~components'
 import type {
   AnyObject,
   TLDocumentModel,
@@ -13,6 +11,7 @@ import type {
 } from '@tldraw/core'
 import type { TLReactComponents } from '~types/component-props'
 import type { TLReactEventMap } from '~types'
+import { AppCanvas } from './AppCanvas'
 
 export interface TLCommonAppProps<
   S extends TLReactShape = TLReactShape,
@@ -58,41 +57,8 @@ export type AppProps<S extends TLReactShape = TLReactShape> =
 
 export function App<S extends TLReactShape>(props: AppProps<S>): JSX.Element {
   return (
-    <AppContext {...props}>
-      <InnerApp {...props} />
-    </AppContext>
+    <AppProvider {...props}>
+      <AppCanvas {...props} />
+    </AppProvider>
   )
 }
-
-const InnerApp = observer(function InnerApp<S extends TLReactShape>(
-  props: AppProps<S>
-): JSX.Element {
-  const app = useApp<S>()
-
-  return (
-    <Renderer
-      viewport={app.viewport}
-      inputs={app.inputs}
-      callbacks={app._events as any}
-      brush={app.brush}
-      editingShape={app.editingShape}
-      hoveredShape={app.hoveredShape}
-      selectionDirectionHint={app.selectionDirectionHint}
-      selectionBounds={app.selectionBounds}
-      selectedShapes={app.selectedShapesArray}
-      erasingShapes={app.erasingShapesArray}
-      shapes={app.shapesInViewport}
-      showGrid={app.settings.showGrid}
-      showSelection={app.showSelection}
-      showSelectionRotation={app.showSelectionRotation}
-      showResizeHandles={app.showResizeHandles}
-      showRotateHandles={app.showRotateHandles}
-      showSelectionDetail={app.showSelectionDetail}
-      showContextBar={app.showContextBar}
-      cursor={app.cursors.cursor}
-      cursorRotation={app.cursors.rotation}
-      selectionRotation={app.selectionRotation}
-      {...props}
-    />
-  )
-})

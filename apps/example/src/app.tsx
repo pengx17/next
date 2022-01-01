@@ -2,8 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
 import type { TLDocumentModel } from '@tldraw/core'
-import {
-  App as TLDrawApp,
+import type {
   TLReactApp,
   TLReactComponents,
   TLReactShapeConstructor,
@@ -39,6 +38,7 @@ import {
 } from '~lib/tools'
 import { AppUI } from '~components/AppUI'
 import { ContextBar } from '~components/ContextBar/ContextBar'
+import { AppCanvas, AppProvider } from '@tldraw/react'
 
 const components: TLReactComponents<Shape> = {
   ContextBar: ContextBar,
@@ -229,19 +229,19 @@ function App(): JSX.Element {
   }, [])
 
   return (
-    <div className="wrapper">
-      <TLDrawApp
-        className="app"
-        onMount={onMount}
-        onPersist={onPersist}
-        model={model}
-        components={components}
-        Shapes={Shapes}
-        Tools={Tools}
-      >
+    <AppProvider
+      onMount={onMount}
+      onPersist={onPersist}
+      model={model}
+      components={components}
+      Shapes={Shapes}
+      Tools={Tools}
+    >
+      <div className="wrapper">
+        <AppCanvas />
         <AppUI />
-      </TLDrawApp>
-    </div>
+      </div>
+    </AppProvider>
   )
 }
 
