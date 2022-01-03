@@ -33,3 +33,8 @@ export function throttle<T extends (...args: any) => any>(
     return lastResult
   }
 }
+
+/** Linear interpolate between two values. */
+export function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t
+}
