@@ -130,6 +130,7 @@ button {
   justify-content: center;
   pointer-events: none;
   gap: 8px;
+  z-index: 10000;
 }
 
 .panel {
