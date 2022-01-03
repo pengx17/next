@@ -1,4 +1,5 @@
 export enum TLCursor {
+  None = 'none',
   Default = 'default',
   Pointer = 'pointer',
   Cross = 'crosshair',

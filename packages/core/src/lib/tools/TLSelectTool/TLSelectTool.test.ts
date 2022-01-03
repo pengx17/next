@@ -1,19 +1,11 @@
 import { TLTestApp } from '~test/TLTestApp'
 import { TLTargetType } from '~types'
-import { TLApp } from '~lib/TLApp'
 import { TLSelectTool } from './TLSelectTool'
 
-describe('A minimal test', () => {
-  it('Creates the shape', () => {
-    class SelectTool extends TLSelectTool {
-      static id = 'erase'
-      static shortcut = ['e']
-    }
-    const app = new TLApp()
-    const shape = new SelectTool(app, app)
-    expect(shape).toBeDefined()
-  })
-})
+export class SelectTool extends TLSelectTool {
+  static id = 'select'
+  static shortcut = ['v']
+}
 
 describe('When in the idle state', () => {
   it('Clears selected shapes when Escape is pressed', () => {

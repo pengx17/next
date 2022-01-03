@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Vec } from '@tldraw/vec'
 import { action, computed, makeObservable, observable } from 'mobx'
-import { BoundsUtils, GeomUtils, KeyUtils, modulate } from '~utils'
+import { BoundsUtils, KeyUtils } from '~utils'
 import {
   TLSelectTool,
   TLInputs,
@@ -129,16 +129,6 @@ export class TLApp<
         fn: () => {
           this.saveAs()
           this.notify('saveAs', null)
-        },
-      },
-      {
-        keys: 'escape',
-        fn: () => {
-          if (this.currentState.id !== 'select') {
-            if (this.currentState.currentState.id === 'idle') {
-              this.selectTool('select')
-            }
-          }
         },
       },
     ]

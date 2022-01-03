@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { TLResizeCorner, TLRotateCorner, TLTargetType } from '~types'
-import { TLTestBox } from '~test/TLTestBox'
+import { BoxShape } from '~lib/shapes/TLBoxShape/TLBoxShape.test'
 import { TLTestApp } from '~test/TLTestApp'
 import Vec from '@tldraw/vec'
 
@@ -216,7 +216,7 @@ describe('app.createShapes', () => {
     const app = new TLTestApp()
     app
       .createShapes([
-        new TLTestBox({
+        new BoxShape({
           id: 'newbox2',
           parentId: app.currentPageId,
           type: 'box',
@@ -482,10 +482,11 @@ describe('app.showContextBar', () => {
     app.setSelectedShapes(['box1'])
     expect(app.showResizeHandles).toBe(true)
 
-    class TLNoContextBarBoxShape extends TLTestBox {
+    class TLNoContextBarBoxShape extends BoxShape {
       static id = 'nocontextbarbox'
       hideContextBar = true
     }
+
     app.registerShapes([TLNoContextBarBoxShape])
     app.createShapes([
       {
@@ -503,7 +504,7 @@ describe('app.showContextBar', () => {
     const app = new TLTestApp()
     app.setSelectedShapes(['box1'])
 
-    class TLNoContextBarBoxShape extends TLTestBox {
+    class TLNoContextBarBoxShape extends BoxShape {
       static id = 'nocontextbarbox'
       hideContextBar = true
     }
@@ -560,7 +561,7 @@ describe('app.showResizeHandles', () => {
     const app = new TLTestApp()
     app.setSelectedShapes(['box1'])
     expect(app.showResizeHandles).toBe(true)
-    class TLNoHandlesBoxShape extends TLTestBox {
+    class TLNoHandlesBoxShape extends BoxShape {
       static id = 'noresizehandlesbox'
       hideResizeHandles = true
     }
@@ -579,7 +580,7 @@ describe('app.showResizeHandles', () => {
 
   it('Hides resize handles if there is a selected shape with hideResizeHandles=true', () => {
     const app = new TLTestApp()
-    class TLNoHandlesBoxShape extends TLTestBox {
+    class TLNoHandlesBoxShape extends BoxShape {
       static id = 'noresizehandlesbox'
       hideResizeHandles = true
     }
@@ -647,7 +648,7 @@ describe('app.showRotateHandles', () => {
     app.setSelectedShapes(['box1'])
     expect(app.showRotateHandles).toBe(true)
 
-    class TLNoRotateHandleBoxShape extends TLTestBox {
+    class TLNoRotateHandleBoxShape extends BoxShape {
       static id = 'norotatehandlesbox'
       hideRotateHandle = true
     }
@@ -666,7 +667,7 @@ describe('app.showRotateHandles', () => {
 
   it('Hides rotate handle if there is a selected shape with hideRotateHandles=true', () => {
     const app = new TLTestApp()
-    class TLNoRotateHandleBoxShape extends TLTestBox {
+    class TLNoRotateHandleBoxShape extends BoxShape {
       static id = 'norotatehandlesbox'
       hideRotateHandle = true
     }

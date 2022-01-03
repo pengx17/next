@@ -5,11 +5,6 @@ import { TLEventMap, TLCursor } from '~types'
 // shape tools need to have two generics: a union of all shapes in
 // the app, and the particular shape that they'll be creating
 
-export interface TLLineShapeClass<T extends TLLineShape = TLLineShape> {
-  new (props: Partial<TLLineShapeProps>): T
-  id: string
-}
-
 export abstract class TLLineTool<
   T extends TLLineShape = TLLineShape,
   S extends TLShape = TLShape,
@@ -24,5 +19,9 @@ export abstract class TLLineTool<
 
   cursor = TLCursor.Cross
 
-  abstract Shape: TLLineShapeClass<T>
+  abstract Shape: {
+    new (props: Partial<TLLineShapeProps>): T
+    id: string
+    defaultProps: TLLineShapeProps
+  }
 }

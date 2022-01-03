@@ -1,6 +1,6 @@
-import { TLTestBox } from './TLTestBox'
+import { BoxShape } from '~lib/shapes/TLBoxShape/TLBoxShape.test'
 
-export class TLTestEditableBox extends TLTestBox {
+export class TLTestEditableBox extends BoxShape {
   static id = 'editable-box'
   isEditable = true
 }

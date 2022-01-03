@@ -13,11 +13,20 @@ export class IdleState<
 
   onPointerDown: TLStateEvents<S, K>['onPointerDown'] = (info, e) => {
     if (info.order) return
-    this.tool.transition('pointing')
+    this.tool.transition('creating')
   }
 
   onPinchStart: TLStateEvents<S, K>['onPinchStart'] = (...args) => {
     this.app.transition('select', { returnTo: 'box' })
     this.app.onPinchStart?.(...args)
+  }
+
+  onKeyDown: TLStateEvents<S>['onKeyDown'] = (info, e) => {
+    switch (e.key) {
+      case 'Escape': {
+        this.app.transition('select')
+        break
+      }
+    }
   }
 }

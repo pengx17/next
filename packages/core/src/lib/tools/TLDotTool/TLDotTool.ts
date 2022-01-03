@@ -1,4 +1,4 @@
-import { IdleState, PointingState, CreatingState } from './states'
+import { IdleState, CreatingState } from './states'
 import { TLTool, TLApp, TLShape, TLDotShape, TLDotShapeProps } from '~lib'
 import { TLCursor, TLEventMap } from '~types'
 
@@ -10,7 +10,7 @@ export abstract class TLDotTool<
 > extends TLTool<S, K, R> {
   static id = 'box'
 
-  static states = [IdleState, PointingState, CreatingState]
+  static states = [IdleState, CreatingState]
 
   static initial = 'idle'
 
@@ -19,5 +19,6 @@ export abstract class TLDotTool<
   abstract Shape: {
     new (props: Partial<TLDotShapeProps>): T
     id: string
+    defaultProps: TLDotShapeProps
   }
 }

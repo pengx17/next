@@ -20,4 +20,13 @@ export class IdleState<
     this.app.transition('select', { returnTo: 'Line' })
     this.app.onPinchStart?.(...args)
   }
+
+  onKeyDown: TLStateEvents<S>['onKeyDown'] = (info, e) => {
+    switch (e.key) {
+      case 'Escape': {
+        this.app.transition('select')
+        break
+      }
+    }
+  }
 }

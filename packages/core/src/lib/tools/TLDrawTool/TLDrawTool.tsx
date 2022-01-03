@@ -1,5 +1,5 @@
-import { IdleState, PointingState, CreatingState } from './states'
-import { TLShapeProps, TLTool, TLApp, TLShape, TLDrawShape, TLDrawShapeProps } from '~lib'
+import { IdleState, CreatingState } from './states'
+import { TLTool, TLApp, TLShape, TLDrawShape, TLDrawShapeProps } from '~lib'
 import { TLCursor, TLEventMap } from '~types'
 
 export abstract class TLDrawTool<
@@ -10,7 +10,7 @@ export abstract class TLDrawTool<
 > extends TLTool<S, K, R> {
   static id = 'draw'
 
-  static states = [IdleState, PointingState, CreatingState]
+  static states = [IdleState, CreatingState]
 
   static initial = 'idle'
 
@@ -21,6 +21,8 @@ export abstract class TLDrawTool<
 
   /** The minimum distance between points when simplifying a line. */
   simplifyTolerance = 1
+
+  previousShape?: T
 
   abstract Shape: {
     new (props: TLDrawShapeProps): T

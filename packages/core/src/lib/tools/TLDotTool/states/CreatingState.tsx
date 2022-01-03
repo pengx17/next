@@ -1,6 +1,7 @@
+import Vec from '@tldraw/vec'
 import { TLApp, TLShape, TLToolState, TLDotShape } from '~lib'
-import type { TLEventMap, TLStateEvents } from '~types'
 import { uniqueId } from '~utils'
+import type { TLEventMap, TLStateEvents } from '~types'
 import type { TLDotTool } from '../TLDotTool'
 
 export class CreatingState<
@@ -12,16 +13,18 @@ export class CreatingState<
 > extends TLToolState<S, K, R, P> {
   static id = 'creating'
 
-  creatingShape?: S
+  creatingShape?: T
+
+  offset: number[] = [0, 0]
 
   onEnter = () => {
     const { Shape } = this.tool
+    this.offset = [Shape.defaultProps.radius, Shape.defaultProps.radius]
     const shape = new Shape({
       id: uniqueId(),
       parentId: this.app.currentPage.id,
-      point: this.app.inputs.originPoint,
+      point: Vec.sub(this.app.inputs.originPoint, this.offset),
     })
-
     this.creatingShape = shape
     this.app.currentPage.addShapes(shape)
     this.app.setSelectedShapes([shape])
@@ -31,7 +34,7 @@ export class CreatingState<
     if (!this.creatingShape) throw Error('Expected a creating shape.')
     const { currentPoint } = this.app.inputs
     this.creatingShape.update({
-      point: currentPoint,
+      point: Vec.sub(currentPoint, this.offset),
     })
   }
 

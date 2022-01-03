@@ -560,6 +560,16 @@ export class Vec {
     if (angle < 0) return angle + Math.PI * 2
     return angle
   }
+
+  /** Get a vector comprised of the maximum of two or more vectors. */
+  static max = (...v: number[][]) => {
+    return [Math.max(...v.map(a => a[0])), Math.max(...v.map(a => a[1]))]
+  }
+
+  /** Get a vector comprised of the minimum of two or more vectors. */
+  static min = (...v: number[][]) => {
+    return [Math.max(...v.map(a => a[0])), Math.max(...v.map(a => a[1]))]
+  }
 }
 
 export default Vec

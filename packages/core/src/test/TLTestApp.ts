@@ -1,7 +1,23 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { TLApp, TLDocumentModel } from '~lib'
-import { TLEventInfo, TLTargetType } from '~types'
-import { TLTestBox } from './TLTestBox'
+import {
+  TLApp,
+  TLBoxShape,
+  TLDocumentModel,
+  TLDotShape,
+  TLDrawShape,
+  TLEllipseShape,
+  TLLineShape,
+  TLPolygonShape,
+  TLPolylineShape,
+  TLShapeConstructor,
+  TLStarShape,
+} from '~lib'
+import { BoxTool } from '~lib/tools/TLBoxTool/TLBoxTool.test'
+import { DotTool } from '~lib/tools/TLDotTool/TLDotTool.test'
+import { DrawTool } from '~lib/tools/TLDrawTool/TLDrawTool.test'
+import { EraseTool } from '~lib/tools/TLEraseTool/TLEraseTool.test'
+import { LineTool } from '~lib/tools/TLLineTool/TLLineTool.test'
+import { TLEventInfo, TLEventMap, TLTargetType } from '~types'
 import { TLTestEditableBox } from './TLTestEditableBox'
 
 interface KeyboardOptions {
@@ -17,13 +33,36 @@ interface PointerOptions {
   ctrlKey?: boolean
 }
 
-type S = TLTestBox
+type S =
+  | TLTestEditableBox
+  | TLBoxShape
+  | TLDrawShape
+  | TLDotShape
+  | TLEllipseShape
+  | TLLineShape
+  | TLPolylineShape
+  | TLPolygonShape
+  | TLStarShape
 
-const CANVAS_INFO_TYPE: TLEventInfo = { type: TLTargetType.Canvas }
+const CANVAS_INFO_TYPE: TLEventInfo<S> = { type: TLTargetType.Canvas }
 
 export class TLTestApp extends TLApp<S> {
   constructor(serializedApp: TLDocumentModel = defaultModel) {
-    super(serializedApp, [TLTestBox, TLTestEditableBox], [])
+    super(
+      serializedApp,
+      [
+        TLTestEditableBox,
+        TLBoxShape,
+        TLDrawShape,
+        TLDotShape,
+        TLEllipseShape,
+        TLLineShape,
+        TLPolylineShape,
+        TLPolygonShape,
+        TLStarShape,
+      ],
+      [BoxTool, EraseTool, LineTool, DotTool, DrawTool]
+    )
     this.viewport.updateBounds({
       minX: 0,
       minY: 0,
@@ -34,6 +73,8 @@ export class TLTestApp extends TLApp<S> {
     })
   }
 
+  prevScreenPoint = [0, 0]
+
   // Inputs
 
   pointerMove = (
@@ -41,43 +82,48 @@ export class TLTestApp extends TLApp<S> {
     info: string | TLEventInfo<S> = CANVAS_INFO_TYPE,
     options?: PointerOptions
   ) => {
+    this.prevScreenPoint = point
     this._events.onPointerMove?.(this.getInfo(info), this.getPointerEvent(point, options))
     return this
   }
 
   pointerDown = (
-    point: number[],
+    point: number[] = this.prevScreenPoint,
     info: string | TLEventInfo<S> = CANVAS_INFO_TYPE,
     options?: PointerOptions
   ) => {
+    this.prevScreenPoint = point
     this._events.onPointerDown?.(this.getInfo(info), this.getPointerEvent(point, options))
     return this
   }
 
   pointerUp = (
-    point: number[],
+    point: number[] = this.prevScreenPoint,
     info: string | TLEventInfo<S> = CANVAS_INFO_TYPE,
     options?: PointerOptions
   ) => {
+    this.prevScreenPoint = point
     this._events.onPointerUp?.(this.getInfo(info), this.getPointerEvent(point, options))
     return this
   }
 
   click = (
-    point: number[],
+    point: number[] = this.prevScreenPoint,
     info: string | TLEventInfo<S> = CANVAS_INFO_TYPE,
     options?: PointerOptions
   ) => {
+    this.prevScreenPoint = point
     this.pointerDown(point, info, options)
     this.pointerUp(point, info, options)
     return this
   }
 
   doubleClick = (
-    point: number[],
+    point: number[] = this.prevScreenPoint,
     info: string | TLEventInfo<S> = CANVAS_INFO_TYPE,
     options?: PointerOptions
   ) => {
+    this.prevScreenPoint = point
     this.click(point, info, options)
     this.click(point, info, options)
     this._events.onDoubleClick?.(this.getInfo(info), this.getPointerEvent(point, options))
@@ -85,19 +131,21 @@ export class TLTestApp extends TLApp<S> {
   }
 
   pointerEnter = (
-    point: number[],
+    point: number[] = this.prevScreenPoint,
     info: string | TLEventInfo<S> = CANVAS_INFO_TYPE,
     options?: PointerOptions
   ) => {
+    this.prevScreenPoint = point
     this._events.onPointerEnter?.(this.getInfo(info), this.getPointerEvent(point, options))
     return this
   }
 
   pointerLeave = (
-    point: number[],
+    point: number[] = this.prevScreenPoint,
     info: string | TLEventInfo<S> = CANVAS_INFO_TYPE,
     options?: PointerOptions
   ) => {
+    this.prevScreenPoint = point
     this._events.onPointerLeave?.(this.getInfo(info), this.getPointerEvent(point, options))
     return this
   }

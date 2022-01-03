@@ -11,6 +11,7 @@ export interface TLToolStateClass<
 > {
   new (tool: P, app: R): TLToolState<S, K, R, P>
   id: string
+  defaultProps: S['props']
 }
 
 export abstract class TLToolState<
