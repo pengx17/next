@@ -4,6 +4,7 @@ import type { TLBoxShapeProps } from '@tldraw/core'
 import { HTMLContainer, TLComponentProps, TLReactBoxShape } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { NuStyleProps, withClampedStyles } from './style-props'
+import { TextInput } from '~components/inputs/TextInput'
 
 export interface CodeSandboxShapeProps extends TLBoxShapeProps, NuStyleProps {
   type: 'code'
@@ -27,7 +28,28 @@ export class CodeSandboxShape extends TLReactBoxShape<CodeSandboxShapeProps> {
   }
 
   isEditable = true
-  isAspectRatioLocked = true
+
+  ReactContextBar = observer(() => {
+    const { embedId } = this.props
+    const rInput = React.useRef<HTMLInputElement>(null)
+    const handleChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+      const url = e.currentTarget.value
+      const match = url.match(/\/s\/([^?]+)/)
+      const embedId = match?.[1] ?? url ?? ''
+      this.update({ embedId })
+    }, [])
+    return (
+      <>
+        <TextInput
+          ref={rInput}
+          label="CodeSandbox Embed ID"
+          type="text"
+          value={embedId}
+          onChange={handleChange}
+        />
+      </>
+    )
+  })
 
   ReactComponent = observer(({ events, isEditing, isErasing }: TLComponentProps) => {
     const { opacity, embedId } = this.props
@@ -50,7 +72,7 @@ export class CodeSandboxShape extends TLReactBoxShape<CodeSandboxShapeProps> {
         >
           {embedId ? (
             <iframe
-              src={`https://codesandbox.io/embed/${embedId}?fontsize=14&hidenavigation=1&theme=dark`}
+              src={`https://codesandbox.io/embed/${embedId}?&fontsize=14&hidenavigation=1&theme=dark`}
               style={{ width: '100%', height: '100%', overflow: 'hidden' }}
               title={'CodeSandbox'}
               allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
@@ -65,27 +87,15 @@ export class CodeSandboxShape extends TLReactBoxShape<CodeSandboxShapeProps> {
                 alignItems: 'center',
                 overflow: 'hidden',
                 justifyContent: 'center',
-                backgroundColor: 'rgb(21, 21, 21)',
+                backgroundColor: '#FFFFFF',
                 border: '1px solid rgb(52, 52, 52)',
                 padding: 16,
               }}
             >
-              <input
-                type="text"
-                style={{
-                  padding: '8px 16px',
-                  fontSize: '16px',
-                  maxWidth: '100%',
-                  backgroundColor: 'transparent',
-                  border: '1px solid rgb(52, 52, 52)',
-                  color: 'white',
-                }}
-                placeholder="CodeSandbox URL"
-                value={embedId}
-                onChange={e => {
-                  this.update({ embedId: e.currentTarget.value })
-                }}
-              />
+              <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="128">
+                <title />
+                <path d="M2 6l10.455-6L22.91 6 23 17.95 12.455 24 2 18V6zm2.088 2.481v4.757l3.345 1.86v3.516l3.972 2.296v-8.272L4.088 8.481zm16.739 0l-7.317 4.157v8.272l3.972-2.296V15.1l3.345-1.861V8.48zM5.134 6.601l7.303 4.144 7.32-4.18-3.871-2.197-3.41 1.945-3.43-1.968L5.133 6.6z" />
+              </svg>
             </div>
           )}
         </div>

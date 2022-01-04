@@ -14,11 +14,13 @@ export class TLCursors {
   }
 
   @action setCursor = (cursor: TLCursor, rotation = 0) => {
+    if (cursor === this.cursor && rotation === this.rotation) return
     this.cursor = cursor
     this.rotation = rotation
   }
 
   @action setRotation = (rotation: number) => {
+    if (rotation === this.rotation) return
     this.rotation = rotation
   }
 }

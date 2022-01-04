@@ -104,7 +104,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
   const erasingShapesSet = React.useMemo(() => new Set(erasingShapes || []), [erasingShapes])
 
   return (
-    <div ref={rContainer} className={`tl-container ${className}`}>
+    <div ref={rContainer} className={`tl-container ${className ?? ''}`}>
       <div tabIndex={-1} className="tl-absolute tl-canvas" {...events}>
         {showGrid && components.Grid && <components.Grid size={gridSize} />}
         <HTMLLayer>

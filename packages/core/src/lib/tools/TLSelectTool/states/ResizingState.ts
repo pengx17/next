@@ -97,21 +97,69 @@ export class ResizingState<
 
   onPointerMove: TLEvents<S>['pointer'] = () => {
     const {
-      inputs: { shiftKey, originPoint, currentPoint },
+      inputs: { altKey, shiftKey, originPoint, currentPoint },
     } = this.app
     const { handle, snapshots, initialCommonBounds } = this
-    const delta = Vec.sub(currentPoint, originPoint)
-    const nextBounds = BoundsUtils.getTransformedBoundingBox(
+    let delta = Vec.sub(currentPoint, originPoint)
+    if (altKey) delta = Vec.mul(delta, 2)
+    let nextBounds = BoundsUtils.getTransformedBoundingBox(
       initialCommonBounds,
       handle,
       delta,
       this.selectionRotation,
       shiftKey || this.isAspectRatioLocked
     )
+    if (altKey) {
+      nextBounds = {
+        ...nextBounds,
+        ...BoundsUtils.centerBounds(nextBounds, BoundsUtils.getBoundsCenter(initialCommonBounds)),
+      }
+    }
     const { scaleX, scaleY } = nextBounds
+    this.app.selectedShapes.forEach(shape => {
+      const {
+        shape: initialShape,
+        bounds: initialShapeBounds,
+        transformOrigin,
+      } = snapshots[shape.id]
+      const relativeBounds = BoundsUtils.getRelativeTransformedBoundingBox(
+        nextBounds,
+        initialCommonBounds,
+        initialShapeBounds,
+        scaleX < 0,
+        scaleY < 0
+      )
+      shape.onResize(relativeBounds, initialShape, {
+        type: handle,
+        scale: [scaleX, scaleY],
+        transformOrigin,
+      })
+    })
+    this.updateCursor(scaleX, scaleY)
+  }
+
+  onPointerUp: TLEvents<S>['pointer'] = () => {
+    this.app.history.resume()
+    this.app.persist()
+    this.tool.transition('idle')
+  }
+
+  onKeyDown: TLEvents<S>['keyboard'] = (info, e) => {
+    switch (e.key) {
+      case 'Escape': {
+        this.app.selectedShapes.forEach(shape => {
+          shape.update({ ...this.snapshots[shape.id].shape })
+        })
+        this.tool.transition('idle')
+        break
+      }
+    }
+  }
+
+  private updateCursor(scaleX: number, scaleY: number) {
     const isFlippedX = scaleX < 0 && scaleY >= 0
     const isFlippedY = scaleY < 0 && scaleX >= 0
-    switch (handle) {
+    switch (this.handle) {
       case TLResizeCorner.TopLeft:
       case TLResizeCorner.BottomRight: {
         if (isFlippedX || isFlippedY) {
@@ -136,43 +184,6 @@ export class ResizingState<
             this.app.cursors.setCursor(TLCursor.NeswResize, this.app.selectionBounds?.rotation)
           }
         }
-        break
-      }
-    }
-    this.app.selectedShapes.forEach(shape => {
-      const {
-        shape: initialShape,
-        bounds: initialShapeBounds,
-        transformOrigin,
-      } = snapshots[shape.id]
-      const relativeBounds = BoundsUtils.getRelativeTransformedBoundingBox(
-        nextBounds,
-        initialCommonBounds,
-        initialShapeBounds,
-        scaleX < 0,
-        scaleY < 0
-      )
-      shape.onResize(relativeBounds, initialShape, {
-        type: handle,
-        scale: [scaleX, scaleY],
-        transformOrigin,
-      })
-    })
-  }
-
-  onPointerUp: TLEvents<S>['pointer'] = () => {
-    this.app.history.resume()
-    this.app.persist()
-    this.tool.transition('idle')
-  }
-
-  onKeyDown: TLEvents<S>['keyboard'] = (info, e) => {
-    switch (e.key) {
-      case 'Escape': {
-        this.app.selectedShapes.forEach(shape => {
-          shape.update({ ...this.snapshots[shape.id].shape })
-        })
-        this.tool.transition('idle')
         break
       }
     }
