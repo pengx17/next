@@ -28,6 +28,7 @@ export interface TLShapeProps {
   handles?: TLHandle[]
   label?: string
   labelPosition?: number[]
+  assetId?: string
   children?: string[]
   isGhost?: boolean
   isHidden?: boolean

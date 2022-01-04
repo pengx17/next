@@ -24,6 +24,7 @@ import type {
   TLShortcut,
   TLEventMap,
   TLStateEvents,
+  TLAsset,
 } from '~types'
 import { TLHistory } from '../TLHistory'
 import { TLSettings } from '../TLSettings'
@@ -35,6 +36,7 @@ export interface TLDocumentModel<S extends TLShape = TLShape> {
   currentPageId: string
   selectedIds: string[]
   pages: TLPageModel<S>[]
+  assets?: TLAsset[]
 }
 
 export class TLApp<
@@ -184,8 +186,9 @@ export class TLApp<
   /*                      Document                      */
   /* -------------------------------------------------- */
 
-  loadDocumentModel(state: TLDocumentModel<S>): this {
-    this.history.deserialize(state)
+  loadDocumentModel(model: TLDocumentModel<S>): this {
+    this.history.deserialize(model)
+    if (model.assets) this.addAssets(model.assets)
     return this
   }
 
@@ -259,18 +262,20 @@ export class TLApp<
   }
 
   @action readonly createShapes = (shapes: S[] | TLShapeModel[]): this => {
-    this.currentPage.addShapes(...shapes)
+    const newShapes = this.currentPage.addShapes(...shapes)
+    if (newShapes) this.notify('create-shapes', newShapes)
+    this.persist()
     return this
   }
 
   @action updateShapes = <T extends S>(shapes: ({ id: string } & Partial<T['props']>)[]): this => {
     shapes.forEach(shape => this.getShapeById(shape.id)?.update(shape))
+    this.persist()
     return this
   }
 
   @action readonly deleteShapes = (shapes: S[] | string[]): this => {
     if (shapes.length === 0) return this
-
     let ids: Set<string>
     if (typeof shapes[0] === 'string') {
       ids = new Set(shapes as string[])
@@ -278,7 +283,8 @@ export class TLApp<
       ids = new Set((shapes as S[]).map(shape => shape.id))
     }
     this.setSelectedShapes(this.selectedShapesArray.filter(shape => !ids.has(shape.id)))
-    this.currentPage.removeShapes(...shapes)
+    const removedShapes = this.currentPage.removeShapes(...shapes)
+    if (removedShapes) this.notify('delete-shapes', removedShapes)
     this.persist()
     return this
   }
@@ -300,6 +306,22 @@ export class TLApp<
 
   bringToFront = (shapes: S[] | string[] = this.selectedShapesArray): this => {
     if (shapes.length > 0) this.currentPage.bringToFront(shapes)
+    return this
+  }
+
+  /* --------------------- Assets --------------------- */
+
+  @observable assets: Record<string, TLAsset> = {}
+
+  @action addAssets(assets: TLAsset[]): this {
+    assets.forEach(asset => (this.assets[asset.id] = asset))
+    this.persist()
+    return this
+  }
+
+  @action removeAssets(assets: TLAsset[]): this {
+    assets.forEach(asset => delete this.assets[asset.id])
+    this.persist()
     return this
   }
 

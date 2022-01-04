@@ -1,11 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
 import { observer } from 'mobx-react-lite'
 import { Container } from '~components'
 import type { TLReactShape } from '~lib'
 import { useShapeEvents } from '~hooks/useShapeEvents'
+import type { TLAsset } from '@tldraw/core'
 
 interface ShapeProps {
   shape: TLReactShape
+  asset?: TLAsset
   zIndex: number
   isHovered?: boolean
   isSelected?: boolean
@@ -23,6 +26,7 @@ export const Shape = observer(function Shape({
   isBinding = false,
   isErasing = false,
   isEditing = false,
+  asset,
   meta,
 }: ShapeProps) {
   const {
@@ -43,6 +47,7 @@ export const Shape = observer(function Shape({
         isSelected={isSelected}
         isErasing={isErasing}
         events={events}
+        asset={asset}
       />
     </Container>
   )

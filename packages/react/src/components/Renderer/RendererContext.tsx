@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
+import { autorun } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import type { TLEventHandlers, TLInputs, TLViewport } from '@tldraw/core'
 import {
@@ -11,12 +12,10 @@ import {
   Handle as _Handle,
   DirectionIndicator as _DirectionIndicator,
 } from '~components'
-import { autorun } from 'mobx'
 import { getRendererContext } from '~hooks'
 import { EMPTY_OBJECT } from '~constants'
 import type { TLReactShape } from '~lib'
-import type { TLReactComponents } from '~types/component-props'
-import type { TLReactEventMap } from '~types'
+import type { TLReactComponents, TLReactEventMap } from '~types'
 
 export interface TLRendererContextProps<S extends TLReactShape = TLReactShape> {
   id?: string

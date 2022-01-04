@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { TLShape, TLShapeProps } from '@tldraw/core'
+import { TLAsset, TLShape, TLShapeProps } from '@tldraw/core'
 
 export interface TLCommonShapeProps<M = unknown> {
   meta: M
@@ -8,6 +8,7 @@ export interface TLCommonShapeProps<M = unknown> {
   isHovered: boolean
   isSelected: boolean
   isErasing: boolean
+  asset?: TLAsset
 }
 
 export type TLIndicatorProps<M = unknown> = TLCommonShapeProps<M>

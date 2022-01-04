@@ -15,9 +15,15 @@ import {
   TLDrawTool,
   TLEraseTool,
   TLLineTool,
+  TLSelectTool,
 } from '~lib'
 import { TLEventInfo, TLTargetType } from '~types'
 import { TLTestEditableBox } from './TLTestEditableBox'
+
+export class SelectTool extends TLSelectTool {
+  static id = 'select'
+  static shortcut = ['v']
+}
 
 export class BoxTool extends TLBoxTool<TLBoxShape, any> {
   static id = 'box'

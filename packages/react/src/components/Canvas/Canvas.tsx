@@ -21,7 +21,7 @@ import {
   useCursor,
   useZoom,
 } from '~hooks'
-import { TLBinding, TLBounds, TLCursor, TLTheme } from '@tldraw/core'
+import { TLAsset, TLBinding, TLBounds, TLCursor, TLTheme } from '@tldraw/core'
 import { EMPTY_OBJECT } from '~constants'
 import type { TLReactShape } from '~lib'
 import { DirectionIndicator } from '~components/ui/DirectionIndicator'
@@ -32,6 +32,7 @@ export interface TLCanvasProps<S extends TLReactShape> {
   bindings?: TLBinding[]
   brush?: TLBounds
   shapes?: S[]
+  assets?: Record<string, TLAsset>
   theme?: TLTheme
   hoveredShape?: S
   editingShape?: S
@@ -124,6 +125,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
               <Shape
                 key={'shape_' + shape.id}
                 shape={shape}
+                asset={shape.props.assetId ? assets[shape.props.assetId] : undefined}
                 isEditing={shape === editingShape}
                 isHovered={shape === hoveredShape}
                 isBinding={shape === bindingShape}

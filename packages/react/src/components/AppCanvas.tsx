@@ -24,6 +24,7 @@ export const AppCanvas = observer(function InnerApp<S extends TLReactShape>(
       selectedShapes={app.selectedShapesArray}
       erasingShapes={app.erasingShapesArray}
       shapes={app.shapesInViewport}
+      assets={app.assets}
       showGrid={app.settings.showGrid}
       showSelection={app.showSelection}
       showSelectionRotation={app.showSelectionRotation}

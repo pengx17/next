@@ -99,6 +99,11 @@ export interface TLOffset {
   height: number
 }
 
+export interface TLAsset {
+  id: string
+  type: any
+}
+
 /* --------------------- Events --------------------- */
 
 export type TLSubscriptionEvent =
@@ -133,6 +138,14 @@ export type TLSubscriptionEvent =
   | {
       event: 'error'
       info: Error
+    }
+  | {
+      event: 'create-shapes'
+      info: TLShape[]
+    }
+  | {
+      event: 'delete-shapes'
+      info: TLShape[]
     }
 
 export type TLSubscriptionEventName = TLSubscriptionEvent['event']
@@ -196,6 +209,7 @@ export type TLEventShapeInfo<S extends TLShape> = {
   shape: S
   order?: number
 }
+
 export type TLEventHandleInfo<S extends TLShape = TLShape> = {
   type: TLTargetType.Handle
   shape: S
@@ -203,11 +217,13 @@ export type TLEventHandleInfo<S extends TLShape = TLShape> = {
   index: number
   order?: number
 }
+
 export type TLEventSelectionInfo = {
   type: TLTargetType.Selection
   handle: TLSelectionHandle
   order?: number
 }
+
 export type TLEventInfo<S extends TLShape = TLShape> =
   | TLEventCanvasInfo
   | TLEventShapeInfo<S>

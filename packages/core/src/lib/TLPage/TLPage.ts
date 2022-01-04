@@ -41,7 +41,6 @@ export class TLPage<S extends TLShape = TLShape, E extends TLEventMap = TLEventM
 
   @action addShapes(...shapes: S[] | TLShapeModel[]) {
     if (shapes.length === 0) return
-
     const shapeInstances =
       'getBounds' in shapes[0]
         ? (shapes as S[])
@@ -49,24 +48,17 @@ export class TLPage<S extends TLShape = TLShape, E extends TLEventMap = TLEventM
             const ShapeClass = this.app.getShapeClass(shape.type)
             return new ShapeClass(shape)
           })
-
     shapeInstances.forEach(instance => observe(instance, this.app.saveState))
-
     this.shapes.push(...shapeInstances)
     this.bump()
     this.app.saveState()
-    return this
+    return shapeInstances
   }
 
   @action removeShapes(...shapes: S[] | string[]) {
-    if (typeof shapes[0] === 'string') {
-      this.shapes = this.shapes.filter(shape => !(shapes as string[]).includes(shape.id))
-    } else {
-      this.shapes = this.shapes.filter(shape => !(shapes as S[]).includes(shape))
-    }
-    return this
-    // this.bump()
-    // this.app.persist()
+    const shapeInstances = this.parseShapesArg(shapes)
+    this.shapes = this.shapes.filter(shape => !shapeInstances.includes(shape))
+    return shapeInstances
   }
 
   @action bringForward = (shapes: S[] | string[]): this => {

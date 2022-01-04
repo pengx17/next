@@ -79,15 +79,12 @@ export class TLHistory<S extends TLShape = TLShape, K extends TLEventMap = TLEve
 
       for (const serializedPage of pages) {
         const page = pagesMap.get(serializedPage.id)
-
         if (page !== undefined) {
           // Update the page
-          const shapesMap = new Map(page.shapes.map(shape => [shape.id, shape]))
+          const shapesMap = new Map(page.shapes.map(shape => [shape.props.id, shape]))
           const shapesToAdd: S[] = []
-
           for (const serializedShape of serializedPage.shapes) {
             const shape = shapesMap.get(serializedShape.id)
-
             if (shape !== undefined) {
               // Update the shape
               if (shape.nonce !== serializedShape.nonce) {
@@ -97,22 +94,19 @@ export class TLHistory<S extends TLShape = TLShape, K extends TLEventMap = TLEve
             } else {
               // Create the shape
               const ShapeClass = this.app.getShapeClass(serializedShape.type)
+              console.log(serializedShape)
               shapesToAdd.push(new ShapeClass(serializedShape))
             }
           }
-
           // Any shapes remaining in the shapes map need to be removed
           if (shapesMap.size > 0) page.removeShapes(...shapesMap.values())
-
           // Add any new shapes
           if (shapesToAdd.length > 0) page.addShapes(...shapesToAdd)
-
           // Remove the page from the map
           pagesMap.delete(serializedPage.id)
         } else {
           // Create the page
           const { id, name, shapes, bindings } = serializedPage
-
           pagesToAdd.push(
             new TLPage(this.app, {
               id,
