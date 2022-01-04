@@ -233,12 +233,11 @@ function App(): JSX.Element {
       onMount={onMount}
       onPersist={onPersist}
       model={model}
-      components={components}
       Shapes={Shapes}
       Tools={Tools}
     >
       <div className="wrapper">
-        <AppCanvas />
+        <AppCanvas components={components} />
         <AppUI />
       </div>
     </AppProvider>

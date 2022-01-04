@@ -4,6 +4,7 @@ import Vec from '@tldraw/vec'
 import { TLCursor, TLEventMap, TLResizeCorner, TLStateEvents } from '~types'
 import type { TLBounds } from '@tldraw/intersect'
 import { BoundsUtils, uniqueId } from '~utils'
+import { toJS } from 'mobx'
 
 export class CreatingState<
   T extends TLBoxShape,
@@ -29,24 +30,37 @@ export class CreatingState<
       id: uniqueId(),
       type: Shape.id,
       parentId: currentPage.id,
-      point: originPoint,
-      size: [1, 1],
+      point: [...originPoint],
+      size: Vec.abs(Vec.sub(currentPoint, originPoint)),
     })
-    this.initialBounds = BoundsUtils.getBoundsFromPoints([originPoint, currentPoint])
-    if (shape.aspectRatio) {
-      this.aspectRatio = shape.aspectRatio
-      this.initialBounds.height = Math.max(1, this.initialBounds.width * this.aspectRatio)
-    } else {
-      this.aspectRatio = 1
-      this.initialBounds.height = this.initialBounds.width
+    this.initialBounds = {
+      minX: originPoint[0],
+      minY: originPoint[1],
+      maxX: originPoint[0] + 1,
+      maxY: originPoint[1] + 1,
+      width: 1,
+      height: 1,
     }
-    this.initialBounds.maxY = this.initialBounds.minY + this.initialBounds.height
+    // toJS(shape.bounds)
+    if (shape.isAspectRatioLocked) {
+      if (shape.aspectRatio) {
+        this.aspectRatio = shape.aspectRatio
+        this.initialBounds.height = this.aspectRatio
+        this.initialBounds.width = 1
+      } else {
+        this.aspectRatio = 1
+        this.initialBounds.height = 1
+        this.initialBounds.width = 1
+      }
+      this.initialBounds.maxY = this.initialBounds.minY + this.initialBounds.height
+    }
     this.creatingShape = shape
     this.app.currentPage.addShapes(shape as unknown as S)
     this.app.setSelectedShapes([shape as unknown as S])
   }
 
-  onPointerMove: TLStateEvents<S, K>['onPointerMove'] = () => {
+  onPointerMove: TLStateEvents<S, K>['onPointerMove'] = info => {
+    if (info.order) return
     if (!this.creatingShape) throw Error('Expected a creating shape.')
     const { initialBounds } = this
     const { currentPoint, originPoint, shiftKey } = this.app.inputs

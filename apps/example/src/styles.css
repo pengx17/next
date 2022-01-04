@@ -82,6 +82,7 @@ button {
   font-size: 14px;
   will-change: transform, contents;
   box-shadow: var(--shadow-medium);
+  z-index: 1000;
 }
 
 .statusbar {
