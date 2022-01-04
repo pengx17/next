@@ -1,29 +1,4 @@
-import { TLDrawTool } from './TLDrawTool'
-import { TLApp, TLDrawShape } from '~lib'
-import { TLTestApp } from '~test/TLTestApp'
-
-export class DrawTool extends TLDrawTool<TLDrawShape, any> {
-  static id = 'draw'
-  static shortcut = ['d']
-  Shape = TLDrawShape
-}
-
-describe('A minimal draw tool test', () => {
-  it('Creates the tool', () => {
-    const app = new TLApp()
-    const tool = new DrawTool(app, app)
-    expect(tool).toBeDefined()
-  })
-  it('Registers the tool with the app', () => {
-    const app = new TLApp()
-    app.registerTools([DrawTool])
-    expect(app.children.get('draw')).toBeDefined()
-  })
-  it('Selects the tool', () => {
-    const app = new TLApp().registerTools([DrawTool]).selectTool('draw')
-    expect(app.isIn('draw.idle')).toBe(true)
-  })
-})
+import { TLTestApp } from '~test'
 
 describe('When using the draw tool', () => {
   it('Starts in idle', () => {

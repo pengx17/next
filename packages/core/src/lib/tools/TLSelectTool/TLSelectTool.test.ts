@@ -1,11 +1,5 @@
 import { TLTestApp } from '~test/TLTestApp'
 import { TLTargetType } from '~types'
-import { TLSelectTool } from './TLSelectTool'
-
-export class SelectTool extends TLSelectTool {
-  static id = 'select'
-  static shortcut = ['v']
-}
 
 describe('When in the idle state', () => {
   it('Clears selected shapes when Escape is pressed', () => {

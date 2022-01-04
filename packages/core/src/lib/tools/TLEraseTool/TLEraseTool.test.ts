@@ -1,28 +1,4 @@
-import { TLEraseTool } from './TLEraseTool'
-import { TLApp } from '~lib'
-import { TLTestApp } from '~test/TLTestApp'
-
-export class EraseTool extends TLEraseTool<any, any> {
-  static id = 'erase'
-  static shortcut = ['e']
-}
-
-describe('A minimal test', () => {
-  it('Creates the tool', () => {
-    const app = new TLApp()
-    const tool = new EraseTool(app, app)
-    expect(tool).toBeDefined()
-  })
-  it('Registers the tool with the app', () => {
-    const app = new TLApp()
-    app.registerTools([EraseTool])
-    expect(app.children.get('erase')).toBeDefined()
-  })
-  it('Selects the tool', () => {
-    const app = new TLApp().registerTools([EraseTool]).selectTool('erase')
-    expect(app.isIn('erase.idle')).toBe(true)
-  })
-})
+import { TLTestApp } from '~test'
 
 describe('When using the tool', () => {
   it('Starts in idle', () => {

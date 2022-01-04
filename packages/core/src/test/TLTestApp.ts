@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
-  TLApp,
   TLBoxShape,
   TLDocumentModel,
   TLDotShape,
@@ -9,16 +8,45 @@ import {
   TLLineShape,
   TLPolygonShape,
   TLPolylineShape,
-  TLShapeConstructor,
   TLStarShape,
+  TLApp,
+  TLBoxTool,
+  TLDotTool,
+  TLDrawTool,
+  TLEraseTool,
+  TLLineTool,
 } from '~lib'
-import { BoxTool } from '~lib/tools/TLBoxTool/TLBoxTool.test'
-import { DotTool } from '~lib/tools/TLDotTool/TLDotTool.test'
-import { DrawTool } from '~lib/tools/TLDrawTool/TLDrawTool.test'
-import { EraseTool } from '~lib/tools/TLEraseTool/TLEraseTool.test'
-import { LineTool } from '~lib/tools/TLLineTool/TLLineTool.test'
-import { TLEventInfo, TLEventMap, TLTargetType } from '~types'
+import { TLEventInfo, TLTargetType } from '~types'
 import { TLTestEditableBox } from './TLTestEditableBox'
+
+export class BoxTool extends TLBoxTool<TLBoxShape, any> {
+  static id = 'box'
+  static shortcut = ['r']
+  Shape = TLBoxShape
+}
+
+export class DotTool extends TLDotTool<TLDotShape, any> {
+  static id = 'dot'
+  static shortcut = ['d']
+  Shape = TLDotShape
+}
+
+export class DrawTool extends TLDrawTool<TLDrawShape, any> {
+  static id = 'draw'
+  static shortcut = ['d']
+  Shape = TLDrawShape
+}
+
+export class EraseTool extends TLEraseTool<any, any> {
+  static id = 'erase'
+  static shortcut = ['e']
+}
+
+export class LineTool extends TLLineTool<TLLineShape, any> {
+  static id = 'line'
+  static shortcut = ['l']
+  Shape = TLLineShape
+}
 
 interface KeyboardOptions {
   shiftKey?: boolean

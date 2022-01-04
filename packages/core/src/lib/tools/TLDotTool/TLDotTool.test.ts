@@ -1,30 +1,4 @@
-import { TLDotTool } from './TLDotTool'
-import { TLDotShape } from '~lib/shapes/TLDotShape'
-import { TLApp } from '~lib/TLApp'
-import { TLTestApp } from '~test/TLTestApp'
-
-export class DotTool extends TLDotTool<TLDotShape, any> {
-  static id = 'dot'
-  static shortcut = ['d']
-  Shape = TLDotShape
-}
-
-describe('A minimal test', () => {
-  it('Creates the tool', () => {
-    const app = new TLApp()
-    const tool = new DotTool(app, app)
-    expect(tool).toBeDefined()
-  })
-  it('Registers the tool with the app', () => {
-    const app = new TLApp()
-    app.registerTools([DotTool])
-    expect(app.children.get('dot')).toBeDefined()
-  })
-  it('Selects the tool', () => {
-    const app = new TLApp().registerTools([DotTool]).selectTool('dot')
-    expect(app.isIn('dot.idle')).toBe(true)
-  })
-})
+import { TLTestApp } from '~test'
 
 describe('When using the tool', () => {
   it('Starts in idle', () => {

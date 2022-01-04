@@ -1,29 +1,4 @@
-import { TLLineTool } from './TLLineTool'
-import { TLApp, TLLineShape } from '~lib'
-import { TLTestApp } from '~test/TLTestApp'
-
-export class LineTool extends TLLineTool<TLLineShape, any> {
-  static id = 'line'
-  static shortcut = ['l']
-  Shape = TLLineShape
-}
-
-describe('A minimal test', () => {
-  it('Creates the tool', () => {
-    const app = new TLApp()
-    const tool = new LineTool(app, app)
-    expect(tool).toBeDefined()
-  })
-  it('Registers the tool with the app', () => {
-    const app = new TLApp()
-    app.registerTools([LineTool])
-    expect(app.children.get('line')).toBeDefined()
-  })
-  it('Selects the tool', () => {
-    const app = new TLApp().registerTools([LineTool]).selectTool('line')
-    expect(app.isIn('line.idle')).toBe(true)
-  })
-})
+import { TLTestApp } from '~test'
 
 describe('When using the tool', () => {
   it('Starts in idle', () => {

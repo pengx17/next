@@ -4,7 +4,6 @@ import Vec from '@tldraw/vec'
 import { TLCursor, TLEventMap, TLResizeCorner, TLStateEvents } from '~types'
 import type { TLBounds } from '@tldraw/intersect'
 import { BoundsUtils, uniqueId } from '~utils'
-import { toJS } from 'mobx'
 
 export class CreatingState<
   T extends TLBoxShape,

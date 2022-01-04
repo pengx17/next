@@ -1,30 +1,4 @@
-import { TLBoxTool } from './TLBoxTool'
-import { TLBoxShape } from '~lib/shapes/TLBoxShape'
-import { TLApp } from '~lib/TLApp'
-import { TLTestApp } from '~test/TLTestApp'
-
-export class BoxTool extends TLBoxTool<TLBoxShape, any> {
-  static id = 'box'
-  static shortcut = ['r']
-  Shape = TLBoxShape
-}
-
-describe('A minimal box tool test', () => {
-  it('Creates the tool', () => {
-    const app = new TLApp()
-    const tool = new BoxTool(app, app)
-    expect(tool).toBeDefined()
-  })
-  it('Registers the tool with the app', () => {
-    const app = new TLApp()
-    app.registerTools([BoxTool])
-    expect(app.children.get('box')).toBeDefined()
-  })
-  it('Selects the tool', () => {
-    const app = new TLApp().registerTools([BoxTool]).selectTool('box')
-    expect(app.isIn('box.idle')).toBe(true)
-  })
-})
+import { TLTestApp } from '~test'
 
 describe('When using the box tool', () => {
   it('Starts in idle', () => {
