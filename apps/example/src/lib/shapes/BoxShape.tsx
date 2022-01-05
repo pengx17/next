@@ -45,7 +45,6 @@ export class BoxShape extends TLBoxShape<BoxShapeProps> {
           y={strokeWidth / 2}
           rx={borderRadius}
           ry={borderRadius}
-          radius={10}
           width={Math.max(0.01, w - strokeWidth)}
           height={Math.max(0.01, h - strokeWidth)}
           pointerEvents="all"
