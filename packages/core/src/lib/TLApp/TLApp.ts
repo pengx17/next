@@ -313,14 +313,25 @@ export class TLApp<
 
   @observable assets: Record<string, TLAsset> = {}
 
-  @action addAssets(assets: TLAsset[]): this {
+  @action addAssets<T extends TLAsset>(assets: T[]): this {
     assets.forEach(asset => (this.assets[asset.id] = asset))
     this.persist()
     return this
   }
 
-  @action removeAssets(assets: TLAsset[]): this {
-    assets.forEach(asset => delete this.assets[asset.id])
+  @action removeAssets<T extends TLAsset>(assets: T[] | string[]): this {
+    if (typeof assets[0] === 'string') assets.forEach(asset => delete this.assets[asset as string])
+    else assets.forEach(asset => delete this.assets[(asset as T).id])
+    this.persist()
+    return this
+  }
+
+  createAssets<T extends TLAsset>(assets: T[], point?: number[]): this {
+    this.addAssets(assets)
+    this.notify('create-assets', {
+      assets,
+      point: point ?? BoundsUtils.getBoundsCenter(this.viewport.currentView),
+    })
     this.persist()
     return this
   }

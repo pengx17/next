@@ -61,6 +61,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
   className,
   brush,
   shapes,
+  assets,
   bindingShape,
   editingShape,
   hoveredShape,
@@ -93,7 +94,6 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
   useGestureEvents(rContainer)
   useCursor(rContainer, cursor, cursorRotation)
   useZoom(rContainer)
-
   const events = useCanvasEvents()
 
   const onlySelectedShape = selectedShapes?.length === 1 && selectedShapes[0]
@@ -125,7 +125,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
               <Shape
                 key={'shape_' + shape.id}
                 shape={shape}
-                asset={shape.props.assetId ? assets[shape.props.assetId] : undefined}
+                asset={assets && shape.props.assetId ? assets[shape.props.assetId] : undefined}
                 isEditing={shape === editingShape}
                 isHovered={shape === hoveredShape}
                 isBinding={shape === bindingShape}

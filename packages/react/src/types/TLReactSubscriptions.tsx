@@ -34,4 +34,5 @@ export interface TLReactCallbacks<
   onSave: TLReactCallback<S, R, 'save'>
   onSaveAs: TLReactCallback<S, R, 'saveAs'>
   onError: TLReactCallback<S, R, 'error'>
+  onAssetCreate: TLReactCallback<S, R, 'create-assets'>
 }

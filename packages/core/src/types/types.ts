@@ -102,6 +102,7 @@ export interface TLOffset {
 export interface TLAsset {
   id: string
   type: any
+  src: string
 }
 
 /* --------------------- Events --------------------- */
@@ -146,6 +147,14 @@ export type TLSubscriptionEvent =
   | {
       event: 'delete-shapes'
       info: TLShape[]
+    }
+  | {
+      event: 'create-assets'
+      info: { point: number[]; assets: TLAsset[] }
+    }
+  | {
+      event: 'delete-assets'
+      info: { assets: TLAsset[] }
     }
 
 export type TLSubscriptionEventName = TLSubscriptionEvent['event']

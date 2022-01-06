@@ -15,4 +15,5 @@ export interface TLEvents<
   ) => void
   pointer: (info: E, event: K['pointer'] | K['wheel']) => void
   keyboard: (info: E, event: K['keyboard']) => void
+  filedrop: (file: File) => Promise<string>
 }

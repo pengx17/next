@@ -20,4 +20,5 @@ export interface TLEventHandlers<
   onPinchStart: TLEvents<S, K, E>['pinch']
   onPinch: TLEvents<S, K, E>['pinch']
   onPinchEnd: TLEvents<S, K, E>['pinch']
+  onFileDrop: TLEvents<S, K, E>['filedrop']
 }
