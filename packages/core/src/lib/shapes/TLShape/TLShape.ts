@@ -6,7 +6,7 @@ import {
 } from '@tldraw/intersect'
 import Vec from '@tldraw/vec'
 import { action, computed, makeObservable, observable } from 'mobx'
-import type { TLHandle, TLBounds, TLResizeEdge, TLResizeCorner } from '~types'
+import type { TLHandle, TLBounds, TLResizeEdge, TLResizeCorner, TLAsset } from '~types'
 import { deepCopy, BoundsUtils, PointUtils } from '~utils'
 
 export type TLShapeModel<P extends TLShapeProps = TLShapeProps> = {
@@ -25,9 +25,11 @@ export interface TLShapeProps {
   point: number[]
   name?: string
   rotation?: number
+  flip?: number[]
   handles?: TLHandle[]
   label?: string
   labelPosition?: number[]
+  clipping?: number | number[]
   assetId?: string
   children?: string[]
   isGhost?: boolean
@@ -39,8 +41,13 @@ export interface TLShapeProps {
 
 export interface TLResizeInfo {
   type: TLResizeEdge | TLResizeCorner
+  clip: boolean
   scale: number[]
   transformOrigin: number[]
+}
+
+export interface TLResetBoundsInfo<T extends TLAsset> {
+  asset?: T
 }
 
 export interface TLHandleChangeInfo {
@@ -74,6 +81,7 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
   readonly hideContextBar: boolean = false
   readonly hideSelectionDetail: boolean = false
   readonly hideSelection: boolean = false
+  readonly isClippable: boolean = false
   readonly isEditable: boolean = false
   readonly isStateful: boolean = false
   readonly isAspectRatioLocked: boolean = false
@@ -182,6 +190,10 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return new this.constructor(this.serialized)
+  }
+
+  onResetBounds = (info: TLResetBoundsInfo<any>) => {
+    return this
   }
 
   onResize = (bounds: TLBounds, initialProps: any, info: TLResizeInfo) => {

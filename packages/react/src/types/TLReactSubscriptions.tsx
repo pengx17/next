@@ -38,5 +38,5 @@ export interface TLReactCallbacks<
   onCreateAssets: TLReactCallback<S, R, 'create-assets'>
   onDeleteShapes: TLReactCallback<S, R, 'delete-shapes'>
   onDeleteAssets: TLReactCallback<S, R, 'delete-assets'>
-  onFileDrop: (file: File) => Promise<string | void>
+  onFileDrop: TLReactCallback<S, R, 'drop-files'>
 }

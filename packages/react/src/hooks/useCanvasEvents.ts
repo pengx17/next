@@ -49,42 +49,43 @@ export function useCanvasEvents() {
       e.preventDefault()
       if (!e.dataTransfer.files?.length) return
       const point = [e.clientX, e.clientY]
-      const assetId = uniqueId()
-      const assetsToCreate: TLAsset[] = []
-      for (const file of Array.from(e.dataTransfer.files)) {
-        try {
-          const dataurl = callbacks.onFileDrop
-            ? await callbacks.onFileDrop(file)
-            : await fileToBase64(file)
-          if (typeof dataurl === 'string') {
-            const extensionMatch = file.name.match(/\.[0-9a-z]+$/i)
-            if (!extensionMatch) throw Error('No extension')
-            const extension = extensionMatch[0].toLowerCase()
-            const isImage = IMAGE_EXTENSIONS.includes(extension)
-            const isVideo = VIDEO_EXTENSIONS.includes(extension)
-            if (!(isImage || isVideo)) throw Error(`Unknown extension: ${extension}`)
-            const assetType = isImage ? 'image' : 'video'
-            const size = isImage ? await getSizeFromDataurl(dataurl) : [401.42, 401.42] // special
-            const existingAsset = Object.values(app.assets).find(
-              asset => asset.type === assetType && asset.src === dataurl
-            )
-            if (existingAsset) {
-              assetsToCreate.push(existingAsset)
-            } else {
-              const asset = {
-                id: assetId,
-                type: assetType,
-                src: dataurl,
-                size,
-              } as TLAsset
-              assetsToCreate.push(asset)
-            }
-          }
-        } catch (error) {
-          console.error(error)
-        }
-      }
-      app.createAssets(assetsToCreate, point)
+      app.dropFiles(e.dataTransfer.files, point)
+      // const assetId = uniqueId()
+      // const assetsToCreate: TLAsset[] = []
+      // for (const file of Array.from(e.dataTransfer.files)) {
+      //   try {
+      //     const dataurl = callbacks.onFileDrop
+      //       ? await callbacks.onFileDrop(file)
+      //       : await fileToBase64(file)
+      //     if (typeof dataurl === 'string') {
+      //       const extensionMatch = file.name.match(/\.[0-9a-z]+$/i)
+      //       if (!extensionMatch) throw Error('No extension.')
+      //       const extension = extensionMatch[0].toLowerCase()
+      //       const isImage = IMAGE_EXTENSIONS.includes(extension)
+      //       const isVideo = VIDEO_EXTENSIONS.includes(extension)
+      //       if (!(isImage || isVideo)) throw Error(`Unknown extension: ${extension}`)
+      //       const assetType = isImage ? 'image' : 'video'
+      //       const size = isImage ? await getSizeFromDataurl(dataurl) : [401.42, 401.42] // special
+      //       const existingAsset = Object.values(app.assets).find(
+      //         asset => asset.type === assetType && asset.src === dataurl
+      //       )
+      //       if (existingAsset) {
+      //         assetsToCreate.push(existingAsset)
+      //       } else {
+      //         const asset = {
+      //           id: assetId,
+      //           type: assetType,
+      //           src: dataurl,
+      //           size,
+      //         } as TLAsset
+      //         assetsToCreate.push(asset)
+      //       }
+      //     }
+      //   } catch (error) {
+      //     console.error(error)
+      //   }
+      // }
+      // app.createAssets(assetsToCreate, point)
     }
 
     const onDragOver = (e: React.DragEvent<Element>) => {

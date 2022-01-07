@@ -46,7 +46,7 @@ export class TLPage<S extends TLShape = TLShape, E extends TLEventMap = TLEventM
         ? (shapes as S[])
         : (shapes as TLShapeModel[]).map(shape => {
             const ShapeClass = this.app.getShapeClass(shape.type)
-            return new ShapeClass(shape)
+            return new ShapeClass(shape, this.app)
           })
     shapeInstances.forEach(instance => observe(instance, this.app.saveState))
     this.shapes.push(...shapeInstances)

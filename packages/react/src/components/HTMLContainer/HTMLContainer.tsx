@@ -16,6 +16,7 @@ export const HTMLContainer = React.forwardRef<HTMLDivElement, HTMLContainerProps
             ref={ref}
             className={`tl-positioned-div ${className}`}
             style={opacity ? { opacity } : undefined}
+            draggable={false}
           >
             <div className={`tl-positioned-inner ${centered ? 'tl-centered' : ''}`} {...rest}>
               {children}

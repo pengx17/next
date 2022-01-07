@@ -32,11 +32,11 @@ import { TLRootState } from '../TLState'
 import { TLApi } from '~lib/TLApi'
 import { TLCursors } from '~lib/TLCursors'
 
-export interface TLDocumentModel<S extends TLShape = TLShape> {
+export interface TLDocumentModel<S extends TLShape = TLShape, A extends TLAsset = TLAsset> {
   currentPageId: string
   selectedIds: string[]
   pages: TLPageModel<S>[]
-  assets?: TLAsset[]
+  assets?: A[]
 }
 
 export class TLApp<
@@ -326,14 +326,22 @@ export class TLApp<
     return this
   }
 
-  createAssets<T extends TLAsset>(assets: T[], point?: number[]): this {
+  createAssets<T extends TLAsset>(assets: T[]): this {
     this.addAssets(assets)
-    this.notify('create-assets', {
-      assets,
-      point: point ?? BoundsUtils.getBoundsCenter(this.viewport.currentView),
-    })
+    this.notify('create-assets', { assets })
     this.persist()
     return this
+  }
+
+  dropFiles = (files: FileList, point?: number[]) => {
+    this.notify('drop-files', {
+      files: Array.from(files),
+      point: point
+        ? this.viewport.getPagePoint(point)
+        : BoundsUtils.getBoundsCenter(this.viewport.currentView),
+    })
+    // This callback may be over-written manually, see useSetup.ts in React.
+    return void null
   }
 
   /* ---------------------- Tools --------------------- */
@@ -544,8 +552,12 @@ export class TLApp<
   }
 
   @computed get showContextBar() {
-    const { selectedShapesArray } = this
+    const {
+      selectedShapesArray,
+      inputs: { ctrlKey },
+    } = this
     return (
+      !ctrlKey &&
       this.isInAny('select.idle', 'select.hoveringSelectionHandle') &&
       selectedShapesArray.length > 0 &&
       !selectedShapesArray.every(shape => shape.hideContextBar)
@@ -621,7 +633,6 @@ export class TLApp<
   notify = <E extends TLSubscriptionEventName>(event: E, info: TLSubscriptionEventInfo<E>) => {
     this.subscriptions.forEach(subscription => {
       if (subscription.event === event) {
-        console.log('calling', subscription.event)
         subscription.callback(this, info)
       }
     })
@@ -681,10 +692,5 @@ export class TLApp<
 
   readonly onPinchEnd: TLEvents<S, K>['pinch'] = (info, e) => {
     this.inputs.onPinchEnd([...this.viewport.getPagePoint(info.point), 0.5], e)
-  }
-
-  onFileDrop: TLEvents<S, K>['filedrop'] = async () => {
-    // This callback may be over-written manually, see useSetup.ts in React.
-    return
   }
 }

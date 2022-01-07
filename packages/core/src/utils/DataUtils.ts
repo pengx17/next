@@ -84,3 +84,27 @@ export function isSerializable(value: any): boolean {
   if (isPlainObject(value)) return Object.values(value).every(isSerializable)
   return false
 }
+
+export function fileToBase64(file: Blob): Promise<string | ArrayBuffer | null> {
+  return new Promise((resolve, reject) => {
+    if (file) {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => resolve(reader.result)
+      reader.onerror = error => reject(error)
+      reader.onabort = error => reject(error)
+    }
+  })
+}
+
+export function getSizeFromDataurl(dataURL: string): Promise<number[]> {
+  return new Promise(resolve => {
+    const img = new Image()
+    img.onload = () => resolve([img.width, img.height])
+    img.src = dataURL
+  })
+}
+
+export function getFirstFromSet<T = unknown>(set: Set<T>): T {
+  return set.values().next().value
+}

@@ -149,8 +149,12 @@ export type TLSubscriptionEvent =
       info: TLShape[]
     }
   | {
+      event: 'drop-files'
+      info: { files: File[]; point: number[] }
+    }
+  | {
       event: 'create-assets'
-      info: { point: number[]; assets: TLAsset[] }
+      info: { assets: TLAsset[] }
     }
   | {
       event: 'delete-assets'

@@ -9,6 +9,7 @@ import {
   TLEventSelectionInfo,
   TLRotateCorner,
 } from '~types'
+import { getFirstFromSet } from '~utils'
 
 export class HoveringSelectionHandleState<
   S extends TLShape,
@@ -34,14 +35,6 @@ export class HoveringSelectionHandleState<
   }
 
   onPointerDown: TLEvents<S>['pointer'] = info => {
-    const {
-      inputs: { ctrlKey },
-    } = this.app
-    // Holding ctrlKey should ignore shapes
-    if (ctrlKey) {
-      this.tool.transition('pointingCanvas')
-      return
-    }
     switch (info.type) {
       case TLTargetType.Selection: {
         switch (info.handle) {
@@ -72,23 +65,34 @@ export class HoveringSelectionHandleState<
   }
 
   onDoubleClick: TLEvents<S>['pointer'] = info => {
-    if (info.order || this.app.selectedShapesArray.length !== 1) return
-    const selectedShape = this.app.selectedShapesArray[0]
-    if (!selectedShape.isEditable) return
-    switch (info.type) {
-      case TLTargetType.Shape: {
-        this.tool.transition('editingShape', info)
-        break
-      }
-      case TLTargetType.Selection: {
-        if (this.app.selectedShapesArray.length === 1) {
-          this.tool.transition('editingShape', {
-            type: TLTargetType.Shape,
-            target: selectedShape,
-          })
+    console.log('hi')
+    if (info.order) return
+    const isSingle = this.app.selectedShapes.size === 1
+    if (!isSingle) return
+    const selectedShape = getFirstFromSet(this.app.selectedShapes)
+
+    if (selectedShape.isEditable) {
+      switch (info.type) {
+        case TLTargetType.Shape: {
+          this.tool.transition('editingShape', info)
+          break
         }
-        break
+        case TLTargetType.Selection: {
+          if (this.app.selectedShapesArray.length === 1) {
+            this.tool.transition('editingShape', {
+              type: TLTargetType.Shape,
+              target: selectedShape,
+            })
+          }
+          break
+        }
       }
+    } else {
+      const asset = selectedShape.props.assetId
+        ? this.app.assets[selectedShape.props.assetId]
+        : undefined
+      selectedShape.onResetBounds({ asset })
+      this.tool.transition('idle')
     }
   }
 }

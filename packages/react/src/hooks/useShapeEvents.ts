@@ -28,10 +28,8 @@ export function useShapeEvents<S extends TLReactShape>(shape: S) {
       const { order = 0 } = e
       if (!order) e.currentTarget?.releasePointerCapture(e.pointerId)
       callbacks.onPointerUp?.({ type: TLTargetType.Shape, shape, order }, e)
-
       const now = Date.now()
       const elapsed = now - rDoubleClickTimer.current
-
       if (elapsed > DOUBLE_CLICK_DURATION) {
         rDoubleClickTimer.current = now
       } else {
@@ -40,7 +38,6 @@ export function useShapeEvents<S extends TLReactShape>(shape: S) {
           rDoubleClickTimer.current = -1
         }
       }
-
       e.order = order + 1
     }
 

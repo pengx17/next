@@ -17,10 +17,9 @@ import { EMPTY_OBJECT } from '~constants'
 import type { TLReactShape } from '~lib'
 import type { TLReactComponents, TLReactEventMap } from '~types'
 
-interface RendererCallbacks<S extends TLReactShape = TLReactShape>
-  extends Partial<TLEventHandlers<S, TLReactEventMap>> {
-  onFileDrop: TLEvents<S>['filedrop']
-}
+type RendererCallbacks<S extends TLReactShape = TLReactShape> = Partial<
+  TLEventHandlers<S, TLReactEventMap>
+>
 
 export interface TLRendererContextProps<S extends TLReactShape = TLReactShape> {
   id?: string

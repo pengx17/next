@@ -2,7 +2,7 @@ import { Vec } from '@tldraw/vec'
 import { toJS } from 'mobx'
 import { TLApp, TLShape, TLSelectTool, TLToolState } from '~lib'
 import { TLBounds, TLResizeCorner, TLResizeEdge, TLCursor, TLEventMap, TLEvents } from '~types'
-import { BoundsUtils } from '~utils'
+import { BoundsUtils, getFirstFromSet } from '~utils'
 
 export class ResizingState<
   S extends TLShape,
@@ -18,9 +18,11 @@ export class ResizingState<
   snapshots: Record<
     string,
     {
-      shape: S['props']
+      props: S['props']
       bounds: TLBounds
       transformOrigin: number[]
+      isAspectRatioLocked: boolean
+      isClippable: boolean
     }
   > = {}
   initialRotation = 0
@@ -74,9 +76,11 @@ export class ResizingState<
         return [
           shape.id,
           {
-            shape: toJS(shape.props),
+            props: toJS(shape.props),
             bounds: { ...shape.bounds },
             transformOrigin: [ix, iy],
+            isClippable: shape.isClippable,
+            isAspectRatioLocked: shape.isAspectRatioLocked,
           },
         ]
       })
@@ -99,17 +103,22 @@ export class ResizingState<
 
   onPointerMove: TLEvents<S>['pointer'] = () => {
     const {
-      inputs: { altKey, shiftKey, originPoint, currentPoint },
+      inputs: { altKey, shiftKey, ctrlKey, originPoint, currentPoint },
     } = this.app
     const { handle, snapshots, initialCommonBounds } = this
     let delta = Vec.sub(currentPoint, originPoint)
     if (altKey) delta = Vec.mul(delta, 2)
+    const firstShape = getFirstFromSet(this.app.selectedShapes)
     let nextBounds = BoundsUtils.getTransformedBoundingBox(
       initialCommonBounds,
       handle,
       delta,
       this.selectionRotation,
-      shiftKey || this.isAspectRatioLocked
+      shiftKey ||
+        (this.isSingle &&
+          (ctrlKey
+            ? !firstShape.isClippable
+            : firstShape.isAspectRatioLocked || firstShape.props.isAspectRatioLocked))
     )
     if (altKey) {
       nextBounds = {
@@ -120,7 +129,7 @@ export class ResizingState<
     const { scaleX, scaleY } = nextBounds
     this.app.selectedShapes.forEach(shape => {
       const {
-        shape: initialShape,
+        props: initialShape,
         bounds: initialShapeBounds,
         transformOrigin,
       } = snapshots[shape.id]
@@ -134,6 +143,7 @@ export class ResizingState<
       shape.onResize(relativeBounds, initialShape, {
         type: handle,
         scale: [scaleX, scaleY],
+        clip: ctrlKey,
         transformOrigin,
       })
     })
@@ -150,7 +160,7 @@ export class ResizingState<
     switch (e.key) {
       case 'Escape': {
         this.app.selectedShapes.forEach(shape => {
-          shape.update({ ...this.snapshots[shape.id].shape })
+          shape.update({ ...this.snapshots[shape.id].props })
         })
         this.tool.transition('idle')
         break

@@ -43,11 +43,9 @@ export function useSetup<
     if (onCreateAssets) unsubs.push(app.subscribe('create-assets', onCreateAssets))
     if (onDeleteShapes) unsubs.push(app.subscribe('delete-shapes', onDeleteShapes))
     if (onDeleteAssets) unsubs.push(app.subscribe('delete-assets', onDeleteAssets))
-    if (onFileDrop) {
-      console.log('setting onFileDrop')
-      // Kind of unusual, is this the right pattern?
-      app.onFileDrop = onFileDrop
-    }
+    if (onFileDrop) unsubs.push(app.subscribe('drop-files', onFileDrop))
+    // Kind of unusual, is this the right pattern?
+
     return () => unsubs.forEach(unsub => unsub())
   }, [app, onPersist, onSave, onSaveAs, onError])
 }

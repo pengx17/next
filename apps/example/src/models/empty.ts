@@ -1,4 +1,7 @@
-export default {
+import type { TLDocumentModel } from '@tldraw/core'
+import type { Shape } from '~lib'
+
+const documentModel: TLDocumentModel<Shape, any> = {
   currentPageId: 'page1',
   selectedIds: [],
   pages: [
@@ -9,4 +12,7 @@ export default {
       bindings: [],
     },
   ],
+  assets: [],
 }
+
+export default documentModel

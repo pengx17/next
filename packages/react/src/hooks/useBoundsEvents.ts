@@ -20,24 +20,21 @@ export function useBoundsEvents(handle: TLSelectionHandle) {
     const onPointerDown: TLReactCustomEvents['pointer'] = e => {
       const { order = 0 } = e
       if (order) return
-      if (e.currentTarget.tagName === 'g') {
-        // Bounds events are set on SVG elements; we need to set
-        // pointer capture on their parent,the SVG container (an
-        // HMTL element).
-        e.currentTarget?.parentElement?.setPointerCapture(e.pointerId)
-      }
+      // See note at bottom of the file
+      const elm = loopToHtmlElement(e.currentTarget)
+      elm.setPointerCapture(e.pointerId)
+      elm.addEventListener('pointerup', onPointerUp)
       callbacks.onPointerDown?.({ type: TLTargetType.Selection, handle, order }, e)
       e.order = order + 1
     }
 
-    const onPointerUp: TLReactCustomEvents['pointer'] = e => {
+    const onPointerUp = (e: PointerEvent & { order?: number }) => {
       const { order = 0 } = e
       if (order) return
-      if (e.currentTarget.tagName === 'g') {
-        e.currentTarget?.releasePointerCapture(e.pointerId)
-      }
+      const elm = e.target as HTMLElement
+      elm.removeEventListener('pointerup', onPointerUp)
+      elm.releasePointerCapture(e.pointerId)
       callbacks.onPointerUp?.({ type: TLTargetType.Selection, handle, order }, e)
-
       const now = Date.now()
       const elapsed = now - rDoubleClickTimer.current
 
@@ -78,7 +75,7 @@ export function useBoundsEvents(handle: TLSelectionHandle) {
     return {
       onPointerDown,
       onPointerMove,
-      onPointerUp,
+      // onPointerUp,
       onPointerEnter,
       onPointerLeave,
       onKeyDown,
@@ -88,3 +85,27 @@ export function useBoundsEvents(handle: TLSelectionHandle) {
 
   return events
 }
+
+function loopToHtmlElement(elm: Element): HTMLElement {
+  if (elm.namespaceURI?.endsWith('svg')) {
+    if (elm.parentElement) return loopToHtmlElement(elm.parentElement)
+    else throw Error('Could not find a parent element of an HTML type!')
+  }
+  return elm as HTMLElement
+}
+
+/*
+There are a few hacks here in facilitate double clicking and pointer
+capture on elements.
+
+The events in this file are possibly set on individual SVG elements, 
+such as handles or corner handles, rather than on HTML elements or 
+SVGSVGElements. Raw SVG elemnets do not support pointerCapture in 
+most cases, meaning that in order for pointer capture to work, we 
+need to crawl up the DOM tree to find the nearest HTML element. Then,
+in order for that element to also call the `onPointerUp` event from
+this file, we need to manually set that event on that element and
+later remove it when the pointerup occurs. This is a potential leak
+if the user clicks on a handle but the pointerup does not fire for
+whatever reason.
+*/

@@ -3,6 +3,7 @@ import type { CodeSandboxShape } from './CodeSandboxShape'
 import type { DotShape } from './DotShape'
 import type { EllipseShape } from './EllipseShape'
 import type { HighlighterShape } from './HighlighterShape'
+import type { ImageShape } from './ImageShape'
 import type { LineShape } from './LineShape'
 import type { PenShape } from './PenShape'
 import type { PolygonShape } from './PolygonShape'
@@ -16,6 +17,7 @@ export type Shape =
   | DotShape
   | EllipseShape
   | HighlighterShape
+  | ImageShape
   | LineShape
   | LineShape
   | PenShape
@@ -29,6 +31,7 @@ export * from './CodeSandboxShape'
 export * from './DotShape'
 export * from './EllipseShape'
 export * from './HighlighterShape'
+export * from './ImageShape'
 export * from './LineShape'
 export * from './PenShape'
 export * from './PolygonShape'

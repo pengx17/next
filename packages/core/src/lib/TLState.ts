@@ -202,15 +202,6 @@ export abstract class TLRootState<S extends TLShape, K extends TLEventMap>
     },
 
     /**
-     * When a file is dropped, return the src (a dataURI or URL).
-     *
-     * @param file The dropped file.
-     */
-    onFileDrop: async file => {
-      return this.onFileDrop?.(file)
-    },
-
-    /**
      * Respond to wheel events forwarded to the state by its parent. Run the current active child
      * state's handler, then the state's own handler.
      *
@@ -388,7 +379,6 @@ export abstract class TLRootState<S extends TLShape, K extends TLEventMap>
   onEnter?: TLStateEvents<S, K>['onEnter']
   onExit?: TLStateEvents<S, K>['onExit']
   onTransition?: TLStateEvents<S, K>['onTransition']
-  onFileDrop?: TLEvents<S, K>['filedrop']
   onWheel?: TLEvents<S, K>['wheel']
   onPointerDown?: TLEvents<S, K>['pointer']
   onPointerUp?: TLEvents<S, K>['pointer']

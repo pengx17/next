@@ -1,13 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Vec } from '@tldraw/vec'
 import { TLApp, TLSelectTool, TLShape, TLToolState } from '~lib'
-import {
-  TLEvents,
-  TLSelectionHandle,
-  TLEventMap,
-  TLResizeCorner,
-  TLEventSelectionInfo,
-} from '~types'
+import type { TLEvents, TLEventMap, TLEventSelectionInfo } from '~types'
 import { CURSORS } from '~constants'
 
 export class PointingResizeHandleState<
@@ -18,10 +12,10 @@ export class PointingResizeHandleState<
 > extends TLToolState<S, K, R, P> {
   static id = 'pointingResizeHandle'
 
-  handle: TLSelectionHandle = TLResizeCorner.BottomLeft
+  info = {} as TLEventSelectionInfo
 
   onEnter = (info: TLEventSelectionInfo) => {
-    this.handle = info.handle
+    this.info = info
     this.updateCursor()
   }
 
@@ -36,12 +30,12 @@ export class PointingResizeHandleState<
   onPointerMove: TLEvents<S>['pointer'] = () => {
     const { currentPoint, originPoint } = this.app.inputs
     if (Vec.dist(currentPoint, originPoint) > 5) {
-      this.tool.transition('resizing', { handle: this.handle })
+      this.tool.transition('resizing', this.info)
     }
   }
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
-    this.tool.transition('idle')
+    this.tool.transition('hoveringSelectionHandle', this.info)
   }
 
   onPinchStart: TLEvents<S>['pinch'] = (info, event) => {
@@ -50,7 +44,7 @@ export class PointingResizeHandleState<
 
   private updateCursor() {
     const rotation = this.app.selectionBounds!.rotation
-    const cursor = CURSORS[this.handle]
+    const cursor = CURSORS[this.info.handle]
     this.app.cursors.setCursor(cursor, rotation)
   }
 }
