@@ -10,27 +10,19 @@ import type {
   TLToolConstructor,
 } from '@tldraw/core'
 import type { TLReactComponents } from '~types/component-props'
-import type { TLReactEventMap } from '~types'
+import type { TLReactCallbacks, TLReactEventMap } from '~types'
 import { AppCanvas } from './AppCanvas'
 
 export interface TLCommonAppProps<
   S extends TLReactShape = TLReactShape,
   R extends TLReactApp<S> = TLReactApp<S>
-> {
+> extends Partial<TLReactCallbacks<S, R>> {
   id?: string
   className?: string
   meta?: AnyObject
   theme?: Partial<TLTheme>
   components?: TLReactComponents<S>
   children?: React.ReactNode
-  onMount?: TLCallback<S, TLReactEventMap, R, 'mount'>
-  onPersist?: TLCallback<S, TLReactEventMap, R, 'persist'>
-  onSave?: TLCallback<S, TLReactEventMap, R, 'save'>
-  onSaveAs?: TLCallback<S, TLReactEventMap, R, 'saveAs'>
-  onLoad?: TLCallback<S, TLReactEventMap, R, 'load'>
-  onUndo?: TLCallback<S, TLReactEventMap, R, 'undo'>
-  onRedo?: TLCallback<S, TLReactEventMap, R, 'redo'>
-  onError?: TLCallback<S, TLReactEventMap, R, 'error'>
 }
 
 export interface TLAppPropsWithoutApp<

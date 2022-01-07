@@ -8,7 +8,18 @@ export function useSetup<
   S extends TLReactShape = TLReactShape,
   R extends TLReactApp<S> = TLReactApp<S>
 >(app: R, props: TLAppPropsWithApp<S, R> | TLAppPropsWithoutApp<S, R>) {
-  const { onPersist, onSave, onSaveAs, onError, onMount } = props
+  const {
+    onPersist,
+    onSave,
+    onSaveAs,
+    onError,
+    onMount,
+    onCreateAssets,
+    onCreateShapes,
+    onDeleteAssets,
+    onDeleteShapes,
+    onFileDrop,
+  } = props
 
   React.useLayoutEffect(() => {
     const unsubs: (() => void)[] = []
@@ -28,6 +39,15 @@ export function useSetup<
     if (onSave) unsubs.push(app.subscribe('save', onSave))
     if (onSaveAs) unsubs.push(app.subscribe('saveAs', onSaveAs))
     if (onError) unsubs.push(app.subscribe('error', onError))
+    if (onCreateShapes) unsubs.push(app.subscribe('create-shapes', onCreateShapes))
+    if (onCreateAssets) unsubs.push(app.subscribe('create-assets', onCreateAssets))
+    if (onDeleteShapes) unsubs.push(app.subscribe('delete-shapes', onDeleteShapes))
+    if (onDeleteAssets) unsubs.push(app.subscribe('delete-assets', onDeleteAssets))
+    if (onFileDrop) {
+      console.log('setting onFileDrop')
+      // Kind of unusual, is this the right pattern?
+      app.onFileDrop = onFileDrop
+    }
     return () => unsubs.forEach(unsub => unsub())
   }, [app, onPersist, onSave, onSaveAs, onError])
 }

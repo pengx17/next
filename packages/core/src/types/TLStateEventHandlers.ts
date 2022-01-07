@@ -9,4 +9,5 @@ export interface TLStateEvents<S extends TLShape = TLShape, K extends TLEventMap
   onExit: (info: { toId: string } & any) => void
   onTransition: (info: { toId: string; fromId: string } & any) => void
   onModifierKey: TLEvents<S, K>['keyboard']
+  onFileDrop: (file: File) => Promise<string | void>
 }

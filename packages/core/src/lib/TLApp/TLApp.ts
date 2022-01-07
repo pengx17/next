@@ -621,6 +621,7 @@ export class TLApp<
   notify = <E extends TLSubscriptionEventName>(event: E, info: TLSubscriptionEventInfo<E>) => {
     this.subscriptions.forEach(subscription => {
       if (subscription.event === event) {
+        console.log('calling', subscription.event)
         subscription.callback(this, info)
       }
     })
@@ -680,5 +681,10 @@ export class TLApp<
 
   readonly onPinchEnd: TLEvents<S, K>['pinch'] = (info, e) => {
     this.inputs.onPinchEnd([...this.viewport.getPagePoint(info.point), 0.5], e)
+  }
+
+  onFileDrop: TLEvents<S, K>['filedrop'] = async () => {
+    // This callback may be over-written manually, see useSetup.ts in React.
+    return
   }
 }

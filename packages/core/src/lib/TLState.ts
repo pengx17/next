@@ -179,7 +179,6 @@ export abstract class TLRootState<S extends TLShape, K extends TLEventMap>
     onTransition: info => {
       this.onTransition?.(info)
     },
-
     /**
      * Handle the change from inactive to active.
      *
@@ -200,6 +199,15 @@ export abstract class TLRootState<S extends TLShape, K extends TLEventMap>
       this._isActive = false
       this.currentState?.onExit?.({ toId: 'parent' })
       this.onExit?.(info)
+    },
+
+    /**
+     * When a file is dropped, return the src (a dataURI or URL).
+     *
+     * @param file The dropped file.
+     */
+    onFileDrop: async file => {
+      return this.onFileDrop?.(file)
     },
 
     /**
@@ -378,33 +386,20 @@ export abstract class TLRootState<S extends TLShape, K extends TLEventMap>
   static shortcuts?: TLShortcut<any, any, any>[]
 
   onEnter?: TLStateEvents<S, K>['onEnter']
-
   onExit?: TLStateEvents<S, K>['onExit']
-
   onTransition?: TLStateEvents<S, K>['onTransition']
-
+  onFileDrop?: TLEvents<S, K>['filedrop']
   onWheel?: TLEvents<S, K>['wheel']
-
   onPointerDown?: TLEvents<S, K>['pointer']
-
   onPointerUp?: TLEvents<S, K>['pointer']
-
   onPointerMove?: TLEvents<S, K>['pointer']
-
   onPointerEnter?: TLEvents<S, K>['pointer']
-
   onPointerLeave?: TLEvents<S, K>['pointer']
-
   onDoubleClick?: TLEvents<S, K>['pointer']
-
   onKeyDown?: TLEvents<S, K>['keyboard']
-
   onKeyUp?: TLEvents<S, K>['keyboard']
-
   onPinchStart?: TLEvents<S, K>['pinch']
-
   onPinch?: TLEvents<S, K>['pinch']
-
   onPinchEnd?: TLEvents<S, K>['pinch']
 }
 

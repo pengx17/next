@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react-lite'
-import type { TLAsset, TLEventHandlers, TLInputs, TLViewport } from '@tldraw/core'
+import type { TLEventHandlers, TLEvents, TLInputs, TLViewport } from '@tldraw/core'
 import {
   SelectionBackground as _SelectionBackground,
   SelectionForeground as _SelectionForeground,
@@ -17,11 +17,16 @@ import { EMPTY_OBJECT } from '~constants'
 import type { TLReactShape } from '~lib'
 import type { TLReactComponents, TLReactEventMap } from '~types'
 
+interface RendererCallbacks<S extends TLReactShape = TLReactShape>
+  extends Partial<TLEventHandlers<S, TLReactEventMap>> {
+  onFileDrop: TLEvents<S>['filedrop']
+}
+
 export interface TLRendererContextProps<S extends TLReactShape = TLReactShape> {
   id?: string
   viewport: TLViewport
   inputs: TLInputs<TLReactEventMap>
-  callbacks?: Partial<TLEventHandlers<S, TLReactEventMap>>
+  callbacks?: RendererCallbacks<S>
   components?: Partial<TLReactComponents<S>>
   meta?: any
   children?: React.ReactNode
@@ -31,7 +36,7 @@ export interface TLRendererContext<S extends TLReactShape = TLReactShape> {
   id: string
   viewport: TLViewport
   inputs: TLInputs<TLReactEventMap>
-  callbacks: Partial<TLEventHandlers<S, TLReactEventMap>>
+  callbacks: RendererCallbacks<S>
   components: Partial<TLReactComponents<S>>
   meta: any
 }

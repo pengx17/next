@@ -3,12 +3,13 @@
 import * as React from 'react'
 import documentModel from './models/empty'
 import type { TLDocumentModel } from '@tldraw/core'
-import type {
+import {
   TLReactApp,
   TLReactComponents,
   TLReactShapeConstructor,
   TLReactCallbacks,
   TLReactToolConstructor,
+  useApp,
 } from '@tldraw/react'
 import {
   BoxShape,
@@ -40,6 +41,8 @@ import {
 import { AppUI } from '~components/AppUI'
 import { ContextBar } from '~components/ContextBar/ContextBar'
 import { AppCanvas, AppProvider } from '@tldraw/react'
+import { Observer } from 'mobx-react-lite'
+import { autorun, reaction } from 'mobx'
 
 const components: TLReactComponents<Shape> = {
   ContextBar: ContextBar,
@@ -87,15 +90,31 @@ function App(): JSX.Element {
     // todo
   }, [])
 
+  const onCreateAssets = React.useCallback<TLReactCallbacks<Shape>['onCreateAssets']>(
+    (assets, point) => {
+      console.log('assets created', assets, point)
+      // create image or video element
+    },
+    []
+  )
+
+  const onFileDrop = React.useCallback<TLReactCallbacks<Shape>['onFileDrop']>(async files => {
+    console.log('File dropped', files)
+    // create image or video element
+  }, [])
+
   return (
     <AppProvider
-      onMount={onMount}
-      onPersist={onPersist}
       model={model}
       Shapes={Shapes}
       Tools={Tools}
+      onMount={onMount}
+      onPersist={onPersist}
+      onCreateAssets={onCreateAssets}
+      onFileDrop={onFileDrop}
     >
       <div className="wrapper">
+        <PatchObserver />
         <AppCanvas components={components} />
         <AppUI />
       </div>
@@ -104,3 +123,19 @@ function App(): JSX.Element {
 }
 
 export default App
+
+function PatchObserver() {
+  const app = useApp()
+  const cache = React.useRef<{ patch: any; time: number }[]>([])
+
+  React.useEffect(() => {
+    reaction(
+      () => app.serialized,
+      app => {
+        console.log('changed')
+      }
+    )
+  })
+
+  return null
+}
