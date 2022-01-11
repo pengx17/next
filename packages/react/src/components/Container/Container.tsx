@@ -6,6 +6,7 @@ import type { TLBounds } from '@tldraw/core'
 interface ContainerProps extends React.HTMLProps<HTMLDivElement> {
   id?: string
   bounds: TLBounds
+  scale?: number[]
   zIndex?: number
   rotation?: number
   className?: string
@@ -15,6 +16,7 @@ interface ContainerProps extends React.HTMLProps<HTMLDivElement> {
 export const Container = observer<ContainerProps>(function Container({
   id,
   bounds,
+  scale,
   rotation = 0,
   className = '',
   zIndex,
@@ -25,14 +27,14 @@ export const Container = observer<ContainerProps>(function Container({
 
   React.useLayoutEffect(() => {
     const elm = rBounds.current!
-
     elm.style.setProperty(
       'transform',
       `translate(
           calc(${bounds.minX}px - var(--tl-padding)),
           calc(${bounds.minY}px - var(--tl-padding))
         )
-        rotate(${rotation + (bounds.rotation || 0)}rad)`
+        rotate(${rotation + (bounds.rotation || 0)}rad)
+        ${scale ? `scale(${scale[0]}, ${scale[1]})` : ''}`
     )
   }, [bounds.minX, bounds.minY, rotation, bounds.rotation])
 

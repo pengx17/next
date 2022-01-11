@@ -31,6 +31,8 @@ export class CreatingState<
       parentId: currentPage.id,
       point: [...originPoint],
       text: '',
+      size: [16, 32],
+      autosize: true,
     })
     this.initialBounds = {
       minX: originPoint[0],

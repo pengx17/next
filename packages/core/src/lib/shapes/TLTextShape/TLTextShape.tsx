@@ -1,13 +1,12 @@
-import type { TLBounds } from '@tldraw/intersect'
 import { makeObservable } from 'mobx'
-import { TLResizeInfo, TLShape, TLShapeProps } from '../TLShape'
-import { BoundsUtils } from '~utils'
+import { TLBoxShape, TLBoxShapeProps } from '../TLBoxShape'
 
-export interface TLTextShapeProps extends TLShapeProps {
+export interface TLTextShapeProps extends TLBoxShapeProps {
   text: string
+  autosize: boolean
 }
 
-export class TLTextShape<P extends TLTextShapeProps = TLTextShapeProps, M = any> extends TLShape<
+export class TLTextShape<P extends TLTextShapeProps = TLTextShapeProps, M = any> extends TLBoxShape<
   P,
   M
 > {
@@ -16,39 +15,17 @@ export class TLTextShape<P extends TLTextShapeProps = TLTextShapeProps, M = any>
     makeObservable(this)
   }
 
+  isEditable = true
+
   static id = 'text'
 
   static defaultProps: TLTextShapeProps = {
     id: 'text',
     type: 'text',
     parentId: 'page',
+    autosize: true,
     point: [0, 0],
+    size: [16, 32],
     text: '',
-  }
-
-  getBounds = (): TLBounds => {
-    const [x, y] = this.props.point
-    // TODO
-    return {
-      minX: x,
-      minY: y,
-      maxX: x + 100,
-      maxY: y + 100,
-      width: 100,
-      height: 100,
-    }
-  }
-
-  getRotatedBounds = (): TLBounds => {
-    return BoundsUtils.getBoundsFromPoints(
-      BoundsUtils.getRotatedCorners(this.bounds, this.props.rotation)
-    )
-  }
-
-  onResize = (bounds: TLBounds, initialProps: any, info: TLResizeInfo): this => {
-    return this.update({
-      point: [bounds.minX, bounds.minY],
-      size: [Math.max(1, bounds.width), Math.max(1, bounds.height)],
-    })
   }
 }

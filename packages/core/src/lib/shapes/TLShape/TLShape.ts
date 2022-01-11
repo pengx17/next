@@ -22,10 +22,10 @@ export interface TLShapeProps {
   id: string
   type: any
   parentId: string
-  point: number[]
   name?: string
+  point: number[]
+  scale?: number[]
   rotation?: number
-  flip?: number[]
   handles?: TLHandle[]
   label?: string
   labelPosition?: number[]
@@ -64,7 +64,7 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
     // @ts-ignore
     const defaultProps = this.constructor['defaultProps']
     this.type = type
-    this.props = { ...defaultProps, ...props }
+    this.props = { scale: [1, 1], ...defaultProps, ...props }
     makeObservable(this)
   }
 
@@ -186,7 +186,7 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
     return this
   }
 
-  clone = (): typeof this => {
+  clone = (): this => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return new this.constructor(this.serialized)
@@ -196,12 +196,22 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
     return this
   }
 
-  onResize = (bounds: TLBounds, initialProps: any, info: TLResizeInfo) => {
-    this.update({ point: [bounds.minX, bounds.minY] })
-    return this
+  protected scale: number[] = [1, 1]
+
+  onResizeStart = () => {
+    this.scale = [...(this.props.scale ?? [1, 1])]
   }
 
-  onResizeStart?: () => void
+  onResize = (bounds: TLBounds, initialProps: any, info: TLResizeInfo) => {
+    const {
+      scale: [scaleX, scaleY],
+    } = info
+    const nextScale = [...this.scale]
+    if (scaleX < 0) nextScale[0] *= -1
+    if (scaleY < 0) nextScale[1] *= -1
+    this.update({ point: [bounds.minX, bounds.minY], scale: nextScale })
+    return this
+  }
 
   onHandleChange = (initialShape: any, { index, delta }: TLHandleChangeInfo) => {
     if (initialShape.handles === undefined) return
@@ -217,61 +227,3 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
     })
   }
 }
-
-// interface TLShapeWithHandlesProps<H extends TLHandle> extends TLShapeProps {
-//   handles: H[]
-// }
-
-// export abstract class TLShapeWithHandles<
-//   H extends TLHandle = TLHandle,
-//   P extends TLShapeWithHandlesProps<H> = TLShapeWithHandlesProps<H>,
-//   M = any
-// > extends TLShape<P, M> {
-//   protected propsKeys = new Set<string>(defaultPropKeys)
-
-//   @observable handles: TLHandle[] = []
-
-//   onHandleChange = ({ index, initialShape, delta }: TLHandleChangeInfo<H, P>) => {
-//     const nextHandles = [...initialShape.handles]
-//     nextHandles[index] = {
-//       ...nextHandles[index],
-//       point: Vec.add(delta, initialShape.handles[index].point),
-//     }
-//     const topLeft = BoundsUtils.getCommonTopLeft(nextHandles.map(h => h.point))
-//     this.update({
-//       point: Vec.add(initialShape.point, topLeft),
-//       handles: nextHandles.map(h => ({ ...h, point: Vec.sub(h.point, topLeft) })),
-//     })
-//   }
-
-//   onResize = (bounds: TLBounds, info: TLResizeInfo<this>) => {
-//     this.update({ point: [bounds.minX, bounds.minY] })
-//     return this
-//   }
-// }
-
-// interface TLShapeWithChildrenProps extends TLShapeProps {
-//   children: string[]
-// }
-
-// export abstract class TLShapeWithChildren<
-//   P extends TLShapeWithChildrenProps = TLShapeWithChildrenProps,
-//   M = any
-// > extends TLShape<P, M> {
-//   protected propsKeys = new Set<string>([
-//     'type',
-//     'nonce',
-//     'parentId',
-//     'point',
-//     'name',
-//     'rotation',
-//     'children',
-//     'isGhost',
-//     'isHidden',
-//     'isLocked',
-//     'isGenerated',
-//     'isAspectRatioLocked',
-//   ])
-
-//   @observable children: TLShape[] = []
-// }

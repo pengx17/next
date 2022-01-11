@@ -31,14 +31,14 @@ export const Shape = observer(function Shape({
 }: ShapeProps) {
   const {
     bounds,
-    props: { rotation },
+    props: { rotation, scale },
     ReactComponent,
   } = shape
 
   const events = useShapeEvents(shape)
 
   return (
-    <Container bounds={bounds} rotation={rotation} zIndex={zIndex}>
+    <Container bounds={bounds} rotation={rotation} scale={scale} zIndex={zIndex}>
       <ReactComponent
         meta={meta}
         isEditing={isEditing}

@@ -51,6 +51,5 @@ export function useFileDrop() {
         opacity: 1,
       }))
     )
-    console.log(app.shapes)
   }, [])
 }

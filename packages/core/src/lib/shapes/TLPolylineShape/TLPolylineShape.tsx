@@ -76,6 +76,7 @@ export class TLPolylineShape<
     } = this
     const size = [bounds.width, bounds.height]
     this.normalizedHandles = handles.map(h => Vec.divV(h.point, size))
+    return this
   }
 
   onResize = (bounds: TLBounds, initialProps: any, info: TLResizeInfo) => {

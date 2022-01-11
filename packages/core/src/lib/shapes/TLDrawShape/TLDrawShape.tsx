@@ -86,6 +86,7 @@ export class TLDrawShape<P extends TLDrawShapeProps = any, M = any> extends TLSh
     } = this
     const size = [bounds.width, bounds.height]
     this.normalizedPoints = points.map(point => Vec.divV(point, size))
+    return this
   }
 
   /**
@@ -96,18 +97,23 @@ export class TLDrawShape<P extends TLDrawShapeProps = any, M = any> extends TLSh
    */
   onResize = (bounds: TLBounds, initialProps: any, info: TLResizeInfo) => {
     const size = [bounds.width, bounds.height]
-    const flipX = info.scale[0] < 0
-    const flipY = info.scale[1] < 0
-
-    this.update({
-      point: [bounds.minX, bounds.minY],
-      points: this.normalizedPoints.map(point => {
-        if (flipX) point = [1 - point[0], point[1]]
-        if (flipY) point = [point[0], 1 - point[1]]
-        return Vec.mulV(point, size).concat(point[2])
-      }),
-    })
-    return this
+    const {
+      scale: [scaleX, scaleY],
+    } = info
+    if (scaleX) this.scale[0] *= -1
+    if (scaleY) this.scale[1] *= -1
+    return this.update(
+      scaleX || scaleY
+        ? {
+            point: [bounds.minX, bounds.minY],
+            points: this.normalizedPoints.map(point => Vec.mulV(point, size).concat(point[2])),
+            scale: this.scale,
+          }
+        : {
+            point: [bounds.minX, bounds.minY],
+            points: this.normalizedPoints.map(point => Vec.mulV(point, size).concat(point[2])),
+          }
+    )
   }
 
   hitTestPoint = (point: number[]): boolean => {

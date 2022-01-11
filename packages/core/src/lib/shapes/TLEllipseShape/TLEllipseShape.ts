@@ -1,5 +1,4 @@
 import { makeObservable } from 'mobx'
-import type { TLResizeInfo } from '~lib'
 import { intersectLineSegmentEllipse, intersectEllipseBounds, TLBounds } from '@tldraw/intersect'
 import { BoundsUtils, PointUtils } from '~utils'
 import { TLBoxShape, TLBoxShapeProps } from '../TLBoxShape'
@@ -79,12 +78,5 @@ export class TLEllipseShape<
       BoundsUtils.boundsContain(bounds, rotatedBounds) ||
       intersectEllipseBounds(this.center, w / 2, h / 2, rotation, bounds).length > 0
     )
-  }
-
-  onResize = (bounds: TLBounds, initialProps: any, info: TLResizeInfo) => {
-    return this.update({
-      point: [bounds.minX, bounds.minY],
-      size: [Math.max(1, bounds.width), Math.max(1, bounds.height)],
-    })
   }
 }

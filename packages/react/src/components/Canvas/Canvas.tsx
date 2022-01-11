@@ -99,9 +99,10 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
   const onlySelectedShape = selectedShapes?.length === 1 && selectedShapes[0]
 
   const onlySelectedShapeWithHandles =
-    onlySelectedShape && 'handles' in onlySelectedShape.props ? selectedShapes[0] : undefined
+    onlySelectedShape && 'handles' in onlySelectedShape.props ? selectedShapes?.[0] : undefined
 
   const selectedShapesSet = React.useMemo(() => new Set(selectedShapes || []), [selectedShapes])
+
   const erasingShapesSet = React.useMemo(() => new Set(erasingShapes || []), [erasingShapes])
 
   return (
