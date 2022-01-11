@@ -3,9 +3,9 @@ import * as React from 'react'
 import { HTMLContainer, TLComponentProps } from '@tldraw/react'
 import { TLImageShape, TLImageShapeProps } from '@tldraw/core'
 import { observer } from 'mobx-react-lite'
-import type { NuStyleProps } from './style-props'
+import type { CustomStyleProps } from './style-props'
 
-export interface ImageShapeProps extends TLImageShapeProps, NuStyleProps {
+export interface ImageShapeProps extends TLImageShapeProps, CustomStyleProps {
   type: 'image'
   assetId: string
   opacity: number

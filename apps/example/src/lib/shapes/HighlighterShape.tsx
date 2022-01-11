@@ -4,9 +4,9 @@ import { SvgPathUtils, TLDrawShape, TLDrawShapeProps } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { computed, makeObservable } from 'mobx'
-import { NuStyleProps, withClampedStyles } from './style-props'
+import { CustomStyleProps, withClampedStyles } from './style-props'
 
-export interface HighlighterShapeProps extends TLDrawShapeProps, NuStyleProps {
+export interface HighlighterShapeProps extends TLDrawShapeProps, CustomStyleProps {
   type: 'highlighter'
 }
 
@@ -25,7 +25,7 @@ export class HighlighterShape extends TLDrawShape<HighlighterShapeProps> {
     point: [0, 0],
     points: [],
     isComplete: false,
-    stroke: '#000000',
+    stroke: '#ffcc00',
     fill: '#ffffff',
     strokeWidth: 2,
     opacity: 1,

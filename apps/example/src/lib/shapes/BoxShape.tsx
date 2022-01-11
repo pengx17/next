@@ -3,9 +3,9 @@ import * as React from 'react'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { TLBoxShape, TLBoxShapeProps } from '@tldraw/core'
 import { observer } from 'mobx-react-lite'
-import { NuStyleProps, withClampedStyles } from './style-props'
+import { CustomStyleProps, withClampedStyles } from './style-props'
 
-export interface BoxShapeProps extends TLBoxShapeProps, NuStyleProps {
+export interface BoxShapeProps extends TLBoxShapeProps, CustomStyleProps {
   borderRadius: number
   type: 'box'
 }

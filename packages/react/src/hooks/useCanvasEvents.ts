@@ -65,7 +65,7 @@ export function useCanvasEvents() {
       //       const isVideo = VIDEO_EXTENSIONS.includes(extension)
       //       if (!(isImage || isVideo)) throw Error(`Unknown extension: ${extension}`)
       //       const assetType = isImage ? 'image' : 'video'
-      //       const size = isImage ? await getSizeFromDataurl(dataurl) : [401.42, 401.42] // special
+      //       const size = isImage ? await getSizeFromSrc(dataurl) : [401.42, 401.42] // special
       //       const existingAsset = Object.values(app.assets).find(
       //         asset => asset.type === assetType && asset.src === dataurl
       //       )
@@ -120,7 +120,7 @@ function fileToBase64(file: Blob): Promise<string | ArrayBuffer | null> {
   })
 }
 
-function getSizeFromDataurl(dataURL: string): Promise<number[]> {
+function getSizeFromSrc(dataURL: string): Promise<number[]> {
   return new Promise(resolve => {
     const img = new Image()
     img.onload = () => resolve([img.width, img.height])

@@ -3,9 +3,9 @@ import * as React from 'react'
 import { TLEllipseShapeProps, TLEllipseShape } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
-import { NuStyleProps, withClampedStyles } from './style-props'
+import { CustomStyleProps, withClampedStyles } from './style-props'
 
-export interface EllipseShapeProps extends TLEllipseShapeProps, NuStyleProps {
+export interface EllipseShapeProps extends TLEllipseShapeProps, CustomStyleProps {
   type: 'ellipse'
   size: number[]
 }
