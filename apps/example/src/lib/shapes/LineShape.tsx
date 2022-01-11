@@ -3,9 +3,9 @@ import * as React from 'react'
 import { TLHandle, TLLineShapeProps, TLLineShape } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
-import { NuStyleProps, withClampedStyles } from './style-props'
+import { CustomStyleProps, withClampedStyles } from './style-props'
 
-interface LineShapeProps extends NuStyleProps, TLLineShapeProps {
+interface LineShapeProps extends CustomStyleProps, TLLineShapeProps {
   type: 'line'
   handles: TLHandle[]
 }

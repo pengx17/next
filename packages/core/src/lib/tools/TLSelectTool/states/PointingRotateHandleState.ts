@@ -12,7 +12,8 @@ export class PointingRotateHandleState<
   static id = 'pointingRotateHandle'
 
   cursor = TLCursor.Rotate
-  handle = '' as TLSelectionHandle
+
+  private handle = '' as TLSelectionHandle
 
   onEnter = (info: TLEventSelectionInfo) => {
     this.handle = info.handle

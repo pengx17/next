@@ -23,17 +23,18 @@ export class TLInputs<K extends TLEventMap> {
 
   @observable state: 'pointing' | 'pinching' | 'idle' = 'idle'
 
-  private updateModifiers(
+  @action private updateModifiers(
     event: K['gesture'] | K['pointer'] | K['keyboard'] | K['wheel'] | K['touch']
   ) {
     if ('clientX' in event) {
       this.previousScreenPoint = this.currentScreenPoint
       this.currentScreenPoint = [event.clientX, event.clientY]
     }
-
-    this.shiftKey = event.shiftKey
-    this.ctrlKey = event.metaKey || event.ctrlKey
-    this.altKey = event.altKey
+    if ('shiftKey' in event) {
+      this.shiftKey = event.shiftKey
+      this.ctrlKey = event.metaKey || event.ctrlKey
+      this.altKey = event.altKey
+    }
   }
 
   @action onWheel = (pagePoint: number[], event: K['wheel']) => {

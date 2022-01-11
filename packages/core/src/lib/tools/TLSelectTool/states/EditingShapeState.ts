@@ -1,5 +1,6 @@
+import { transaction } from 'mobx'
 import { TLApp, TLSelectTool, TLShape, TLToolState } from '~lib'
-import { TLEventInfo, TLEventMap, TLTargetType } from '~types'
+import { TLEvents, TLEventMap, TLTargetType } from '~types'
 
 export class EditingShapeState<
   S extends TLShape,
@@ -9,7 +10,7 @@ export class EditingShapeState<
 > extends TLToolState<S, K, R, P> {
   static id = 'editingShape'
 
-  editingShape = {} as S
+  private editingShape = {} as S
 
   onEnter = (info: { type: TLTargetType.Shape; shape: S; order?: number }) => {
     this.editingShape = info.shape
@@ -17,10 +18,10 @@ export class EditingShapeState<
   }
 
   onExit = () => {
-    this.app.setEditingShape(undefined)
+    this.app.clearEditingShape()
   }
 
-  onPointerDown = (info: TLEventInfo<S>) => {
+  onPointerDown: TLEvents<S>['pointer'] = info => {
     switch (info.type) {
       case TLTargetType.Shape: {
         if (info.shape === this.editingShape) return
@@ -37,6 +38,19 @@ export class EditingShapeState<
         if (!info.order) {
           this.tool.transition('idle', info)
         }
+        break
+      }
+    }
+  }
+
+  onKeyDown: TLEvents<S>['keyboard'] = (info, e) => {
+    switch (e.key) {
+      case 'Escape': {
+        transaction(() => {
+          e.stopPropagation()
+          this.app.setSelectedShapes([this.editingShape])
+          this.tool.transition('idle')
+        })
         break
       }
     }

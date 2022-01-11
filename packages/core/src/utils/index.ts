@@ -6,6 +6,7 @@ export * from './GeomUtils'
 export * from './PolygonUtils'
 export * from './SvgPathUtils'
 export * from './DataUtils'
+export * from './TextUtils'
 
 export function uniqueId() {
   return nanoid()

@@ -19,8 +19,9 @@ export class PinchingState<
 > extends TLToolState<S, K, R, P> {
   static id = 'pinching'
 
-  origin: number[] = [0, 0]
-  prevDelta: number[] = [0, 0]
+  private origin: number[] = [0, 0]
+
+  private prevDelta: number[] = [0, 0]
 
   private pinchCamera(point: number[], delta: number[], zoom: number) {
     const { camera } = this.app.viewport

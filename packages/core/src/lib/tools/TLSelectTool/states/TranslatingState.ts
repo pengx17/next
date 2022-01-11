@@ -13,10 +13,15 @@ export class TranslatingState<
   cursor = TLCursor.Move
 
   private isCloning = false
+
   private didClone = false
+
   private initialPoints: Record<string, number[]> = {}
+
   private initialShapePoints: Record<string, number[]> = {}
+
   private initialClonePoints: Record<string, number[]> = {}
+
   private clones: S[] = []
 
   private moveSelectedShapesToPointer() {

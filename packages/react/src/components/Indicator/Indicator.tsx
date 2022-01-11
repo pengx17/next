@@ -23,12 +23,13 @@ export const Indicator = observer(function Shape({
 }: IndicatorProps) {
   const {
     bounds,
-    props: { rotation = 0 },
+
+    props: { scale, rotation = 0 },
     ReactIndicator,
   } = shape
 
   return (
-    <Container bounds={bounds} rotation={rotation} zIndex={10000}>
+    <Container bounds={bounds} rotation={rotation} scale={scale} zIndex={10000}>
       <SVGContainer>
         <g className={`tl-indicator-container ${isSelected ? 'tl-selected' : 'tl-hovered'}`}>
           <ReactIndicator

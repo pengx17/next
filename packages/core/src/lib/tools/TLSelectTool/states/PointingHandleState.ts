@@ -9,9 +9,10 @@ export class PointingHandleState<
   P extends TLSelectTool<S, K, R>
 > extends TLToolState<S, K, R, P> {
   static id = 'pointingHandle'
+
   cursor = TLCursor.Grabbing
 
-  info = {} as { shape: S; target: S; handle: TLHandle; index: number }
+  private info = {} as { shape: S; target: S; handle: TLHandle; index: number }
 
   onEnter = (info: { shape: S; target: S; handle: TLHandle; index: number }) => {
     this.info = info

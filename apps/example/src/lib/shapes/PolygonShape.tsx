@@ -3,9 +3,9 @@ import * as React from 'react'
 import { TLPolygonShape, TLPolygonShapeProps } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
-import { NuStyleProps, withClampedStyles } from './style-props'
+import { CustomStyleProps, withClampedStyles } from './style-props'
 
-interface PolygonShapeProps extends TLPolygonShapeProps, NuStyleProps {
+interface PolygonShapeProps extends TLPolygonShapeProps, CustomStyleProps {
   type: 'polygon'
 }
 

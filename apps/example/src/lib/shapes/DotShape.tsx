@@ -2,9 +2,9 @@ import * as React from 'react'
 import { TLDotShape, TLDotShapeProps } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
-import { NuStyleProps, withClampedStyles } from './style-props'
+import { CustomStyleProps, withClampedStyles } from './style-props'
 
-export interface DotShapeProps extends TLDotShapeProps, NuStyleProps {
+export interface DotShapeProps extends TLDotShapeProps, CustomStyleProps {
   type: 'dot'
 }
 

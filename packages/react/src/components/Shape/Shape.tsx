@@ -15,30 +15,29 @@ interface ShapeProps {
   isBinding?: boolean
   isErasing?: boolean
   isEditing?: boolean
+  onEditingEnd: () => void
   meta: any
 }
 
 export const Shape = observer(function Shape({
   shape,
-  zIndex,
   isHovered = false,
   isSelected = false,
   isBinding = false,
   isErasing = false,
   isEditing = false,
+  onEditingEnd,
   asset,
   meta,
 }: ShapeProps) {
   const {
     bounds,
-    props: { rotation },
+    props: { rotation, scale },
     ReactComponent,
   } = shape
-
   const events = useShapeEvents(shape)
-
   return (
-    <Container bounds={bounds} rotation={rotation} zIndex={zIndex}>
+    <Container bounds={bounds} rotation={rotation} scale={scale}>
       <ReactComponent
         meta={meta}
         isEditing={isEditing}
@@ -48,6 +47,7 @@ export const Shape = observer(function Shape({
         isErasing={isErasing}
         events={events}
         asset={asset}
+        onEditingEnd={onEditingEnd}
       />
     </Container>
   )

@@ -3,9 +3,9 @@ import * as React from 'react'
 import { TLPolylineShape, TLPolylineShapeProps } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
-import { NuStyleProps, withClampedStyles } from './style-props'
+import { CustomStyleProps, withClampedStyles } from './style-props'
 
-interface PolylineShapeProps extends NuStyleProps, TLPolylineShapeProps {
+interface PolylineShapeProps extends CustomStyleProps, TLPolylineShapeProps {
   type: 'polyline'
 }
 

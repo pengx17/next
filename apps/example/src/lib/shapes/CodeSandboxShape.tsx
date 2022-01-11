@@ -3,10 +3,10 @@ import * as React from 'react'
 import type { TLBoxShapeProps } from '@tldraw/core'
 import { HTMLContainer, TLComponentProps, TLReactBoxShape } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
-import { NuStyleProps, withClampedStyles } from './style-props'
+import { CustomStyleProps, withClampedStyles } from './style-props'
 import { TextInput } from '~components/inputs/TextInput'
 
-export interface CodeSandboxShapeProps extends TLBoxShapeProps, NuStyleProps {
+export interface CodeSandboxShapeProps extends TLBoxShapeProps, CustomStyleProps {
   type: 'code'
   embedId: string
 }
@@ -27,7 +27,9 @@ export class CodeSandboxShape extends TLReactBoxShape<CodeSandboxShapeProps> {
     embedId: '',
   }
 
-  isEditable = true
+  canEdit = true
+
+  canFlip = false
 
   ReactContextBar = observer(() => {
     const { embedId } = this.props

@@ -5,7 +5,7 @@ import {
   intersectPolygonBounds,
 } from '@tldraw/intersect'
 import Vec from '@tldraw/vec'
-import { action, computed, makeObservable, observable } from 'mobx'
+import { action, computed, makeObservable, observable, toJS } from 'mobx'
 import type { TLHandle, TLBounds, TLResizeEdge, TLResizeCorner, TLAsset } from '~types'
 import { deepCopy, BoundsUtils, PointUtils } from '~utils'
 
@@ -18,14 +18,16 @@ export interface TLShapeConstructor<S extends TLShape = TLShape> {
   id: string
 }
 
+export type TLFlag = boolean | (() => boolean)
+
 export interface TLShapeProps {
   id: string
   type: any
   parentId: string
-  point: number[]
   name?: string
+  point: number[]
+  scale?: number[]
   rotation?: number
-  flip?: number[]
   handles?: TLHandle[]
   label?: string
   labelPosition?: number[]
@@ -36,10 +38,18 @@ export interface TLShapeProps {
   isHidden?: boolean
   isLocked?: boolean
   isGenerated?: boolean
+  isSizeLocked?: boolean
   isAspectRatioLocked?: boolean
 }
 
+export interface TLResizeStartInfo {
+  isSingle: boolean
+}
+
 export interface TLResizeInfo {
+  bounds: TLBounds
+  center: number[]
+  rotation: number
   type: TLResizeEdge | TLResizeCorner
   clip: boolean
   scale: number[]
@@ -62,36 +72,33 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
     const type = this.constructor['id']
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const defaultProps = this.constructor['defaultProps']
+    const defaultProps = this.constructor['defaultProps'] ?? {}
     this.type = type
-    this.props = { ...defaultProps, ...props }
+    this.props = { scale: [1, 1], ...defaultProps, ...props }
     makeObservable(this)
   }
 
   static type: string
 
-  private version = 1
-
   @observable props: P
-
-  readonly stayMounted: boolean = false
-  readonly showCloneHandles: boolean = false
-  readonly hideResizeHandles: boolean = false
-  readonly hideRotateHandle: boolean = false
-  readonly hideContextBar: boolean = false
-  readonly hideSelectionDetail: boolean = false
-  readonly hideSelection: boolean = false
-  readonly isClippable: boolean = false
-  readonly isEditable: boolean = false
-  readonly isStateful: boolean = false
-  readonly isAspectRatioLocked: boolean = false
-  readonly aspectRatio?: number
-  readonly type: string
-
+  aspectRatio?: number
+  type: string
+  // Display options
+  hideCloneHandles = false
+  hideResizeHandles = false
+  hideRotateHandle = false
+  hideContextBar = false
+  hideSelectionDetail = false
+  hideSelection = false
+  // Behavior options
+  canChangeAspectRatio: TLFlag = true
+  canUnmount: TLFlag = true
+  canResize: TLFlag = true
+  canScale: TLFlag = true
+  canFlip: TLFlag = true
+  canEdit: TLFlag = false
   nonce = 0
-
-  isDirty = false
-
+  private isDirty = false
   private lastSerialized = {} as TLShapeModel<P>
 
   abstract getBounds: () => TLBounds
@@ -158,7 +165,7 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
   }
 
   getSerialized = (): TLShapeModel<P> => {
-    return deepCopy({ ...this.props, type: this.type, nonce: this.nonce } as TLShapeModel<P>)
+    return toJS({ ...this.props, type: this.type, nonce: this.nonce } as TLShapeModel<P>)
   }
 
   protected getCachedSerialized = (): TLShapeModel<P> => {
@@ -186,7 +193,7 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
     return this
   }
 
-  clone = (): typeof this => {
+  clone = (): this => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return new this.constructor(this.serialized)
@@ -196,12 +203,25 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
     return this
   }
 
-  onResize = (bounds: TLBounds, initialProps: any, info: TLResizeInfo) => {
-    this.update({ point: [bounds.minX, bounds.minY] })
+  protected scale: number[] = [1, 1]
+
+  onResizeStart = (info: TLResizeStartInfo) => {
+    this.scale = [...(this.props.scale ?? [1, 1])]
     return this
   }
 
-  onResizeStart?: () => void
+  onResize = (initialProps: TLShapeModel<P>, info: TLResizeInfo) => {
+    const {
+      bounds,
+      rotation,
+      scale: [scaleX, scaleY],
+    } = info
+    const nextScale = [...this.scale]
+    if (scaleX < 0) nextScale[0] *= -1
+    if (scaleY < 0) nextScale[1] *= -1
+    this.update({ point: [bounds.minX, bounds.minY], scale: nextScale, rotation })
+    return this
+  }
 
   onHandleChange = (initialShape: any, { index, delta }: TLHandleChangeInfo) => {
     if (initialShape.handles === undefined) return
@@ -217,61 +237,3 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
     })
   }
 }
-
-// interface TLShapeWithHandlesProps<H extends TLHandle> extends TLShapeProps {
-//   handles: H[]
-// }
-
-// export abstract class TLShapeWithHandles<
-//   H extends TLHandle = TLHandle,
-//   P extends TLShapeWithHandlesProps<H> = TLShapeWithHandlesProps<H>,
-//   M = any
-// > extends TLShape<P, M> {
-//   protected propsKeys = new Set<string>(defaultPropKeys)
-
-//   @observable handles: TLHandle[] = []
-
-//   onHandleChange = ({ index, initialShape, delta }: TLHandleChangeInfo<H, P>) => {
-//     const nextHandles = [...initialShape.handles]
-//     nextHandles[index] = {
-//       ...nextHandles[index],
-//       point: Vec.add(delta, initialShape.handles[index].point),
-//     }
-//     const topLeft = BoundsUtils.getCommonTopLeft(nextHandles.map(h => h.point))
-//     this.update({
-//       point: Vec.add(initialShape.point, topLeft),
-//       handles: nextHandles.map(h => ({ ...h, point: Vec.sub(h.point, topLeft) })),
-//     })
-//   }
-
-//   onResize = (bounds: TLBounds, info: TLResizeInfo<this>) => {
-//     this.update({ point: [bounds.minX, bounds.minY] })
-//     return this
-//   }
-// }
-
-// interface TLShapeWithChildrenProps extends TLShapeProps {
-//   children: string[]
-// }
-
-// export abstract class TLShapeWithChildren<
-//   P extends TLShapeWithChildrenProps = TLShapeWithChildrenProps,
-//   M = any
-// > extends TLShape<P, M> {
-//   protected propsKeys = new Set<string>([
-//     'type',
-//     'nonce',
-//     'parentId',
-//     'point',
-//     'name',
-//     'rotation',
-//     'children',
-//     'isGhost',
-//     'isHidden',
-//     'isLocked',
-//     'isGenerated',
-//     'isAspectRatioLocked',
-//   ])
-
-//   @observable children: TLShape[] = []
-// }

@@ -4,9 +4,9 @@ import { SvgPathUtils, TLDrawShape, TLDrawShapeProps } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { computed, makeObservable } from 'mobx'
-import { NuStyleProps, withClampedStyles } from './style-props'
+import { CustomStyleProps, withClampedStyles } from './style-props'
 
-export interface PencilShapeProps extends TLDrawShapeProps, NuStyleProps {
+export interface PencilShapeProps extends TLDrawShapeProps, CustomStyleProps {
   type: 'pencil'
 }
 

@@ -54,12 +54,15 @@ export class TLDotShape<P extends TLDotShapeProps = TLDotShapeProps, M = any> ex
     )
   }
 
-  onResize = (bounds: TLBounds, initialProps: any, info: TLResizeInfo): this => {
+  onResize = (initialProps: any, info: TLResizeInfo): this => {
     const {
       props: { radius },
     } = this
     return this.update({
-      point: [bounds.minX + bounds.width / 2 - radius, bounds.minY + bounds.height / 2 - radius],
+      point: [
+        info.bounds.minX + info.bounds.width / 2 - radius,
+        info.bounds.minY + info.bounds.height / 2 - radius,
+      ],
     })
   }
 }

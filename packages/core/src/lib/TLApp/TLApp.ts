@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-extra-semi */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Vec } from '@tldraw/vec'
@@ -309,6 +310,16 @@ export class TLApp<
     return this
   }
 
+  flipHorizontal = (shapes: S[] | string[] = this.selectedShapesArray): this => {
+    this.currentPage.flip(shapes, 'horizontal')
+    return this
+  }
+
+  flipVertical = (shapes: S[] | string[] = this.selectedShapesArray): this => {
+    this.currentPage.flip(shapes, 'vertical')
+    return this
+  }
+
   /* --------------------- Assets --------------------- */
 
   @observable assets: Record<string, TLAsset> = {}
@@ -320,8 +331,9 @@ export class TLApp<
   }
 
   @action removeAssets<T extends TLAsset>(assets: T[] | string[]): this {
-    if (typeof assets[0] === 'string') assets.forEach(asset => delete this.assets[asset as string])
-    else assets.forEach(asset => delete this.assets[(asset as T).id])
+    if (typeof assets[0] === 'string')
+      (assets as string[]).forEach(asset => delete this.assets[asset])
+    else (assets as T[]).forEach(asset => delete this.assets[(asset as T).id])
     this.persist()
     return this
   }
@@ -368,6 +380,10 @@ export class TLApp<
     return this
   }
 
+  readonly clearEditingShape = (): this => {
+    return this.setEditingShape()
+  }
+
   /* ------------------ Hovered Shape ----------------- */
 
   @observable hoveredId?: string
@@ -402,9 +418,9 @@ export class TLApp<
     selectedIds.clear()
     selectedShapes.clear()
     if (shapes[0] && typeof shapes[0] === 'string') {
-      shapes.forEach(s => selectedIds.add(s as string))
+      ;(shapes as string[]).forEach(s => selectedIds.add(s))
     } else {
-      shapes.forEach(s => selectedIds.add((s as S).id))
+      ;(shapes as S[]).forEach(s => selectedIds.add(s.id))
     }
     const newSelectedShapes = this.currentPage.shapes.filter(shape => selectedIds.has(shape.id))
     newSelectedShapes.forEach(s => selectedShapes.add(s))
@@ -435,9 +451,9 @@ export class TLApp<
     erasingIds.clear()
     erasingShapes.clear()
     if (shapes[0] && typeof shapes[0] === 'string') {
-      shapes.forEach(s => erasingIds.add(s as string))
+      ;(shapes as string[]).forEach(s => erasingIds.add(s))
     } else {
-      shapes.forEach(s => erasingIds.add((s as S).id))
+      ;(shapes as S[]).forEach(s => erasingIds.add(s.id))
     }
     const newErasingShapes = this.currentPage.shapes.filter(shape => erasingIds.has(shape.id))
     newErasingShapes.forEach(s => erasingShapes.add(s))
@@ -488,7 +504,7 @@ export class TLApp<
     return currentPage.shapes.filter(shape => {
       return (
         shape.props.parentId === currentPage.id &&
-        (shape.stayMounted ||
+        (!shape.canUnmount ||
           selectedShapes.has(shape) ||
           BoundsUtils.boundsContain(currentView, shape.rotatedBounds) ||
           BoundsUtils.boundsCollide(currentView, shape.rotatedBounds))
@@ -584,6 +600,8 @@ export class TLApp<
       this.isInAny(
         'select.idle',
         'select.hoveringSelectionHandle',
+        'select.pointingShape',
+        'select.pointingSelectedShape',
         'select.pointingRotateHandle',
         'select.pointingResizeHandle'
       ) &&

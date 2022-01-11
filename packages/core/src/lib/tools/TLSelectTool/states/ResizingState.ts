@@ -1,6 +1,5 @@
 import { Vec } from '@tldraw/vec'
-import { toJS } from 'mobx'
-import { TLApp, TLShape, TLSelectTool, TLToolState } from '~lib'
+import { TLApp, TLShape, TLSelectTool, TLToolState, TLShapeModel } from '~lib'
 import { TLBounds, TLResizeCorner, TLResizeEdge, TLCursor, TLEventMap, TLEvents } from '~types'
 import { BoundsUtils, getFirstFromSet } from '~utils'
 
@@ -12,25 +11,26 @@ export class ResizingState<
 > extends TLToolState<S, K, R, P> {
   static id = 'resizing'
 
-  isSingle = false
-  isAspectRatioLocked = false
-  handle: TLResizeCorner | TLResizeEdge = TLResizeCorner.BottomRight
-  snapshots: Record<
+  private isSingle = false
+
+  private handle: TLResizeCorner | TLResizeEdge = TLResizeCorner.BottomRight
+
+  private snapshots: Record<
     string,
     {
-      props: S['props']
+      props: TLShapeModel<S['props']>
       bounds: TLBounds
       transformOrigin: number[]
+      innerTransformOrigin: number[]
       isAspectRatioLocked: boolean
-      isClippable: boolean
     }
   > = {}
-  initialRotation = 0
-  initialInnerBounds = {} as TLBounds
-  initialCommonBounds = {} as TLBounds
-  initialCommonCenter = {} as number[]
-  transformOrigins: Record<string, number[]> = {}
-  selectionRotation = 0
+
+  private initialCommonBounds = {} as TLBounds
+
+  private selectionRotation = 0
+
+  private resizeType = 'corner'
 
   static CURSORS: Record<TLResizeCorner | TLResizeEdge, TLCursor> = {
     [TLResizeEdge.Bottom]: TLCursor.NsResize,
@@ -47,6 +47,12 @@ export class ResizingState<
     const { history, selectedShapesArray, selectionBounds } = this.app
     if (!selectionBounds) throw Error('Expected a selected bounds.')
     this.handle = info.handle
+    this.resizeType =
+      info.handle === TLResizeEdge.Left || info.handle === TLResizeEdge.Right
+        ? 'horizontal-edge'
+        : info.handle === TLResizeEdge.Top || info.handle === TLResizeEdge.Bottom
+        ? 'vertical-edge'
+        : 'corner'
     this.app.cursors.setCursor(
       ResizingState.CURSORS[info.handle],
       this.app.selectionBounds?.rotation
@@ -56,37 +62,33 @@ export class ResizingState<
       selectedShapesArray.map(shape => BoundsUtils.getBoundsCenter(shape.bounds))
     )
     this.isSingle = selectedShapesArray.length === 1
-
-    this.isAspectRatioLocked =
-      this.isSingle &&
-      (selectedShapesArray[0].isAspectRatioLocked ||
-        !!selectedShapesArray[0].props.isAspectRatioLocked)
-
     this.selectionRotation = this.isSingle ? selectedShapesArray[0].props.rotation ?? 0 : 0
     this.initialCommonBounds = { ...selectionBounds }
-    this.initialCommonCenter = BoundsUtils.getBoundsCenter(this.initialCommonBounds)
     this.snapshots = Object.fromEntries(
       selectedShapesArray.map(shape => {
-        const { bounds } = shape
-        const ic = BoundsUtils.getBoundsCenter(bounds)
-
-        const ix = (ic[0] - initialInnerBounds.minX) / initialInnerBounds.width
-        const iy = (ic[1] - initialInnerBounds.minY) / initialInnerBounds.height
-
+        const bounds = { ...shape.bounds }
+        const [cx, cy] = BoundsUtils.getBoundsCenter(bounds)
         return [
           shape.id,
           {
-            props: toJS(shape.props),
-            bounds: { ...shape.bounds },
-            transformOrigin: [ix, iy],
-            isClippable: shape.isClippable,
-            isAspectRatioLocked: shape.isAspectRatioLocked,
+            props: shape.serialized,
+            bounds,
+            transformOrigin: [
+              (cx - this.initialCommonBounds.minX) / this.initialCommonBounds.width,
+              (cy - this.initialCommonBounds.minY) / this.initialCommonBounds.height,
+            ],
+            innerTransformOrigin: [
+              (cx - initialInnerBounds.minX) / initialInnerBounds.width,
+              (cy - initialInnerBounds.minY) / initialInnerBounds.height,
+            ],
+            isAspectRatioLocked:
+              shape.props.isAspectRatioLocked ||
+              Boolean(!shape.canChangeAspectRatio || shape.props.rotation),
           },
         ]
       })
     )
-
-    selectedShapesArray.forEach(shape => shape.onResizeStart?.())
+    selectedShapesArray.forEach(shape => shape.onResizeStart?.({ isSingle: this.isSingle }))
   }
 
   onExit = () => {
@@ -107,18 +109,22 @@ export class ResizingState<
     } = this.app
     const { handle, snapshots, initialCommonBounds } = this
     let delta = Vec.sub(currentPoint, originPoint)
-    if (altKey) delta = Vec.mul(delta, 2)
+    if (altKey) {
+      delta = Vec.mul(delta, 2)
+    }
     const firstShape = getFirstFromSet(this.app.selectedShapes)
+    const useAspectRatioLock =
+      shiftKey ||
+      (this.isSingle &&
+        (ctrlKey
+          ? !('clipping' in firstShape.props)
+          : !firstShape.canChangeAspectRatio || firstShape.props.isAspectRatioLocked))
     let nextBounds = BoundsUtils.getTransformedBoundingBox(
       initialCommonBounds,
       handle,
       delta,
       this.selectionRotation,
-      shiftKey ||
-        (this.isSingle &&
-          (ctrlKey
-            ? !firstShape.isClippable
-            : firstShape.isAspectRatioLocked || firstShape.props.isAspectRatioLocked))
+      useAspectRatioLock
     )
     if (altKey) {
       nextBounds = {
@@ -127,22 +133,83 @@ export class ResizingState<
       }
     }
     const { scaleX, scaleY } = nextBounds
+    let resizeDimension: number
+    switch (this.resizeType) {
+      case 'horizontal-edge': {
+        resizeDimension = Math.abs(scaleX)
+        break
+      }
+      case 'vertical-edge': {
+        resizeDimension = Math.abs(scaleY)
+        break
+      }
+      case 'corner': {
+        resizeDimension = Math.min(Math.abs(scaleX), Math.abs(scaleY))
+      }
+    }
     this.app.selectedShapes.forEach(shape => {
       const {
-        props: initialShape,
+        isAspectRatioLocked,
+        props: initialShapeProps,
         bounds: initialShapeBounds,
         transformOrigin,
+        innerTransformOrigin,
       } = snapshots[shape.id]
-      const relativeBounds = BoundsUtils.getRelativeTransformedBoundingBox(
+      let relativeBounds = BoundsUtils.getRelativeTransformedBoundingBox(
         nextBounds,
         initialCommonBounds,
         initialShapeBounds,
         scaleX < 0,
         scaleY < 0
       )
-      shape.onResize(relativeBounds, initialShape, {
+      // If the shape can't resize and it's the only shape selected, bail
+      if (!(shape.canResize || shape.props.isSizeLocked) && this.isSingle) {
+        return
+      }
+      let scale = [scaleX, scaleY]
+      let rotation = initialShapeProps.rotation ?? 0
+      let center = BoundsUtils.getBoundsCenter(relativeBounds)
+      // If the shape can't flip, make sure that scale is [+,+]
+      if (!shape.canFlip) {
+        scale = Vec.abs(scale)
+      }
+      // If the shape can't scale, keep the shape's initial scale
+      if (!shape.canScale) {
+        scale = initialShapeProps.scale ?? [1, 1]
+      }
+      // If we're flipped and the shape is rotated, flip the rotation
+      if ((rotation && scaleX < 0 && scaleY >= 0) || (scaleY < 0 && scaleX >= 0)) {
+        rotation *= -1
+      }
+      // If the shape is aspect ratio locked or size locked...
+      if (isAspectRatioLocked || !shape.canResize || shape.props.isSizeLocked) {
+        relativeBounds.width = initialShapeBounds.width
+        relativeBounds.height = initialShapeBounds.height
+        if (isAspectRatioLocked) {
+          // Scale the width and height to the longer dimension
+          relativeBounds.width *= resizeDimension
+          relativeBounds.height *= resizeDimension
+        }
+        // Find the center using the inner transform origin
+        center = [
+          nextBounds.minX +
+            (scaleX < 0 ? 1 - innerTransformOrigin[0] : innerTransformOrigin[0]) *
+              (nextBounds.width - relativeBounds.width) +
+            relativeBounds.width / 2,
+          nextBounds.minY +
+            (scaleY < 0 ? 1 - innerTransformOrigin[1] : innerTransformOrigin[1]) *
+              (nextBounds.height - relativeBounds.height) +
+            relativeBounds.height / 2,
+        ]
+        // Position the bounds at the center
+        relativeBounds = BoundsUtils.centerBounds(relativeBounds, center)
+      }
+      shape.onResize(initialShapeProps, {
+        center,
+        rotation,
+        scale,
+        bounds: relativeBounds,
         type: handle,
-        scale: [scaleX, scaleY],
         clip: ctrlKey,
         transformOrigin,
       })

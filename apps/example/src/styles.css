@@ -209,3 +209,91 @@ button {
   left: calc(50% - 5px);
   border-radius: 100%;
 }
+
+.text-shape-wrapper {
+  position: absolute;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  width: auto;
+  border: 1px solid transparent;
+  margin: 0px;
+  padding: 0px;
+  z-index: 9999;
+  user-select: none;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  min-height: 1;
+  min-width: 1;
+  line-height: 1;
+  outline: 0;
+  backface-visibility: hidden;
+  user-select: none;
+  pointer-events: all;
+  vertical-align: baseline;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.text-shape-content {
+  z-index: 1;
+  width: fit-content;
+  height: fit-content;
+  border: none;
+  resize: none;
+  margin: 0;
+  padding: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-variant: inherit;
+  text-align: inherit;
+  min-height: inherit;
+  min-width: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  outline: 0;
+  white-space: inherit;
+  overflow-wrap: inherit;
+  font-weight: inherit;
+  overflow: hidden;
+  backface-visibility: hidden;
+  display: inline-block;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.text-shape-content[data-isediting='true'] {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.text-shape-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border: none;
+  resize: none;
+  padding: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-variant: inherit;
+  text-align: inherit;
+  min-height: inherit;
+  min-width: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  outline: 0;
+  white-space: inherit;
+  overflow-wrap: inherit;
+  font-weight: inherit;
+  overflow: hidden;
+  backface-visibility: hidden;
+  display: inline-block;
+  pointer-events: all;
+  user-select: text;
+  -webkit-user-select: text;
+}

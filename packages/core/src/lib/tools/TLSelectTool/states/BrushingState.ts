@@ -11,6 +11,7 @@ export class BrushingState<
   static id = 'brushing'
 
   private initialSelectedIds: string[] = []
+
   private initialSelectedShapes: S[] = []
 
   private tree: TLBush<S> = new TLBush()

@@ -9,6 +9,7 @@ export class PointingBoundsBackgroundState<
   P extends TLSelectTool<S, K, R>
 > extends TLToolState<S, K, R, P> {
   static id = 'pointingBoundsBackground'
+
   cursor = TLCursor.Move
 
   onWheel: TLEvents<S>['wheel'] = (info, e) => {

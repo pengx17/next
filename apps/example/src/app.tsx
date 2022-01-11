@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import documentModel from './models/withAsset'
-import { fileToBase64, getSizeFromDataurl, TLAsset, TLDocumentModel, uniqueId } from '@tldraw/core'
+import type { TLDocumentModel } from '@tldraw/core'
 import type {
   TLReactApp,
   TLReactComponents,
@@ -22,6 +21,7 @@ import {
   PolygonShape,
   PolylineShape,
   StarShape,
+  TextShape,
   YouTubeShape,
   Shape,
 } from '~lib/shapes'
@@ -36,11 +36,14 @@ import {
   PenTool,
   PolygonTool,
   StarTool,
+  TextTool,
   YouTubeTool,
 } from '~lib/tools'
 import { AppUI } from '~components/AppUI'
 import { ContextBar } from '~components/ContextBar/ContextBar'
 import { AppCanvas, AppProvider } from '@tldraw/react'
+import { useFileDrop } from '~hooks/useFileDrop'
+import documentModel from './documents/dev'
 
 const components: TLReactComponents<Shape> = {
   ContextBar: ContextBar,
@@ -61,6 +64,7 @@ function App(): JSX.Element {
     PolygonShape,
     PolylineShape,
     StarShape,
+    TextShape,
     YouTubeShape,
   ])
 
@@ -75,6 +79,7 @@ function App(): JSX.Element {
     PenTool,
     PolygonTool,
     StarTool,
+    TextTool,
     YouTubeTool,
   ])
 
@@ -86,70 +91,17 @@ function App(): JSX.Element {
   }, [])
 
   const onPersist = React.useCallback<TLReactCallbacks<Shape>['onPersist']>(() => {
-    // todo
+    // noop
   }, [])
 
   const onCreateAssets = React.useCallback<TLReactCallbacks<Shape>['onCreateAssets']>(
     (assets, point) => {
-      console.log('assets created', assets, point)
-      // create image or video element
+      //  noop
     },
     []
   )
 
-  const onFileDrop = React.useCallback<TLReactCallbacks<Shape>['onFileDrop']>(
-    async (app, { files, point }) => {
-      const IMAGE_EXTENSIONS = ['.png', '.svg', '.jpg', '.jpeg', '.gif']
-      const assetId = uniqueId()
-      interface ImageAsset extends TLAsset {
-        size: number[]
-      }
-      const assetsToCreate: ImageAsset[] = []
-      for (const file of files) {
-        console.log('hello', file)
-        try {
-          // Get extension, verify that it's an image
-          const extensionMatch = file.name.match(/\.[0-9a-z]+$/i)
-          if (!extensionMatch) throw Error('No extension.')
-          const extension = extensionMatch[0].toLowerCase()
-          if (!IMAGE_EXTENSIONS.includes(extension)) continue
-          // Turn the image into a base64 dataurl
-          const dataurl = await fileToBase64(file)
-          if (typeof dataurl !== 'string') continue
-          // Do we already have an asset for this image?
-          const existingAsset = Object.values(app.assets).find(asset => asset.src === dataurl)
-          if (existingAsset) {
-            assetsToCreate.push(existingAsset as ImageAsset)
-            continue
-          }
-          // Create a new asset for this image
-          const asset: ImageAsset = {
-            id: assetId,
-            type: 'image',
-            src: dataurl,
-            size: await getSizeFromDataurl(dataurl),
-          }
-          assetsToCreate.push(asset)
-        } catch (error) {
-          console.error(error)
-        }
-      }
-      app.createAssets(assetsToCreate)
-      app.createShapes(
-        assetsToCreate.map((asset, i) => ({
-          id: uniqueId(),
-          type: 'image',
-          parentId: app.currentPageId,
-          point: [point[0] - asset.size[0] / 2 + i * 16, point[1] - asset.size[1] / 2 + i * 16],
-          size: asset.size,
-          assetId: asset.id,
-          opacity: 1,
-        }))
-      )
-      console.log(app.shapes)
-    },
-    []
-  )
+  const onFileDrop = useFileDrop()
 
   return (
     <AppProvider

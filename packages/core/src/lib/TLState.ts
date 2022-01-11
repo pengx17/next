@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { action, makeObservable, observable } from 'mobx'
+import { action, makeObservable, observable, transaction } from 'mobx'
 import type {
   TLEventHandlers,
   TLShortcut,
@@ -115,17 +115,19 @@ export abstract class TLRootState<S extends TLShape, K extends TLEventMap>
     const nextState = this.children.get(id)
     const prevState = this.currentState
     if (!nextState) throw Error(`Could not find a state named ${id}.`)
-    if (this.currentState) {
-      prevState._events.onExit({ ...data, toId: id })
-      prevState.dispose()
-      nextState.registerKeyboardShortcuts()
-      this.setCurrentState(nextState)
-      this._events.onTransition({ ...data, fromId: prevState.id, toId: id })
-      nextState._events.onEnter({ ...data, fromId: prevState.id })
-    } else {
-      this.currentState = nextState
-      nextState._events.onEnter({ ...data, fromId: '' })
-    }
+    transaction(() => {
+      if (this.currentState) {
+        prevState._events.onExit({ ...data, toId: id })
+        prevState.dispose()
+        nextState.registerKeyboardShortcuts()
+        this.setCurrentState(nextState)
+        this._events.onTransition({ ...data, fromId: prevState.id, toId: id })
+        nextState._events.onEnter({ ...data, fromId: prevState.id })
+      } else {
+        this.currentState = nextState
+        nextState._events.onEnter({ ...data, fromId: '' })
+      }
+    })
     return this
   }
 
@@ -166,7 +168,7 @@ export abstract class TLRootState<S extends TLShape, K extends TLEventMap>
     if (this.currentState?._events?.[eventName]) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      this.currentState._events?.[eventName](...args)
+      transaction(() => this.currentState._events?.[eventName](...args))
     }
   }
 

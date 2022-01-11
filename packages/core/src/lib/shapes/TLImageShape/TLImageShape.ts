@@ -64,8 +64,8 @@ export class TLImageShape<
     return this
   }
 
-  onResize = (bounds: TLBounds, initialProps: any, info: TLResizeInfo) => {
-    const { clip, scale } = info
+  onResize = (initialProps: any, info: TLResizeInfo) => {
+    const { bounds, clip, scale } = info
     let { clipping } = this.props
     const { clipping: iClipping } = initialProps
 

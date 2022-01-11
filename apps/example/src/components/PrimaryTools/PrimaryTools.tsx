@@ -10,6 +10,7 @@ import {
   BoxIcon,
   CodeIcon,
   VideoIcon,
+  TextIcon,
 } from '@radix-ui/react-icons'
 import { observer } from 'mobx-react-lite'
 import { Button } from '~components/Button'
@@ -104,6 +105,14 @@ export const PrimaryTools = observer(function PrimaryTools() {
           onDoubleClick={handleToolDoubleClick}
         >
           <LineIcon />
+        </Button>
+        <Button
+          data-tool="text"
+          data-selected={selectedToolId === 'text'}
+          onClick={handleToolClick}
+          onDoubleClick={handleToolDoubleClick}
+        >
+          <TextIcon />
         </Button>
         <Button
           data-tool="code"

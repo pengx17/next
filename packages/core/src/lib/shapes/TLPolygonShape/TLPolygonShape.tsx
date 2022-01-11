@@ -83,32 +83,17 @@ export class TLPolygonShape<
   }
 
   getVertices(padding = 0): number[][] {
-    const { ratio, sides, size, isFlippedY } = this.props
+    const { ratio, sides, size, scale } = this.props
     const vertices =
       sides === 3
         ? PolygonUtils.getTriangleVertices(size, padding, ratio)
         : PolygonUtils.getPolygonVertices(size, sides, padding, ratio)
 
-    if (isFlippedY) {
-      return vertices.map(point => [point[0], size[1] - point[1]])
-    }
+    // if (scale && scale[1] < 0) {
+    //   return vertices.map(point => [point[0], size[1] - point[1]])
+    // }
 
     return vertices
-  }
-
-  initialFlipped = this.props.isFlippedY
-
-  onResizeStart = () => {
-    this.initialFlipped = this.props.isFlippedY
-  }
-
-  onResize = (bounds: TLBounds, initialProps: any, info: TLResizeInfo) => {
-    const { initialFlipped } = this
-    return this.update({
-      point: [bounds.minX, bounds.minY],
-      size: [Math.max(1, bounds.width), Math.max(1, bounds.height)],
-      isFlippedY: info.scale[1] < 0 ? !initialFlipped : initialFlipped,
-    })
   }
 
   hitTestPoint = (point: number[]): boolean => {

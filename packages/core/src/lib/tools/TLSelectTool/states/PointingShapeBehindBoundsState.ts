@@ -10,7 +10,7 @@ export class PointingShapeBehindBoundsState<
 > extends TLToolState<S, K, R, P> {
   static id = 'pointingShapeBehindBounds'
 
-  info = {} as TLEventShapeInfo<S>
+  private info = {} as TLEventShapeInfo<S>
 
   onEnter = (info: TLEventShapeInfo<S>) => {
     this.info = info

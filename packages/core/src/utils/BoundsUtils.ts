@@ -389,10 +389,10 @@ corners should change.
     const bw = Math.abs(bx1 - bx0)
     const bh = Math.abs(by1 - by0)
     /*
-2. Aspect ratio
-If the aspect ratio is locked, adjust the corners so that the
-new box's aspect ratio matches the original aspect ratio.
-*/
+    2. Aspect ratio
+    If the aspect ratio is locked, adjust the corners so that the
+    new box's aspect ratio matches the original aspect ratio.
+    */
     if (isAspectRatioLocked) {
       const ar = aw / ah
       const isTall = ar < bw / bh
@@ -602,12 +602,10 @@ left past the initial left edge) then swap points on that axis.
         : initialShapeBounds.minY - initialBounds.minY) / initialBounds.height
     const nw = initialShapeBounds.width / initialBounds.width
     const nh = initialShapeBounds.height / initialBounds.height
-
     const minX = bounds.minX + bounds.width * nx
     const minY = bounds.minY + bounds.height * ny
     const width = bounds.width * nw
     const height = bounds.height * nh
-
     return {
       minX,
       minY,

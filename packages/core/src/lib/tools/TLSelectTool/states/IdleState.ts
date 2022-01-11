@@ -18,9 +18,9 @@ export class IdleState<
   ]
 
   onEnter = (info: { fromId: string } & any) => {
-    if (info.fromId === 'editing') {
-      this.onPointerDown(info as any, {} as any)
-    }
+    // if (info.fromId === 'editingShape') {
+    //   this.onPointerDown(info as any, {} as any)
+    // }
   }
 
   onExit = () => {
@@ -119,7 +119,7 @@ export class IdleState<
 
     if (this.app.selectedShapesArray.length !== 1) return
     const selectedShape = this.app.selectedShapesArray[0]
-    if (!selectedShape.isEditable) return
+    if (!selectedShape.canEdit) return
 
     switch (info.type) {
       case TLTargetType.Shape: {
@@ -139,9 +139,20 @@ export class IdleState<
   }
 
   onKeyDown: TLEvents<S>['keyboard'] = (info, e) => {
+    const { selectedShapesArray } = this.app
     switch (e.key) {
+      case 'Enter': {
+        if (selectedShapesArray.length === 1 && selectedShapesArray[0].canEdit) {
+          this.tool.transition('editingShape', {
+            type: TLTargetType.Shape,
+            shape: selectedShapesArray[0],
+            order: 0,
+          })
+        }
+        break
+      }
       case 'Escape': {
-        if (this.app.selectedIds.size) {
+        if (selectedShapesArray.length) {
           this.app.setSelectedShapes([])
         }
         break

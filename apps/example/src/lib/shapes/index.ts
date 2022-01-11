@@ -9,6 +9,7 @@ import type { PenShape } from './PenShape'
 import type { PolygonShape } from './PolygonShape'
 import type { PolylineShape } from './PolylineShape'
 import type { StarShape } from './StarShape'
+import type { TextShape } from './TextShape'
 import type { YouTubeShape } from './YouTubeShape'
 
 export type Shape =
@@ -24,6 +25,7 @@ export type Shape =
   | PolygonShape
   | PolylineShape
   | StarShape
+  | TextShape
   | YouTubeShape
 
 export * from './BoxShape'
@@ -37,4 +39,5 @@ export * from './PenShape'
 export * from './PolygonShape'
 export * from './PolylineShape'
 export * from './StarShape'
+export * from './TextShape'
 export * from './YouTubeShape'
