@@ -18,6 +18,8 @@ export interface TLShapeConstructor<S extends TLShape = TLShape> {
   id: string
 }
 
+export type TLFlag = boolean | (() => boolean)
+
 export interface TLShapeProps {
   id: string
   type: any
@@ -36,7 +38,12 @@ export interface TLShapeProps {
   isHidden?: boolean
   isLocked?: boolean
   isGenerated?: boolean
+  isSizeLocked?: boolean
   isAspectRatioLocked?: boolean
+}
+
+export interface TLResizeStartInfo {
+  isSingle: boolean
 }
 
 export interface TLResizeInfo {
@@ -84,12 +91,12 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
   hideSelectionDetail = false
   hideSelection = false
   // Behavior options
-  canChangeAspectRatio = true
-  canUnmount = true
-  canResize = true
-  canScale = true
-  canFlip = true
-  canEdit = false
+  canChangeAspectRatio: TLFlag = true
+  canUnmount: TLFlag = true
+  canResize: TLFlag = true
+  canScale: TLFlag = true
+  canFlip: TLFlag = true
+  canEdit: TLFlag = false
   nonce = 0
   private isDirty = false
   private lastSerialized = {} as TLShapeModel<P>
@@ -198,7 +205,7 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
 
   protected scale: number[] = [1, 1]
 
-  onResizeStart = () => {
+  onResizeStart = (info: TLResizeStartInfo) => {
     this.scale = [...(this.props.scale ?? [1, 1])]
     return this
   }

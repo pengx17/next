@@ -1,6 +1,6 @@
 import { TLShape, TLApp, TLSelectTool, TLToolState } from '~lib'
 import { TLEventMap, TLEvents, TLShortcut, TLTargetType } from '~types'
-import { getFirstFromSet, PointUtils } from '~utils'
+import { PointUtils } from '~utils'
 
 export class IdleState<
   S extends TLShape,
@@ -18,7 +18,9 @@ export class IdleState<
   ]
 
   onEnter = (info: { fromId: string } & any) => {
-    // noop
+    // if (info.fromId === 'editingShape') {
+    //   this.onPointerDown(info as any, {} as any)
+    // }
   }
 
   onExit = () => {

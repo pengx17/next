@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
 import { HTMLContainer, TLComponentProps, TLTextMeasure } from '@tldraw/react'
-import { TextUtils, TLBounds, TLTextShape, TLTextShapeProps } from '@tldraw/core'
+import { TextUtils, TLBounds, TLResizeStartInfo, TLTextShape, TLTextShapeProps } from '@tldraw/core'
 import { observer } from 'mobx-react-lite'
 import { CustomStyleProps, withClampedStyles } from './style-props'
 
@@ -23,7 +23,7 @@ export class TextShape extends TLTextShape<TextShapeProps> {
     type: 'text',
     point: [0, 0],
     size: [100, 100],
-    autosize: true,
+    isSizeLocked: true,
     text: '',
     lineHeight: 1.2,
     fontSize: 20,
@@ -48,9 +48,9 @@ export class TextShape extends TLTextShape<TextShapeProps> {
 
     // When the text changes, update the text—and,
     const handleChange = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const { autosize } = this.props
+      const { isSizeLocked } = this.props
       const text = TextUtils.normalizeText(e.currentTarget.value)
-      if (autosize) {
+      if (isSizeLocked) {
         this.update({ text, size: this.getAutoSizedBoundingBox(text) })
         return
       }
@@ -241,17 +241,18 @@ export class TextShape extends TLTextShape<TextShapeProps> {
     }
   }
 
-  onResizeStart = () => {
+  onResizeStart = ({ isSingle }: TLResizeStartInfo) => {
+    if (!isSingle) return this
     this.scale = [...(this.props.scale ?? [1, 1])]
     return this.update({
-      autosize: false,
+      isSizeLocked: false,
     })
   }
 
   onResetBounds = () => {
     this.update({
       size: this.getAutoSizedBoundingBox(),
-      autosize: true,
+      isSizeLocked: true,
     })
     return this
   }

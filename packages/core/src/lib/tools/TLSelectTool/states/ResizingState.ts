@@ -91,7 +91,7 @@ export class ResizingState<
         ]
       })
     )
-    selectedShapesArray.forEach(shape => shape.onResizeStart?.())
+    selectedShapesArray.forEach(shape => shape.onResizeStart?.({ isSingle: this.isSingle }))
   }
 
   onExit = () => {
@@ -164,7 +164,7 @@ export class ResizingState<
         scaleY < 0
       )
       // If the shape can't resize and it's the only shape selected, bail
-      if (!shape.canResize && this.isSingle) return
+      if (!(shape.canResize || shape.props.isSizeLocked) && this.isSingle) return
       let scale = [scaleX, scaleY]
       let rotation = initialShapeProps.rotation ?? 0
       let center = BoundsUtils.getBoundsCenter(relativeBounds)
@@ -174,32 +174,26 @@ export class ResizingState<
       if (!shape.canScale) scale = initialShapeProps.scale ?? [1, 1]
       // If we're flipped and the shape is rotated, flip the rotation
       if ((rotation && scaleX < 0 && scaleY >= 0) || (scaleY < 0 && scaleX >= 0)) rotation *= -1
-      // If the shape can't resize, then keep the initial width and height
-      if (!shape.canResize) {
+      if (isAspectRatioLocked || !shape.canResize || shape.props.isSizeLocked) {
         relativeBounds.width = initialShapeBounds.width
         relativeBounds.height = initialShapeBounds.height
-        center = [
-          nextBounds.minX + nextBounds.width * transformOrigin[0],
-          nextBounds.minY + nextBounds.height * transformOrigin[1],
-        ]
-        relativeBounds = BoundsUtils.centerBounds(relativeBounds, center)
-      }
-      // If the shape is aspect ratio locked, then adjust using transform origins
-      if (isAspectRatioLocked || !shape.canResize) {
         if (isAspectRatioLocked) {
-          relativeBounds.width = initialShapeBounds.width * resizeDimension
-          relativeBounds.height = initialShapeBounds.height * resizeDimension
+          relativeBounds.width *= resizeDimension
+          relativeBounds.height *= resizeDimension
         }
         center = [
           nextBounds.minX +
-            innerTransformOrigin[0] * (nextBounds.width - relativeBounds.width) +
+            (scaleX < 0 ? 1 - innerTransformOrigin[0] : innerTransformOrigin[0]) *
+              (nextBounds.width - relativeBounds.width) +
             relativeBounds.width / 2,
           nextBounds.minY +
-            innerTransformOrigin[1] * (nextBounds.height - relativeBounds.height) +
+            (scaleY < 0 ? 1 - innerTransformOrigin[1] : innerTransformOrigin[1]) *
+              (nextBounds.height - relativeBounds.height) +
             relativeBounds.height / 2,
         ]
         relativeBounds = BoundsUtils.centerBounds(relativeBounds, center)
       }
+
       shape.onResize(initialShapeProps, {
         center,
         rotation,
