@@ -181,23 +181,27 @@ export class ResizingState<
       if (!shape.canResize) {
         relativeBounds.width = initialShapeBounds.width
         relativeBounds.height = initialShapeBounds.height
-        relativeBounds = BoundsUtils.centerBounds(relativeBounds, [
+        center = [
           nextBounds.minX + nextBounds.width * transformOrigin[0],
           nextBounds.minY + nextBounds.height * transformOrigin[1],
-        ])
+        ]
+        relativeBounds = BoundsUtils.centerBounds(relativeBounds, center)
       }
       // If the shape is aspect ratio locked, then adjust using transform origins
       if (isAspectRatioLocked || !shape.canResize) {
-        if (shape.canResize) {
+        if (isAspectRatioLocked) {
           relativeBounds.width = initialShapeBounds.width * resizeDimension
           relativeBounds.height = initialShapeBounds.height * resizeDimension
-          relativeBounds.minX =
-            nextBounds.minX + innerTransformOrigin[0] * (nextBounds.width - relativeBounds.width)
-          relativeBounds.minY =
-            nextBounds.minY + innerTransformOrigin[1] * (nextBounds.height - relativeBounds.height)
-          relativeBounds.maxX = relativeBounds.minX + relativeBounds.width
-          relativeBounds.maxY = relativeBounds.minY + relativeBounds.height
         }
+        center = [
+          nextBounds.minX +
+            innerTransformOrigin[0] * (nextBounds.width - relativeBounds.width) +
+            relativeBounds.width / 2,
+          nextBounds.minY +
+            innerTransformOrigin[1] * (nextBounds.height - relativeBounds.height) +
+            relativeBounds.height / 2,
+        ]
+        relativeBounds = BoundsUtils.centerBounds(relativeBounds, center)
       }
       shape.onResize(initialShapeProps, {
         center,
