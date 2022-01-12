@@ -146,13 +146,17 @@ export class TLPage<S extends TLShape = TLShape, E extends TLEventMap = TLEventM
         direction === 'horizontal',
         direction === 'vertical'
       )
-      shape.onResize(relativeBounds, shape.serialized, {
+      shape.onResize(shape.serialized, {
+        bounds: relativeBounds,
+        center: BoundsUtils.getBoundsCenter(relativeBounds),
+        rotation: shape.props.rotation ?? 0 * -1,
         type: TLResizeCorner.TopLeft,
-        scale: shape.props.scale
-          ? direction === 'horizontal'
-            ? [-shape.props.scale[0], 1]
-            : [1, -shape.props.scale[1]]
-          : [1, 1],
+        scale:
+          shape.canFlip && shape.props.scale
+            ? direction === 'horizontal'
+              ? [-shape.props.scale[0], 1]
+              : [1, -shape.props.scale[1]]
+            : [1, 1],
         clip: false,
         transformOrigin: [0.5, 0.5],
       })

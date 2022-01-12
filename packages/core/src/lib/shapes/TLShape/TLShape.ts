@@ -90,7 +90,7 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
   canScale = true
   canFlip = true
   canEdit = false
-  private nonce = 0
+  nonce = 0
   private isDirty = false
   private lastSerialized = {} as TLShapeModel<P>
 

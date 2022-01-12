@@ -29,6 +29,8 @@ export class CodeSandboxShape extends TLReactBoxShape<CodeSandboxShapeProps> {
 
   canEdit = true
 
+  canFlip = false
+
   ReactContextBar = observer(() => {
     const { embedId } = this.props
     const rInput = React.useRef<HTMLInputElement>(null)

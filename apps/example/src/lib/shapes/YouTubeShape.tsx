@@ -33,6 +33,8 @@ export class YouTubeShape extends TLBoxShape<YouTubeShapeProps> {
 
   canEdit = true
 
+  canFlip = false
+
   ReactContextBar = observer(() => {
     const { embedId } = this.props
     const rInput = React.useRef<HTMLInputElement>(null)

@@ -41,7 +41,7 @@ export class CreatingState<
       height: 1,
     }
     // toJS(shape.bounds)
-    if (shape.isAspectRatioLocked) {
+    if (!shape.canChangeAspectRatio) {
       if (shape.aspectRatio) {
         this.aspectRatio = shape.aspectRatio
         this.initialBounds.height = this.aspectRatio
@@ -70,7 +70,7 @@ export class CreatingState<
       0,
       shiftKey ||
         this.creatingShape.props.isAspectRatioLocked ||
-        this.creatingShape.isAspectRatioLocked
+        !this.creatingShape.canChangeAspectRatio
     )
 
     this.creatingShape.update({
