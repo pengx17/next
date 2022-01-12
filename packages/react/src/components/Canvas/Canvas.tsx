@@ -22,38 +22,40 @@ import {
   useZoom,
 } from '~hooks'
 import { TLAsset, TLBinding, TLBounds, TLCursor, TLTheme } from '@tldraw/core'
-import { EMPTY_OBJECT } from '~constants'
+import { EMPTY_OBJECT, NOOP } from '~constants'
 import type { TLReactShape } from '~lib'
 import { DirectionIndicator } from '~components/ui/DirectionIndicator'
+import { useKeyboardEvents } from '~hooks/useKeyboardEvents'
 
 export interface TLCanvasProps<S extends TLReactShape> {
-  id?: string
-  className?: string
-  bindings?: TLBinding[]
-  brush?: TLBounds
-  shapes?: S[]
-  assets?: Record<string, TLAsset>
-  theme?: TLTheme
-  hoveredShape?: S
-  editingShape?: S
-  bindingShape?: S
-  selectionDirectionHint?: number[]
-  selectionBounds?: TLBounds
-  selectedShapes?: S[]
-  erasingShapes?: S[]
-  gridSize?: number
-  cursor?: TLCursor
-  cursorRotation?: number
-  selectionRotation?: number
-  showGrid?: boolean
-  showSelection?: boolean
-  showHandles?: boolean
-  showResizeHandles?: boolean
-  showRotateHandles?: boolean
-  showContextBar?: boolean
-  showSelectionDetail?: boolean
-  showSelectionRotation?: boolean
-  children?: React.ReactNode
+  id: string
+  className: string
+  bindings: TLBinding[]
+  brush: TLBounds
+  shapes: S[]
+  assets: Record<string, TLAsset>
+  theme: TLTheme
+  hoveredShape: S
+  editingShape: S
+  bindingShape: S
+  selectionDirectionHint: number[]
+  selectionBounds: TLBounds
+  selectedShapes: S[]
+  erasingShapes: S[]
+  gridSize: number
+  cursor: TLCursor
+  cursorRotation: number
+  selectionRotation: number
+  onEditingEnd: () => void
+  showGrid: boolean
+  showSelection: boolean
+  showHandles: boolean
+  showResizeHandles: boolean
+  showRotateHandles: boolean
+  showContextBar: boolean
+  showSelectionDetail: boolean
+  showSelectionRotation: boolean
+  children: React.ReactNode
 }
 
 export const Canvas = observer(function Renderer<S extends TLReactShape>({
@@ -81,6 +83,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
   showContextBar = true,
   showGrid = true,
   gridSize = 8,
+  onEditingEnd = NOOP,
   theme = EMPTY_OBJECT,
   children,
 }: Partial<TLCanvasProps<S>>): JSX.Element {
@@ -94,6 +97,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
   useGestureEvents(rContainer)
   useCursor(rContainer, cursor, cursorRotation)
   useZoom(rContainer)
+  useKeyboardEvents()
   const events = useCanvasEvents()
 
   const onlySelectedShape = selectedShapes?.length === 1 && selectedShapes[0]
@@ -134,6 +138,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
                 isErasing={erasingShapesSet.has(shape)}
                 meta={meta}
                 zIndex={1000 + i}
+                onEditingEnd={onEditingEnd}
               />
             ))}
           {selectedShapes?.map(shape => (

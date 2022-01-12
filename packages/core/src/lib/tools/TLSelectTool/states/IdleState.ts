@@ -1,6 +1,6 @@
 import { TLShape, TLApp, TLSelectTool, TLToolState } from '~lib'
 import { TLEventMap, TLEvents, TLShortcut, TLTargetType } from '~types'
-import { PointUtils } from '~utils'
+import { getFirstFromSet, PointUtils } from '~utils'
 
 export class IdleState<
   S extends TLShape,
@@ -18,9 +18,7 @@ export class IdleState<
   ]
 
   onEnter = (info: { fromId: string } & any) => {
-    if (info.fromId === 'editing') {
-      this.onPointerDown(info as any, {} as any)
-    }
+    // noop
   }
 
   onExit = () => {
@@ -139,9 +137,20 @@ export class IdleState<
   }
 
   onKeyDown: TLEvents<S>['keyboard'] = (info, e) => {
+    const { selectedShapesArray } = this.app
     switch (e.key) {
+      case 'Enter': {
+        if (selectedShapesArray.length === 1 && selectedShapesArray[0].canEdit) {
+          this.tool.transition('editingShape', {
+            type: TLTargetType.Shape,
+            shape: selectedShapesArray[0],
+            order: 0,
+          })
+        }
+        break
+      }
       case 'Escape': {
-        if (this.app.selectedIds.size) {
+        if (selectedShapesArray.length) {
           this.app.setSelectedShapes([])
         }
         break

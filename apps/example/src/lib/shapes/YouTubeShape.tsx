@@ -31,8 +31,6 @@ export class YouTubeShape extends TLBoxShape<YouTubeShapeProps> {
 
   canChangeAspectRatio = false
 
-  canEdit = true
-
   canFlip = false
 
   ReactContextBar = observer(() => {

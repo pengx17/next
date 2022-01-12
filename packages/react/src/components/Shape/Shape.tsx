@@ -15,6 +15,7 @@ interface ShapeProps {
   isBinding?: boolean
   isErasing?: boolean
   isEditing?: boolean
+  onEditingEnd: () => void
   meta: any
 }
 
@@ -26,6 +27,7 @@ export const Shape = observer(function Shape({
   isBinding = false,
   isErasing = false,
   isEditing = false,
+  onEditingEnd,
   asset,
   meta,
 }: ShapeProps) {
@@ -48,6 +50,7 @@ export const Shape = observer(function Shape({
         isErasing={isErasing}
         events={events}
         asset={asset}
+        onEditingEnd={onEditingEnd}
       />
     </Container>
   )

@@ -23,6 +23,7 @@ export interface TLComponentProps<M = unknown> extends TLCommonShapeProps<M> {
     onKeyUp: React.KeyboardEventHandler
     onKeyDown: React.KeyboardEventHandler
   }
+  onEditingEnd: () => void
 }
 
 export interface TLReactShapeConstructor<S extends TLReactShape = TLReactShape> {

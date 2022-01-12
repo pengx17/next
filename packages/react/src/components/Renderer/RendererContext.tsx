@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react-lite'
-import type { TLEventHandlers, TLEvents, TLInputs, TLViewport } from '@tldraw/core'
+import type { TLEventHandlers, TLInputs, TLViewport } from '@tldraw/core'
 import {
   SelectionBackground as _SelectionBackground,
   SelectionForeground as _SelectionForeground,

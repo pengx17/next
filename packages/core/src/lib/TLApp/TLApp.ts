@@ -380,6 +380,10 @@ export class TLApp<
     return this
   }
 
+  readonly clearEditingShape = (): this => {
+    return this.setEditingShape()
+  }
+
   /* ------------------ Hovered Shape ----------------- */
 
   @observable hoveredId?: string
@@ -596,6 +600,8 @@ export class TLApp<
       this.isInAny(
         'select.idle',
         'select.hoveringSelectionHandle',
+        'select.pointingShape',
+        'select.pointingSelectedShape',
         'select.pointingRotateHandle',
         'select.pointingResizeHandle'
       ) &&

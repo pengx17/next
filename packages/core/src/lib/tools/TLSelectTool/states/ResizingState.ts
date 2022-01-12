@@ -148,9 +148,6 @@ export class ResizingState<
         resizeDimension = Math.min(Math.abs(scaleX), Math.abs(scaleY))
       }
     }
-    // const shortDimension = Math.min(Math.abs(scaleX), Math.abs(scaleY))
-    // console.log(scaleX, scaleY)
-    // const isShortX = Math.abs(scaleX) === shortDimension
     this.app.selectedShapes.forEach(shape => {
       const {
         isAspectRatioLocked,

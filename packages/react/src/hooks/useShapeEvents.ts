@@ -55,10 +55,12 @@ export function useShapeEvents<S extends TLReactShape>(shape: S) {
 
     const onKeyDown: TLReactCustomEvents['keyboard'] = e => {
       callbacks.onKeyDown?.({ type: TLTargetType.Shape, shape, order: -1 }, e)
+      e.stopPropagation()
     }
 
     const onKeyUp: TLReactCustomEvents['keyboard'] = e => {
       callbacks.onKeyUp?.({ type: TLTargetType.Shape, shape, order: -1 }, e)
+      e.stopPropagation()
     }
 
     return {

@@ -36,7 +36,7 @@ export class TextShape extends TLTextShape<TextShapeProps> {
     opacity: 1,
   }
 
-  ReactComponent = observer(({ events, isErasing, isEditing, isSelected }: TLComponentProps) => {
+  ReactComponent = observer(({ events, isErasing, isEditing, onEditingEnd }: TLComponentProps) => {
     const {
       props: { opacity, fontFamily, fontSize, lineHeight, text, stroke, padding },
     } = this
@@ -45,10 +45,6 @@ export class TextShape extends TLTextShape<TextShapeProps> {
     const rIsMounted = React.useRef(false)
 
     const rInnerWrapper = React.useRef<HTMLDivElement>(null)
-
-    const onBlur = React.useCallback(() => {
-      // tell the app to clear the editing state
-    }, [])
 
     // When the text changes, update the text—and,
     const handleChange = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -80,10 +76,6 @@ export class TextShape extends TLTextShape<TextShapeProps> {
           }
           break
         }
-        case 'Escape': {
-          e.currentTarget.blur()
-          break
-        }
         case 'Enter': {
           if (e.ctrlKey || e.metaKey) {
             e.currentTarget.blur()
@@ -106,9 +98,9 @@ export class TextShape extends TLTextShape<TextShapeProps> {
     const handleBlur = React.useCallback(
       (e: React.FocusEvent<HTMLTextAreaElement>) => {
         e.currentTarget.setSelectionRange(0, 0)
-        onBlur?.()
+        onEditingEnd?.()
       },
-      [onBlur]
+      [onEditingEnd]
     )
 
     const handleFocus = React.useCallback(
@@ -140,9 +132,9 @@ export class TextShape extends TLTextShape<TextShapeProps> {
           }
         })
       } else {
-        onBlur?.()
+        onEditingEnd?.()
       }
-    }, [isEditing, onBlur])
+    }, [isEditing, onEditingEnd])
 
     React.useLayoutEffect(() => {
       const { fontFamily, fontSize, lineHeight, padding } = this.props
@@ -179,7 +171,7 @@ export class TextShape extends TLTextShape<TextShapeProps> {
               autoCapitalize="false"
               autoCorrect="false"
               autoSave="false"
-              autoFocus
+              // autoFocus
               placeholder=""
               spellCheck="true"
               wrap="off"

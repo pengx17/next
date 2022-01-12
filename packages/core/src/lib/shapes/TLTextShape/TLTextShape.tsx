@@ -16,7 +16,9 @@ export class TLTextShape<P extends TLTextShapeProps = TLTextShapeProps, M = any>
   }
 
   canEdit = true
+
   canFlip = false
+
   canResize = true
 
   static id = 'text'
