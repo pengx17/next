@@ -29,9 +29,9 @@ export class YouTubeShape extends TLBoxShape<YouTubeShapeProps> {
 
   aspectRatio = 480 / 853
 
-  isAspectRatioLocked = true
+  canChangeAspectRatio = false
 
-  isEditable = true
+  canEdit = true
 
   ReactContextBar = observer(() => {
     const { embedId } = this.props

@@ -30,8 +30,6 @@ export class ImageShape extends TLImageShape<ImageShapeProps> {
     isAspectRatioLocked: true,
   }
 
-  isClippable = true
-
   ReactComponent = observer(({ events, isErasing, asset }: TLComponentProps) => {
     const {
       props: {

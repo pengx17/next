@@ -12,7 +12,7 @@ export class PointingResizeHandleState<
 > extends TLToolState<S, K, R, P> {
   static id = 'pointingResizeHandle'
 
-  info = {} as TLEventSelectionInfo
+  private info = {} as TLEventSelectionInfo
 
   onEnter = (info: TLEventSelectionInfo) => {
     this.info = info

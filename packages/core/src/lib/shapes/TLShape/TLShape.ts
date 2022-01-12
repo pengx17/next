@@ -5,7 +5,7 @@ import {
   intersectPolygonBounds,
 } from '@tldraw/intersect'
 import Vec from '@tldraw/vec'
-import { action, computed, makeObservable, observable } from 'mobx'
+import { action, computed, makeObservable, observable, toJS } from 'mobx'
 import type { TLHandle, TLBounds, TLResizeEdge, TLResizeCorner, TLAsset } from '~types'
 import { deepCopy, BoundsUtils, PointUtils } from '~utils'
 
@@ -40,6 +40,9 @@ export interface TLShapeProps {
 }
 
 export interface TLResizeInfo {
+  bounds: TLBounds
+  center: number[]
+  rotation: number
   type: TLResizeEdge | TLResizeCorner
   clip: boolean
   scale: number[]
@@ -62,7 +65,7 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
     const type = this.constructor['id']
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const defaultProps = this.constructor['defaultProps']
+    const defaultProps = this.constructor['defaultProps'] ?? {}
     this.type = type
     this.props = { scale: [1, 1], ...defaultProps, ...props }
     makeObservable(this)
@@ -70,28 +73,25 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
 
   static type: string
 
-  private version = 1
-
   @observable props: P
-
-  readonly stayMounted: boolean = false
-  readonly showCloneHandles: boolean = false
-  readonly hideResizeHandles: boolean = false
-  readonly hideRotateHandle: boolean = false
-  readonly hideContextBar: boolean = false
-  readonly hideSelectionDetail: boolean = false
-  readonly hideSelection: boolean = false
-  readonly isClippable: boolean = false
-  readonly isEditable: boolean = false
-  readonly isStateful: boolean = false
-  readonly isAspectRatioLocked: boolean = false
-  readonly aspectRatio?: number
-  readonly type: string
-
-  nonce = 0
-
-  isDirty = false
-
+  aspectRatio?: number
+  type: string
+  // Display options
+  hideCloneHandles = false
+  hideResizeHandles = false
+  hideRotateHandle = false
+  hideContextBar = false
+  hideSelectionDetail = false
+  hideSelection = false
+  // Behavior options
+  canChangeAspectRatio = true
+  canUnmount = true
+  canResize = true
+  canScale = true
+  canFlip = true
+  canEdit = false
+  private nonce = 0
+  private isDirty = false
   private lastSerialized = {} as TLShapeModel<P>
 
   abstract getBounds: () => TLBounds
@@ -158,7 +158,7 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
   }
 
   getSerialized = (): TLShapeModel<P> => {
-    return deepCopy({ ...this.props, type: this.type, nonce: this.nonce } as TLShapeModel<P>)
+    return toJS({ ...this.props, type: this.type, nonce: this.nonce } as TLShapeModel<P>)
   }
 
   protected getCachedSerialized = (): TLShapeModel<P> => {
@@ -200,16 +200,19 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
 
   onResizeStart = () => {
     this.scale = [...(this.props.scale ?? [1, 1])]
+    return this
   }
 
-  onResize = (bounds: TLBounds, initialProps: any, info: TLResizeInfo) => {
+  onResize = (initialProps: TLShapeModel<P>, info: TLResizeInfo) => {
     const {
+      bounds,
+      rotation,
       scale: [scaleX, scaleY],
     } = info
     const nextScale = [...this.scale]
     if (scaleX < 0) nextScale[0] *= -1
     if (scaleY < 0) nextScale[1] *= -1
-    this.update({ point: [bounds.minX, bounds.minY], scale: nextScale })
+    this.update({ point: [bounds.minX, bounds.minY], scale: nextScale, rotation })
     return this
   }
 

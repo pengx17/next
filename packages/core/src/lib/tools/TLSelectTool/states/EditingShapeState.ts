@@ -9,7 +9,7 @@ export class EditingShapeState<
 > extends TLToolState<S, K, R, P> {
   static id = 'editingShape'
 
-  editingShape = {} as S
+  private editingShape = {} as S
 
   onEnter = (info: { type: TLTargetType.Shape; shape: S; order?: number }) => {
     this.editingShape = info.shape

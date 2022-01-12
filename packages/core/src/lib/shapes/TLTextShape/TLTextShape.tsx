@@ -15,7 +15,9 @@ export class TLTextShape<P extends TLTextShapeProps = TLTextShapeProps, M = any>
     makeObservable(this)
   }
 
-  isEditable = true
+  canEdit = true
+  canFlip = false
+  canResize = false
 
   static id = 'text'
 

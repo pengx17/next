@@ -310,6 +310,16 @@ export class TLApp<
     return this
   }
 
+  flipHorizontal = (shapes: S[] | string[] = this.selectedShapesArray): this => {
+    this.currentPage.flip(shapes, 'horizontal')
+    return this
+  }
+
+  flipVertical = (shapes: S[] | string[] = this.selectedShapesArray): this => {
+    this.currentPage.flip(shapes, 'vertical')
+    return this
+  }
+
   /* --------------------- Assets --------------------- */
 
   @observable assets: Record<string, TLAsset> = {}
@@ -490,7 +500,7 @@ export class TLApp<
     return currentPage.shapes.filter(shape => {
       return (
         shape.props.parentId === currentPage.id &&
-        (shape.stayMounted ||
+        (!shape.canUnmount ||
           selectedShapes.has(shape) ||
           BoundsUtils.boundsContain(currentView, shape.rotatedBounds) ||
           BoundsUtils.boundsCollide(currentView, shape.rotatedBounds))

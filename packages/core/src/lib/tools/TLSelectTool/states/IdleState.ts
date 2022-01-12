@@ -119,7 +119,7 @@ export class IdleState<
 
     if (this.app.selectedShapesArray.length !== 1) return
     const selectedShape = this.app.selectedShapesArray[0]
-    if (!selectedShape.isEditable) return
+    if (!selectedShape.canEdit) return
 
     switch (info.type) {
       case TLTargetType.Shape: {

@@ -36,7 +36,7 @@ export const Container = observer<ContainerProps>(function Container({
         rotate(${rotation + (bounds.rotation || 0)}rad)
         ${scale ? `scale(${scale[0]}, ${scale[1]})` : ''}`
     )
-  }, [bounds.minX, bounds.minY, rotation, bounds.rotation])
+  }, [bounds.minX, bounds.minY, rotation, bounds.rotation, scale])
 
   React.useLayoutEffect(() => {
     const elm = rBounds.current!

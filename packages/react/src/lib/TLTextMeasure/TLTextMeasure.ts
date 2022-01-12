@@ -33,8 +33,6 @@ export class TLTextMeasure {
       zIndex: '9999',
       userSelect: 'none',
       pointerEvents: 'none',
-      // alignmentBaseline: 'mathematical',
-      // dominantBaseline: 'mathematical',
     })
 
     pre.tabIndex = -1

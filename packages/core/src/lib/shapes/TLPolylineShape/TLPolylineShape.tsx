@@ -74,24 +74,32 @@ export class TLPolylineShape<
       props: { handles },
       bounds,
     } = this
+    this.scale = [...(this.props.scale ?? [1, 1])]
     const size = [bounds.width, bounds.height]
     this.normalizedHandles = handles.map(h => Vec.divV(h.point, size))
     return this
   }
 
-  onResize = (bounds: TLBounds, initialProps: any, info: TLResizeInfo) => {
+  onResize = (initialProps: any, info: TLResizeInfo) => {
+    const {
+      bounds,
+      scale: [scaleX, scaleY],
+    } = info
     const {
       props: { handles },
       normalizedHandles,
     } = this
     const size = [bounds.width, bounds.height]
-
+    const nextScale = [...this.scale]
+    if (scaleX < 0) nextScale[0] *= -1
+    if (scaleY < 0) nextScale[1] *= -1
     return this.update({
       point: [bounds.minX, bounds.minY],
       handles: handles.map((handle, i) => ({
         ...handle,
         point: Vec.mulV(normalizedHandles[i], size),
       })),
+      scale: nextScale,
     })
   }
 

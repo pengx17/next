@@ -27,7 +27,7 @@ export class CodeSandboxShape extends TLReactBoxShape<CodeSandboxShapeProps> {
     embedId: '',
   }
 
-  isEditable = true
+  canEdit = true
 
   ReactContextBar = observer(() => {
     const { embedId } = this.props

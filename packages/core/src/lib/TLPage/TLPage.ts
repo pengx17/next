@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { action, observable, makeObservable, computed, observe } from 'mobx'
-import type { TLBinding, TLEventMap } from '~types'
+import { TLBinding, TLEventMap, TLResizeCorner } from '~types'
 import type { TLApp, TLShape, TLShapeModel } from '~lib'
+import { BoundsUtils } from '~utils'
 
 export interface TLPageModel<S extends TLShape = TLShape> {
   id: string
@@ -39,6 +40,27 @@ export class TLPage<S extends TLShape = TLShape, E extends TLEventMap = TLEventM
 
   @observable bindings: TLBinding[]
 
+  @computed get serialized(): TLPageModel<S> {
+    return {
+      id: this.id,
+      name: this.name,
+      shapes: this.shapes.map(shape => shape.serialized),
+      bindings: this.bindings.map(binding => ({ ...binding })),
+      nonce: this.nonce,
+    }
+  }
+
+  nonce = 0
+
+  private bump = () => {
+    this.nonce++
+  }
+
+  @action update(props: Partial<TLPageProps<S>>) {
+    Object.assign(this, props)
+    return this
+  }
+
   @action addShapes(...shapes: S[] | TLShapeModel[]) {
     if (shapes.length === 0) return
     const shapeInstances =
@@ -53,6 +75,14 @@ export class TLPage<S extends TLShape = TLShape, E extends TLEventMap = TLEventM
     this.bump()
     this.app.saveState()
     return shapeInstances
+  }
+
+  private parseShapesArg<S>(shapes: S[] | string[]) {
+    if (typeof shapes[0] === 'string') {
+      return this.shapes.filter(shape => (shapes as string[]).includes(shape.id))
+    } else {
+      return shapes as S[]
+    }
   }
 
   @action removeShapes(...shapes: S[] | string[]) {
@@ -105,33 +135,28 @@ export class TLPage<S extends TLShape = TLShape, E extends TLEventMap = TLEventM
     return this
   }
 
-  // TODO: How to avoid making deep copies when shapes have not changed?
-  @computed get serialized(): TLPageModel<S> {
-    return {
-      id: this.id,
-      name: this.name,
-      shapes: this.shapes.map(shape => shape.serialized),
-      bindings: this.bindings.map(binding => ({ ...binding })),
-      nonce: this.nonce,
-    }
-  }
-
-  nonce = 0
-
-  private bump = () => {
-    this.nonce++
-  }
-
-  @action update(props: Partial<TLPageProps<S>>) {
-    Object.assign(this, props)
+  flip = (shapes: S[] | string[], direction: 'horizontal' | 'vertical'): this => {
+    const shapesToMove = this.parseShapesArg(shapes)
+    const commonBounds = BoundsUtils.getCommonBounds(shapesToMove.map(shape => shape.bounds))
+    shapesToMove.forEach(shape => {
+      const relativeBounds = BoundsUtils.getRelativeTransformedBoundingBox(
+        commonBounds,
+        commonBounds,
+        shape.bounds,
+        direction === 'horizontal',
+        direction === 'vertical'
+      )
+      shape.onResize(relativeBounds, shape.serialized, {
+        type: TLResizeCorner.TopLeft,
+        scale: shape.props.scale
+          ? direction === 'horizontal'
+            ? [-shape.props.scale[0], 1]
+            : [1, -shape.props.scale[1]]
+          : [1, 1],
+        clip: false,
+        transformOrigin: [0.5, 0.5],
+      })
+    })
     return this
-  }
-
-  private parseShapesArg<S>(shapes: S[] | string[]) {
-    if (typeof shapes[0] === 'string') {
-      return this.shapes.filter(shape => (shapes as string[]).includes(shape.id))
-    } else {
-      return shapes as S[]
-    }
   }
 }

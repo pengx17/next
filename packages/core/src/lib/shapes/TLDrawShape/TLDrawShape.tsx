@@ -84,6 +84,7 @@ export class TLDrawShape<P extends TLDrawShapeProps = any, M = any> extends TLSh
       bounds,
       props: { points },
     } = this
+    this.scale = [...(this.props.scale ?? [1, 1])]
     const size = [bounds.width, bounds.height]
     this.normalizedPoints = points.map(point => Vec.divV(point, size))
     return this
@@ -95,19 +96,21 @@ export class TLDrawShape<P extends TLDrawShapeProps = any, M = any> extends TLSh
    * @param bounds
    * @param info
    */
-  onResize = (bounds: TLBounds, initialProps: any, info: TLResizeInfo) => {
-    const size = [bounds.width, bounds.height]
+  onResize = (initialProps: any, info: TLResizeInfo) => {
     const {
+      bounds,
       scale: [scaleX, scaleY],
     } = info
-    if (scaleX) this.scale[0] *= -1
-    if (scaleY) this.scale[1] *= -1
+    const size = [bounds.width, bounds.height]
+    const nextScale = [...this.scale]
+    if (scaleX < 0) nextScale[0] *= -1
+    if (scaleY < 0) nextScale[1] *= -1
     return this.update(
       scaleX || scaleY
         ? {
             point: [bounds.minX, bounds.minY],
             points: this.normalizedPoints.map(point => Vec.mulV(point, size).concat(point[2])),
-            scale: this.scale,
+            scale: nextScale,
           }
         : {
             point: [bounds.minX, bounds.minY],

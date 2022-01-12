@@ -45,14 +45,16 @@ export class TLBoxShape<P extends TLBoxShapeProps = TLBoxShapeProps, M = any> ex
     )
   }
 
-  onResize = (bounds: TLBounds, initialProps: any, info: TLResizeInfo): this => {
+  onResize = (initialProps: any, info: TLResizeInfo): this => {
     const {
+      bounds,
+      rotation,
       scale: [scaleX, scaleY],
     } = info
     const nextScale = [...this.scale]
     if (scaleX < 0) nextScale[0] *= -1
     if (scaleY < 0) nextScale[1] *= -1
-    this.update({ point: [bounds.minX, bounds.minY], scale: nextScale })
+    this.update({ point: [bounds.minX, bounds.minY], scale: nextScale, rotation })
     return this.update({
       point: [bounds.minX, bounds.minY],
       size: [Math.max(1, bounds.width), Math.max(1, bounds.height)],
