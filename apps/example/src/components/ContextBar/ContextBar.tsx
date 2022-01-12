@@ -6,7 +6,7 @@ import {
   getContextBarTranslation,
 } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
-import type { StarShape, PolygonShape, Shape } from '~lib/shapes'
+import type { TextShape, StarShape, PolygonShape, Shape } from '~lib/shapes'
 import { NumberInput } from '~components/inputs/NumberInput'
 import { ColorInput } from '~components/inputs/ColorInput'
 
@@ -44,6 +44,10 @@ const _ContextBar: TLContextBarComponent<Shape> = ({
     shapes.forEach(shape => shape.update({ ratio: +e.currentTarget.value }))
   }, [])
 
+  const updateFontSize = React.useCallback<React.ChangeEventHandler<HTMLInputElement>>(e => {
+    textShapes.forEach(shape => shape.update({ fontSize: +e.currentTarget.value }))
+  }, [])
+
   React.useLayoutEffect(() => {
     const elm = rContextBar.current
     if (!elm) return
@@ -60,6 +64,8 @@ const _ContextBar: TLContextBarComponent<Shape> = ({
   }, [scaledBounds, offset])
 
   if (!app) return null
+
+  const textShapes = shapes.filter(shape => shape.type === 'text') as TextShape[]
 
   const sidesShapes = shapes.filter(shape => 'sides' in shape.props) as (PolygonShape | StarShape)[]
 
@@ -107,6 +113,16 @@ const _ContextBar: TLContextBarComponent<Shape> = ({
               step={0.1}
               style={{ width: 48 }}
             />
+            {textShapes.length > 0 ? (
+              <>
+                <NumberInput
+                  label="Font Size"
+                  value={Math.max(...textShapes.map(shape => shape.props.fontSize))}
+                  onChange={updateFontSize}
+                  style={{ width: 48 }}
+                />
+              </>
+            ) : null}
           </>
         )}
       </div>

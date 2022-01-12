@@ -4,6 +4,7 @@ import { HTMLContainer, TLComponentProps, TLTextMeasure } from '@tldraw/react'
 import { TextUtils, TLBounds, TLResizeStartInfo, TLTextShape, TLTextShapeProps } from '@tldraw/core'
 import { observer } from 'mobx-react-lite'
 import { CustomStyleProps, withClampedStyles } from './style-props'
+import { NumberInput } from '~components/inputs/NumberInput'
 
 export interface TextShapeProps extends TLTextShapeProps, CustomStyleProps {
   borderRadius: number
@@ -51,7 +52,7 @@ export class TextShape extends TLTextShape<TextShapeProps> {
       const { isSizeLocked } = this.props
       const text = TextUtils.normalizeText(e.currentTarget.value)
       if (isSizeLocked) {
-        this.update({ text, size: this.getAutoSizedBoundingBox(text) })
+        this.update({ text, size: this.getAutoSizedBoundingBox({ text }) })
         return
       }
       // If not autosizing, update just the text
@@ -210,7 +211,9 @@ export class TextShape extends TLTextShape<TextShapeProps> {
   })
 
   validateProps = (props: Partial<TextShapeProps>) => {
-    if (props.borderRadius !== undefined) props.borderRadius = Math.max(0, props.borderRadius)
+    if (props.isSizeLocked || this.props.isSizeLocked) {
+      props.size = this.getAutoSizedBoundingBox(props)
+    }
     return withClampedStyles(props)
   }
 
@@ -218,8 +221,14 @@ export class TextShape extends TLTextShape<TextShapeProps> {
 
   private measure = new TLTextMeasure()
 
-  getAutoSizedBoundingBox(text = this.props.text) {
-    const { fontFamily, fontSize, lineHeight, padding } = this.props
+  getAutoSizedBoundingBox(props = {} as Partial<TextShapeProps>) {
+    const {
+      text = this.props.text,
+      fontFamily = this.props.fontFamily,
+      fontSize = this.props.fontSize,
+      lineHeight = this.props.lineHeight,
+      padding = this.props.padding,
+    } = props
     const { width, height } = this.measure.measureText(
       text,
       { fontFamily, fontSize, lineHeight },
