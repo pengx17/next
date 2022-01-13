@@ -17,9 +17,9 @@ export const Container = observer<ContainerProps>(function Container({
   id,
   bounds,
   scale,
+  zIndex,
   rotation = 0,
   className = '',
-  zIndex,
   children,
   ...props
 }) {
@@ -27,31 +27,23 @@ export const Container = observer<ContainerProps>(function Container({
 
   React.useLayoutEffect(() => {
     const elm = rBounds.current!
-    elm.style.setProperty(
-      'transform',
-      `translate(
-          calc(${bounds.minX}px - var(--tl-padding)),
-          calc(${bounds.minY}px - var(--tl-padding))
-        )
+    elm.style.transform = `translate(
+        calc(${bounds.minX}px - var(--tl-padding)),
+        calc(${bounds.minY}px - var(--tl-padding)))
         rotate(${rotation + (bounds.rotation || 0)}rad)
-        ${scale ? `scale(${scale[0]}, ${scale[1]})` : ''}`
-    )
+      ${scale ? `scale(${scale[0]}, ${scale[1]})` : ''}`
   }, [bounds.minX, bounds.minY, rotation, bounds.rotation, scale])
 
   React.useLayoutEffect(() => {
     const elm = rBounds.current!
+    elm.style.width = `calc(${Math.floor(bounds.width)}px + (var(--tl-padding) * 2))`
+    elm.style.height = `calc(${Math.floor(bounds.height)}px + (var(--tl-padding) * 2))`
+  }, [bounds.width, bounds.height])
 
-    elm.style.setProperty('width', `calc(${Math.floor(bounds.width)}px + (var(--tl-padding) * 2))`)
-
-    elm.style.setProperty(
-      'height',
-      `calc(${Math.floor(bounds.height)}px + (var(--tl-padding) * 2))`
-    )
-
-    if (zIndex !== undefined) {
-      elm.style.setProperty('z-index', zIndex?.toString())
-    }
-  }, [bounds.width, bounds.height, zIndex, rotation])
+  React.useLayoutEffect(() => {
+    const elm = rBounds.current!
+    if (zIndex !== undefined) elm.style.zIndex = zIndex.toString()
+  }, [zIndex])
 
   return (
     <div

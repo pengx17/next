@@ -21,7 +21,6 @@ interface ShapeProps {
 
 export const Shape = observer(function Shape({
   shape,
-  zIndex,
   isHovered = false,
   isSelected = false,
   isBinding = false,
@@ -36,11 +35,9 @@ export const Shape = observer(function Shape({
     props: { rotation, scale },
     ReactComponent,
   } = shape
-
   const events = useShapeEvents(shape)
-
   return (
-    <Container bounds={bounds} rotation={rotation} scale={scale} zIndex={zIndex}>
+    <Container bounds={bounds} rotation={rotation} scale={scale}>
       <ReactComponent
         meta={meta}
         isEditing={isEditing}

@@ -1,5 +1,4 @@
 import { Vec } from '@tldraw/vec'
-import { toJS } from 'mobx'
 import { TLApp, TLShape, TLSelectTool, TLToolState, TLShapeModel } from '~lib'
 import { TLBounds, TLResizeCorner, TLResizeEdge, TLCursor, TLEventMap, TLEvents } from '~types'
 import { BoundsUtils, getFirstFromSet } from '~utils'
@@ -69,21 +68,19 @@ export class ResizingState<
       selectedShapesArray.map(shape => {
         const bounds = { ...shape.bounds }
         const [cx, cy] = BoundsUtils.getBoundsCenter(bounds)
-        const transformOrigin = [
-          (cx - this.initialCommonBounds.minX) / this.initialCommonBounds.width,
-          (cy - this.initialCommonBounds.minY) / this.initialCommonBounds.height,
-        ]
-        const innerTransformOrigin = [
-          (cx - initialInnerBounds.minX) / initialInnerBounds.width,
-          (cy - initialInnerBounds.minY) / initialInnerBounds.height,
-        ]
         return [
           shape.id,
           {
             props: shape.serialized,
             bounds,
-            transformOrigin,
-            innerTransformOrigin,
+            transformOrigin: [
+              (cx - this.initialCommonBounds.minX) / this.initialCommonBounds.width,
+              (cy - this.initialCommonBounds.minY) / this.initialCommonBounds.height,
+            ],
+            innerTransformOrigin: [
+              (cx - initialInnerBounds.minX) / initialInnerBounds.width,
+              (cy - initialInnerBounds.minY) / initialInnerBounds.height,
+            ],
             isAspectRatioLocked:
               shape.props.isAspectRatioLocked ||
               Boolean(!shape.canChangeAspectRatio || shape.props.rotation),
@@ -112,7 +109,9 @@ export class ResizingState<
     } = this.app
     const { handle, snapshots, initialCommonBounds } = this
     let delta = Vec.sub(currentPoint, originPoint)
-    if (altKey) delta = Vec.mul(delta, 2)
+    if (altKey) {
+      delta = Vec.mul(delta, 2)
+    }
     const firstShape = getFirstFromSet(this.app.selectedShapes)
     const useAspectRatioLock =
       shiftKey ||
@@ -164,23 +163,34 @@ export class ResizingState<
         scaleY < 0
       )
       // If the shape can't resize and it's the only shape selected, bail
-      if (!(shape.canResize || shape.props.isSizeLocked) && this.isSingle) return
+      if (!(shape.canResize || shape.props.isSizeLocked) && this.isSingle) {
+        return
+      }
       let scale = [scaleX, scaleY]
       let rotation = initialShapeProps.rotation ?? 0
       let center = BoundsUtils.getBoundsCenter(relativeBounds)
       // If the shape can't flip, make sure that scale is [+,+]
-      if (!shape.canFlip) scale = Vec.abs(scale)
+      if (!shape.canFlip) {
+        scale = Vec.abs(scale)
+      }
       // If the shape can't scale, keep the shape's initial scale
-      if (!shape.canScale) scale = initialShapeProps.scale ?? [1, 1]
+      if (!shape.canScale) {
+        scale = initialShapeProps.scale ?? [1, 1]
+      }
       // If we're flipped and the shape is rotated, flip the rotation
-      if ((rotation && scaleX < 0 && scaleY >= 0) || (scaleY < 0 && scaleX >= 0)) rotation *= -1
+      if ((rotation && scaleX < 0 && scaleY >= 0) || (scaleY < 0 && scaleX >= 0)) {
+        rotation *= -1
+      }
+      // If the shape is aspect ratio locked or size locked...
       if (isAspectRatioLocked || !shape.canResize || shape.props.isSizeLocked) {
         relativeBounds.width = initialShapeBounds.width
         relativeBounds.height = initialShapeBounds.height
         if (isAspectRatioLocked) {
+          // Scale the width and height to the longer dimension
           relativeBounds.width *= resizeDimension
           relativeBounds.height *= resizeDimension
         }
+        // Find the center using the inner transform origin
         center = [
           nextBounds.minX +
             (scaleX < 0 ? 1 - innerTransformOrigin[0] : innerTransformOrigin[0]) *
@@ -191,9 +201,9 @@ export class ResizingState<
               (nextBounds.height - relativeBounds.height) +
             relativeBounds.height / 2,
         ]
+        // Position the bounds at the center
         relativeBounds = BoundsUtils.centerBounds(relativeBounds, center)
       }
-
       shape.onResize(initialShapeProps, {
         center,
         rotation,

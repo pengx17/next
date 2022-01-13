@@ -10,6 +10,7 @@ export interface TextShapeProps extends TLTextShapeProps, CustomStyleProps {
   borderRadius: number
   fontFamily: string
   fontSize: number
+  fontWeight: number
   lineHeight: number
   padding: number
   type: 'text'
@@ -28,6 +29,7 @@ export class TextShape extends TLTextShape<TextShapeProps> {
     text: '',
     lineHeight: 1.2,
     fontSize: 20,
+    fontWeight: 400,
     padding: 4,
     fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
     borderRadius: 0,
@@ -39,7 +41,7 @@ export class TextShape extends TLTextShape<TextShapeProps> {
 
   ReactComponent = observer(({ events, isErasing, isEditing, onEditingEnd }: TLComponentProps) => {
     const {
-      props: { opacity, fontFamily, fontSize, lineHeight, text, stroke, padding },
+      props: { opacity, fontFamily, fontSize, fontWeight, lineHeight, text, stroke, padding },
     } = this
     const rInput = React.useRef<HTMLTextAreaElement>(null)
 
@@ -138,10 +140,10 @@ export class TextShape extends TLTextShape<TextShapeProps> {
     }, [isEditing, onEditingEnd])
 
     React.useLayoutEffect(() => {
-      const { fontFamily, fontSize, lineHeight, padding } = this.props
+      const { fontFamily, fontSize, fontWeight, lineHeight, padding } = this.props
       const { width, height } = this.measure.measureText(
         text,
-        { fontFamily, fontSize, lineHeight },
+        { fontFamily, fontSize, fontWeight, lineHeight },
         padding
       )
       this.update({ size: [width, height] })
@@ -157,6 +159,7 @@ export class TextShape extends TLTextShape<TextShapeProps> {
           style={{
             fontFamily,
             fontSize,
+            fontWeight,
             padding,
             lineHeight,
             color: stroke,
@@ -226,12 +229,13 @@ export class TextShape extends TLTextShape<TextShapeProps> {
       text = this.props.text,
       fontFamily = this.props.fontFamily,
       fontSize = this.props.fontSize,
+      fontWeight = this.props.fontWeight,
       lineHeight = this.props.lineHeight,
       padding = this.props.padding,
     } = props
     const { width, height } = this.measure.measureText(
       text,
-      { fontFamily, fontSize, lineHeight },
+      { fontFamily, fontSize, lineHeight, fontWeight },
       padding
     )
     return [width, height]

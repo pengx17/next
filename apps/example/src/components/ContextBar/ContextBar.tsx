@@ -48,6 +48,10 @@ const _ContextBar: TLContextBarComponent<Shape> = ({
     textShapes.forEach(shape => shape.update({ fontSize: +e.currentTarget.value }))
   }, [])
 
+  const updateFontWeight = React.useCallback<React.ChangeEventHandler<HTMLInputElement>>(e => {
+    textShapes.forEach(shape => shape.update({ fontWeight: +e.currentTarget.value }))
+  }, [])
+
   React.useLayoutEffect(() => {
     const elm = rContextBar.current
     if (!elm) return
@@ -116,9 +120,15 @@ const _ContextBar: TLContextBarComponent<Shape> = ({
             {textShapes.length > 0 ? (
               <>
                 <NumberInput
-                  label="Font Size"
+                  label="Size"
                   value={Math.max(...textShapes.map(shape => shape.props.fontSize))}
                   onChange={updateFontSize}
+                  style={{ width: 48 }}
+                />
+                <NumberInput
+                  label=" Weight"
+                  value={Math.max(...textShapes.map(shape => shape.props.fontWeight))}
+                  onChange={updateFontWeight}
                   style={{ width: 48 }}
                 />
               </>
