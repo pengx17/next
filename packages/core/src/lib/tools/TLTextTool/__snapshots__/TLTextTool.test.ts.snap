@@ -2,12 +2,19 @@
 
 exports[`When using the box tool Creates a shape and transitions to select.idle after pointer up: created box 1`] = `
 TLBoxShape {
+  "canChangeAspectRatio": true,
+  "canEdit": false,
+  "canFlip": true,
+  "canResize": true,
+  "canScale": true,
+  "canUnmount": true,
   "clone": [Function],
   "getBounds": [Function],
   "getCachedSerialized": [Function],
   "getCenter": [Function],
   "getRotatedBounds": [Function],
   "getSerialized": [Function],
+  "hideCloneHandles": false,
   "hideContextBar": false,
   "hideResizeHandles": false,
   "hideRotateHandle": false,
@@ -16,21 +23,24 @@ TLBoxShape {
   "hitTestBounds": [Function],
   "hitTestLineSegment": [Function],
   "hitTestPoint": [Function],
-  "isAspectRatioLocked": false,
   "isDirty": true,
-  "canEdit": false,
-  "isStateful": false,
   "lastSerialized": Object {},
   "nonce": 0,
   "onHandleChange": [Function],
+  "onResetBounds": [Function],
   "onResize": [Function],
+  "onResizeStart": [Function],
   "props": Object {
     "id": "test_box",
-    "parentId": "page1",
+    "parentId": "page",
     "point": Array [
       100,
       100,
       0.5,
+    ],
+    "scale": Array [
+      1,
+      1,
     ],
     "size": Array [
       0,
@@ -38,10 +48,11 @@ TLBoxShape {
     ],
     "type": "box",
   },
-  "showCloneHandles": false,
-  "canUnmount": false,
+  "scale": Array [
+    1,
+    1,
+  ],
   "type": "box",
   "validateProps": [Function],
-  "version": 1,
 }
 `;

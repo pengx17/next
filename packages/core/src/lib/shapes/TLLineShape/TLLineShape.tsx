@@ -1,6 +1,5 @@
 import { makeObservable } from 'mobx'
 import type { TLHandle } from '~types'
-import type { TLShapeProps } from '~lib'
 import { TLPolylineShape, TLPolylineShapeProps } from '../TLPolylineShape'
 
 export interface TLLineShapeProps extends TLPolylineShapeProps {

@@ -62,8 +62,6 @@ export class TLApp<
     }
     if (Shapes) this.registerShapes(Shapes)
     if (Tools) this.registerTools(Tools)
-    this.history.resume()
-    if (serializedApp) this.history.deserialize(serializedApp)
     const ownShortcuts: TLShortcut<S, K>[] = [
       {
         keys: 'mod+shift+g',
@@ -146,6 +144,8 @@ export class TLApp<
       })
     )
     this.api = new TLApi(this)
+    this.history.resume()
+    if (serializedApp) this.history.deserialize(serializedApp)
     makeObservable(this)
     this.notify('mount', null)
   }
