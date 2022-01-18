@@ -1,24 +1,17 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { TLApp, TLShape, TLShapeModel } from './_TLApp'
-
-interface BoxModel extends TLShapeModel {
-  type: 'box'
-}
-
-class Box extends TLShape<BoxModel> {
-  static type = 'box'
-}
+import { TLApp } from './_TLApp'
+import { Box, testApp } from './tests/shared'
 
 describe('When creating the app', () => {
   it('creates an app with an empty state if no initial state is provided.', () => {
     const app = new TLApp()
     expect(app.document).toMatchObject({
       shapes: [],
-      assets: [],
+      selectedIds: [],
     })
     expect(app.appState).toMatchObject({
       camera: [0, 0, 1],
-      selectedIds: [],
     })
   })
 
@@ -33,11 +26,10 @@ describe('When creating the app', () => {
             point: [0, 0],
           },
         ],
-        assets: [],
+        selectedIds: [],
       },
       shapes: [Box],
     })
-    expect(app.id).toBe('app')
     expect(app.document).toMatchObject({
       shapes: [
         {
@@ -46,7 +38,7 @@ describe('When creating the app', () => {
           point: [0, 0],
         },
       ],
-      assets: [],
+      selectedIds: [],
     })
     expect(app.shapes.size).toBe(1)
     expect(app.shapes.get('box1')).toBeInstanceOf(Box)
@@ -70,7 +62,7 @@ describe('When cloning the app', () => {
             point: [0, 0],
           },
         ],
-        assets: [],
+        selectedIds: [],
       },
       shapes: [Box],
     })
@@ -85,23 +77,42 @@ describe('When cloning the app', () => {
   })
 })
 
-const testApp = new TLApp({
-  id: 'app',
-  document: {
-    shapes: [
-      {
-        id: 'box1',
-        type: 'box',
-        point: [0, 0],
-      },
-    ],
-    assets: [],
-  },
-  shapes: [Box],
+/* -------------------------------------------------- */
+/*                      TLApp API                     */
+/* -------------------------------------------------- */
+
+describe('TLApp.getShape', () => {
+  it('Gets a shape by its ID', () => {
+    const app = testApp.clone()
+    const box = app.getShape('box1')
+    expect(box).toBeInstanceOf(Box)
+  })
+
+  it('Throws error if shape is not found', () => {
+    const app = testApp.clone()
+    expect(() => app.getShape('missingBox')).toThrowError(`Shape "missingBox" not found.`)
+  })
 })
 
-describe('When creating shapes', () => {
-  it('Adds new shapes via TLApp.addShapes', () => {
+describe('TLApp.getShapeModel', () => {
+  it('Gets a shape model by its ID', () => {
+    const app = testApp.clone()
+    const box = app.getShapeModel('box1')
+    expect(box).toMatchObject({
+      id: 'box1',
+      type: 'box',
+      point: [0, 0],
+    })
+  })
+
+  it('Throws error if shape is not found', () => {
+    const app = testApp.clone()
+    expect(() => app.getShapeModel('missingBox')).toThrowError(`Shape "missingBox" not found.`)
+  })
+})
+
+describe('TLApp.addShapes', () => {
+  it('Adds new shapes to the model.', () => {
     const app = testApp.clone()
     app.addShapes([
       {
@@ -123,68 +134,45 @@ describe('When creating shapes', () => {
           point: [0, 0],
         },
       ],
-      assets: [],
+      selectedIds: [],
     })
+  })
+
+  it('Adds new TLShapes instances', () => {
+    const app = testApp.clone()
+    app.addShapes([
+      {
+        id: 'box2',
+        type: 'box',
+        point: [0, 0],
+      },
+    ])
     expect(app.shapes.size).toBe(2)
     expect(app.shapes.get('box2')).toBeInstanceOf(Box)
-    expect(app.shapes.get('box2').model).toMatchObject({
+    expect(app.shapes.get('box2')!.model).toMatchObject({
       id: 'box2',
       type: 'box',
       point: [0, 0],
     })
   })
-})
 
-describe('When cloning a shape', () => {
-  it('Adds new shapes via TLApp.clone', () => {
+  it('Throws error if a TLShapeConstructor is not found for a shape', () => {
     const app = testApp.clone()
-    app.getShape('box1').clone('box1clone1')
-    expect(app.document).toMatchObject({
-      shapes: [
+    expect(() =>
+      app.addShapes([
         {
-          id: 'box1',
-          type: 'box',
+          id: 'box2',
+          // @ts-expect-error
+          type: 'missingType',
           point: [0, 0],
         },
-        {
-          id: 'box1clone1',
-          type: 'box',
-          point: [0, 0],
-        },
-      ],
-      assets: [],
-    })
-  })
-
-  it('Adds the new shape above the cloned shape', () => {
-    const app = testApp.clone()
-    app.getShape('box1').clone('box1clone1')
-    app.getShape('box1').clone('box1clone2')
-    expect(app.document).toMatchObject({
-      shapes: [
-        {
-          id: 'box1',
-          type: 'box',
-          point: [0, 0],
-        },
-        {
-          id: 'box1clone2',
-          type: 'box',
-          point: [0, 0],
-        },
-        {
-          id: 'box1clone1',
-          type: 'box',
-          point: [0, 0],
-        },
-      ],
-      assets: [],
-    })
+      ])
+    ).toThrowError(`Shape type "missingType" is not registered.`)
   })
 })
 
-describe('When updating shapes', () => {
-  it('Updates the model via TLApp.updateShapes', () => {
+describe('TLApp.updateShapes', () => {
+  it('Updates the shapes in the model', () => {
     const app = testApp.clone()
     app.updateShapes([
       {
@@ -201,47 +189,102 @@ describe('When updating shapes', () => {
           point: [1, 1],
         },
       ],
-      assets: [],
-    })
-  })
-
-  it('Updates the model via TLShape.update', () => {
-    const app = testApp.clone()
-    const box = app.shapes.get('box1')!
-    box.update({ point: [2, 2] })
-    expect(app.document).toMatchObject({
-      shapes: [
-        {
-          id: 'box1',
-          type: 'box',
-          point: [2, 2],
-        },
-      ],
-      assets: [],
+      selectedIds: [],
     })
   })
 })
 
-describe('When deleting a shape', () => {
-  it('Removes the shape via TLApp.deleteShapes', () => {
+describe('TLApp.deleteShapes', () => {
+  it('Removes the shapes', () => {
     const app = testApp.clone()
     const boxModel = app.getShapeModel('box1')
     app.deleteShapes([boxModel])
     expect(app.document).toMatchObject({
       shapes: [],
-      assets: [],
+      selectedIds: [],
     })
     expect(app.shapes.size).toBe(0)
   })
+})
 
-  it('Removes the shape via TLShape.delete', () => {
+describe('TLApp history', () => {
+  it('Does change, undo', () => {
     const app = testApp.clone()
-    const box = app.getShape('box1')
-    box.delete()
-    expect(app.document).toMatchObject({
-      shapes: [],
-      assets: [],
-    })
-    expect(app.shapes.size).toBe(0)
+    app.debug = true
+    app.getShape('box1').update({ point: [1, 1] })
+    expect(app.getShape('box1').model.point).toMatchObject([1, 1])
+    app.undo()
+    expect(app.getShape('box1').model.point).toMatchObject([0, 0])
+  })
+
+  it('Does change, undo, redo', () => {
+    const app = testApp.clone()
+    app.debug = true
+    app.getShape('box1').update({ point: [1, 1] })
+    app.undo()
+    expect(app.getShape('box1').model.point).toMatchObject([0, 0])
+    app.redo()
+    expect(app.getShape('box1').model.point).toMatchObject([1, 1])
+  })
+
+  it('Does change, undo, undo', () => {
+    const app = testApp.clone()
+    app.debug = true
+    app.getShape('box1').update({ point: [1, 1] })
+    app.undo()
+    app.undo()
+    expect(app.getShape('box1').model.point).toMatchObject([0, 0])
+  })
+
+  it('Does change, change, undo', () => {
+    const app = testApp.clone()
+    app.debug = true
+    app.getShape('box1').update({ point: [1, 1] })
+    app.getShape('box1').update({ point: [2, 2] })
+    app.undo()
+    expect(app.getShape('box1').model.point).toMatchObject([1, 1])
+  })
+
+  it('Does change, change, undo, undo', () => {
+    const app = testApp.clone()
+    app.debug = true
+    app.getShape('box1').update({ point: [1, 1] })
+    app.getShape('box1').update({ point: [2, 2] })
+    app.undo()
+    app.undo()
+    expect(app.getShape('box1').model.point).toMatchObject([0, 0])
+  })
+
+  it('Does change, change, undo, change, undo', () => {
+    const app = testApp.clone()
+    app.debug = true
+    app.getShape('box1').update({ point: [1, 1] })
+    app.getShape('box1').update({ point: [2, 2] })
+    app.undo()
+    app.getShape('box1').update({ point: [3, 3] })
+    app.undo()
+    expect(app.getShape('box1').model.point).toMatchObject([1, 1])
+  })
+
+  it('Does change, undo, redo', () => {
+    const app = testApp.clone()
+    app.debug = true
+    app.getShape('box1').update({ point: [1, 1] })
+    app.getShape('box1').update({ point: [2, 2] })
+    app.undo()
+    app.redo()
+    expect(app.getShape('box1').model.point).toMatchObject([2, 2])
+  })
+
+  it('Does change, change, undo, undo, redo, redo', () => {
+    const app = testApp.clone()
+    app.debug = true
+    app.getShape('box1').update({ point: [1, 1] })
+    app.getShape('box1').update({ point: [2, 2] })
+    app.undo()
+    app.undo()
+    app.redo()
+    app.redo()
+    expect(app.getShape('box1').model.point).toMatchObject([2, 2])
   })
 })

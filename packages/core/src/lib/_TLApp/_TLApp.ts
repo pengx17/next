@@ -1,14 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { action, computed, makeObservable, observable, toJS } from 'mobx'
-import { uniqueId } from '~utils'
+import { action, computed, makeObservable, observable, reaction, toJS, transaction } from 'mobx'
+import type { TLEventMap } from './_types'
+import { TLHistoryManager } from './_TLHistoryManager'
+import type { TLShape, TLShapeConstructor } from './_shapes/TLShape'
+import { TLCursors } from './_TLCursors'
+import { TLRootState } from './_TLState'
+import { TLInputs } from './_TLInputs'
+import { TLViewport } from './_TLViewport'
+import type { TLToolConstructor } from '.'
 
-export type IdMap<K extends { id: string }> = Record<string, K>
-
-export interface TLHandle {
-  id: string
-  point: number[]
-}
+/* -------------------------------------------------- */
+/*                        TLApp                       */
+/* -------------------------------------------------- */
 
 export interface TLAssetModel {
   id: string
@@ -16,154 +20,164 @@ export interface TLAssetModel {
   src: string
 }
 
-export interface TLShapeModel {
-  id: string
-  type: any
-  point: number[]
-  name?: string
-  parentId?: string
-  scale?: number[]
-  rotation?: number
-  handles?: IdMap<TLHandle>
-  label?: string
-  labelPosition?: number[]
-  clipping?: number | number[]
-  assetId?: string
-  children?: string[]
-  isGhost?: boolean
-  isHidden?: boolean
-  isLocked?: boolean
-  isGenerated?: boolean
-  isSizeLocked?: boolean
-  isAspectRatioLocked?: boolean
-}
-
 export interface TLAppState {
   camera: number[]
-  selectedIds: []
 }
 
-export interface TLDocumentModel<S extends TLShapeModel, A extends TLAssetModel> {
-  shapes: S[]
-  assets: A[]
+export interface TLDocumentModel<S extends TLShape = TLShape> {
+  shapes: S['model'][]
+  selectedIds: string[]
 }
 
-export interface TLAppConstructorParams<
-  S extends TLShapeModel = TLShapeModel,
-  A extends TLAssetModel = TLAssetModel
-> {
+export interface TLAppConstructorParams<S extends TLShape = TLShape> {
   id: string
-  document: TLDocumentModel<S, A>
+  document: TLDocumentModel<S>
   shapes: TLShapeConstructor<S>[]
+  tools: TLToolConstructor<S>[]
   appState: TLAppState
+  debug: boolean
 }
 
 /* -------------------------------------------------- */
 /*                         App                        */
 /* -------------------------------------------------- */
 
-export class TLApp<S extends TLShapeModel, A extends TLAssetModel = TLAssetModel> {
-  id: string
+export class TLApp<
+  S extends TLShape = TLShape,
+  K extends TLEventMap = TLEventMap
+> extends TLRootState<S, K> {
+  constructor(params = {} as Partial<TLAppConstructorParams<S>>) {
+    super()
+    const { document, appState, debug = false, shapes = [] } = params
+    this.debug = debug
+    this.history = new TLHistoryManager(this)
+    this.shapes.clear()
+    if (shapes) this.registerShapes(shapes)
+    if (appState) this.updateAppState(appState)
+    if (document) this.loadDocument(document)
+    makeObservable(this)
+    reaction(() => toJS(this.document), this.history.persist)
+  }
 
-  @observable document: TLDocumentModel<S, A> = {
+  debug: boolean
+
+  @observable document: TLDocumentModel<S> = {
     shapes: [],
-    assets: [],
+    selectedIds: [],
   }
 
   @observable appState: TLAppState = {
     camera: [0, 0, 1],
-    selectedIds: [],
   }
 
-  @observable shapes = new Map<string, TLShape<S>>()
+  @observable shapes = new Map<string, S>()
 
+  inputs = new TLInputs()
+
+  viewport = new TLViewport()
+
+  cursors = new TLCursors()
+
+  /** A manager for history, i.e. undo and redo */
+  history: TLHistoryManager<S, K>
+
+  /** Undo to the previous frame. */
+  @action undo = () => this.history.undo()
+
+  /** Redo to the next frame. */
+  @action redo = () => this.history.redo()
+
+  /** Pause the history. Any further changes will be coalesced into the current frame. */
+  pause = () => this.history.pause()
+
+  /** Unpause the history. The next change will produce a new frame. */
+  unpause = () => this.history.unpause()
+
+  /** A map of registered shape constructors */
   private registeredShapes = new Map<string, TLShapeConstructor<S>>()
-
-  constructor(params = {} as Partial<TLAppConstructorParams<S, A>>) {
-    const { id = 'app', document, appState, shapes = [] } = params
-    this.id = id
-    this.shapes.clear()
-    if (shapes) this.registerShapes(shapes)
-    if (appState) this.updateAppState(appState)
-    if (document) this.loadModel(document)
-    makeObservable(this)
-  }
 
   /** Register a shape constructor. */
   @action registerShapes(shapeCtors: TLShapeConstructor<S>[]) {
     shapeCtors.forEach(shapeCtor => this.registeredShapes.set(shapeCtor.type, shapeCtor))
+    return this
+  }
+
+  /** A map of registered tool constructors */
+  private registeredTools = new Map<string, TLShapeConstructor<S>>()
+
+  /** Register a tool constructor. */
+  @action registerTools(toolCtors: TLShapeConstructor<S>[]) {
+    toolCtors.forEach(toolCtor => this.registeredShapes.set(toolCtor.type, toolCtor))
+    return this
   }
 
   /** Load a document model. */
-  @action loadModel(model: TLDocumentModel<S, A>) {
-    this.document.assets = []
-    this.document.shapes = []
-    this.addAssets(model.assets)
-    this.addShapes(model.shapes)
+  @action loadDocument(model: TLDocumentModel<S>) {
+    transaction(() => {
+      this.document.shapes = []
+      this.document.selectedIds = []
+      this.addShapes(model.shapes)
+      this.setSelectedShapes(model.selectedIds)
+    })
+    this.history.reset()
+    return this
   }
 
-  @action updateAppState(appState: TLAppState) {
+  /** Apply a change to the app state. */
+  @action updateAppState(appState: Partial<TLAppState>) {
     Object.assign(this.appState, appState)
+    return this
+  }
+
+  @action setSelectedShapes(selectedIds: string[]) {
+    this.document.selectedIds = selectedIds
+    return this
   }
 
   /** Add shapes to the document model. */
-  @action addShapes(shapeModels: S[], index = this.document.shapes.length) {
+  @action addShapes(shapeModels: S['model'][], index = this.document.shapes.length) {
     this.document.shapes.splice(index, 0, ...shapeModels)
     shapeModels.forEach(shapeModel => {
       const ShapeCtor = this.registeredShapes.get(shapeModel.type)
-      if (!ShapeCtor) throw Error(`Shape type "${shapeModel.type}" is not registered.`)
+      if (!ShapeCtor) throw new Error(`Shape type "${shapeModel.type}" is not registered.`)
       this.shapes.set(shapeModel.id, new ShapeCtor(this, shapeModel.id))
     })
+    return this
   }
 
   /** Delete shapes from the document model. */
-  @action deleteShapes(shapeModels: S[]) {
-    shapeModels.forEach(shapeModel => this.shapes.delete(shapeModel.id))
-    this.document.shapes = this.document.shapes.filter(
-      shapeModel => !shapeModels.includes(shapeModel)
-    )
+  @action deleteShapes(shapeModels: S['model'][]) {
+    const { shapes, document } = this
+    shapeModels.forEach(shapeModel => {
+      shapes.delete(shapeModel.id)
+      document.shapes.splice(document.shapes.indexOf(shapeModel), 1)
+    })
+    return this
   }
 
   /** Update shapes in the document model. */
-  @action updateShapes(shapeModels: S[]) {
+  @action updateShapes(shapeModels: S['model'][]) {
     shapeModels.forEach(shapeModel => {
       const shape = this.shapes.get(shapeModel.id)
       if (shape) shape.update(shapeModel)
     })
-  }
-
-  /** Add assets to the document model. */
-  @action addAssets(assetModels: A[]) {
-    this.document.assets.push(...assetModels)
-  }
-
-  /** Delete assets from the document model. */
-  @action deleteAssets(assetModels: A[]) {
-    this.document.assets = this.document.assets.filter(
-      assetModel => !assetModels.includes(assetModel)
-    )
-  }
-
-  /** Update assets in the document model. */
-  @action updateAssets(assetModels: A[]) {
-    assetModels.forEach(assetModel => {
-      const asset = this.document.assets.find(asset => asset.id === assetModel.id)
-      if (asset) Object.assign(asset, assetModel)
-    })
+    return this
   }
 
   /** Get the model for a shape by its Id. */
-  getShapeModel = (id: string): S => {
-    const shape = this.shapes.get(id)
-    if (!shape) throw Error(`Shape "${id}" not found.`)
-    return shape.model
+  getShapeModel = (id: string): S['model'] => {
+    return this.getShape(id).model
   }
 
   /** Get a shape by its Id. */
-  getShape = <T extends S>(id: string) => this.shapes.get(id) as TLShape<T>
+  getShape = <T extends S>(id: string): T => {
+    const shape = this.shapes.get(id) as T
+    if (!shape) throw new Error(`Shape "${id}" not found.`)
+    return shape
+  }
 
   /** Clone the app into a new TLApp instance. */
-  clone = () => {
+  clone = (): TLApp<S, K> => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return new this.constructor({
@@ -172,49 +186,12 @@ export class TLApp<S extends TLShapeModel, A extends TLAssetModel = TLAssetModel
       shapes: Array.from(this.registeredShapes.values()),
     })
   }
-}
 
-/* -------------------------------------------------- */
-/*                        Shape                       */
-/* -------------------------------------------------- */
-
-export interface TLShapeConstructor<S extends TLShapeModel> {
-  new (app: TLApp<S>, id: string): TLShape<S>
-  type: string
-}
-
-export class TLShape<S extends TLShapeModel> {
-  static type = 'shape'
-
-  constructor(public app: TLApp<S>, public id: string) {
-    makeObservable(this)
+  get selectedIds() {
+    return this.document.selectedIds
   }
 
-  @computed get model(): S {
-    const { id, app } = this
-    return app.document.shapes.find(shapeModel => shapeModel.id === id)! as S
-  }
-
-  @computed get zIndex(): number {
-    const { id, app } = this
-    return app.document.shapes.findIndex(shapeModel => shapeModel.id === id)
-  }
-
-  /** Update the shape's props. */
-  @action update(change: Partial<S>) {
-    Object.assign(this.model, change)
-  }
-
-  /** Delete this shape. */
-  delete = () => {
-    this.app.deleteShapes([this.model])
-    return this
-  }
-
-  /** Create a new shape from this shape's props. Returns the new shape. */
-  clone = (id = uniqueId()) => {
-    const { app, model } = this
-    app.addShapes([{ ...model, id }], this.zIndex + 1)
-    return app.shapes.get(id)
+  @computed get selectedShapes() {
+    return this.selectedIds.map(id => this.getShape(id))
   }
 }
