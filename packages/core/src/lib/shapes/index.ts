@@ -1,4 +1,4 @@
-export * from './TLShape'
+export * from '../TLShape'
 export * from './TLBoxShape'
 export * from './TLDrawShape'
 export * from './TLDotShape'

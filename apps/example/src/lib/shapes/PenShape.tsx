@@ -19,7 +19,7 @@ export class PenShape extends TLDrawShape<PenShapeProps> {
 
   static id = 'draw'
 
-  static defaultProps: PenShapeProps = {
+  static defaultModel: PenShapeProps = {
     id: 'draw',
     parentId: 'page',
     type: 'draw',

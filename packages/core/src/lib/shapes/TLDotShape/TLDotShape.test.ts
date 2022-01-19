@@ -1,25 +1,41 @@
-import type { TLDotShapeProps } from '.'
-import { TLDotShape } from './TLDotShape'
+import { TLDotShapeModel, TLDotShape } from './TLDotShape'
+import { TLApp } from '~lib'
+
+export interface DotShapeProps extends TLDotShapeModel {
+  stroke: string
+}
+
+export class DotShape extends TLDotShape<DotShapeProps> {
+  static type = 'dot'
+
+  static defaultModel: DotShapeProps = {
+    id: 'dot',
+    type: 'dot',
+    radius: 3,
+    point: [0, 0],
+    stroke: 'black',
+  }
+}
 
 describe('A minimal test', () => {
   it('Creates the shape', () => {
-    interface DotShapeProps extends TLDotShapeProps {
-      stroke: string
-    }
+    const app = new TLApp({
+      document: {
+        shapes: [
+          {
+            id: 'dot1',
+            type: 'dot',
+            point: [0, 0],
+            radius: 3,
+            stroke: 'black',
+          },
+        ],
+        selectedIds: [],
+      },
+      shapes: [DotShape],
+    })
 
-    class Shape extends TLDotShape<DotShapeProps> {
-      static defaultProps: DotShapeProps = {
-        id: 'dot',
-        type: 'dot',
-        parentId: 'page',
-        point: [0, 0],
-        radius: 4,
-        stroke: 'black',
-      }
-    }
-
-    const shape = new Shape()
-    expect(shape).toBeDefined()
-    expect(shape.props.stroke).toBe('black')
+    expect(app.getShape('dot1')).toBeDefined()
+    expect(app.getShape('dot1').model.stroke).toBe('black')
   })
 })

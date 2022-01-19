@@ -14,7 +14,7 @@ export interface ImageShapeProps extends TLImageShapeProps, CustomStyleProps {
 export class ImageShape extends TLImageShape<ImageShapeProps> {
   static id = 'image'
 
-  static defaultProps: ImageShapeProps = {
+  static defaultModel: ImageShapeProps = {
     id: 'image1',
     parentId: 'page',
     type: 'image',

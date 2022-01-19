@@ -1,7 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { TLEventInfo, TLTargetType } from '~types'
 import {
+  TLApp,
+  TLDisplayState,
+  TLUserState,
   TLBoxShape,
-  TLDocumentModel,
   TLDotShape,
   TLDrawShape,
   TLEllipseShape,
@@ -9,16 +13,26 @@ import {
   TLPolygonShape,
   TLPolylineShape,
   TLStarShape,
-  TLApp,
   TLBoxTool,
   TLDotTool,
   TLDrawTool,
   TLEraseTool,
   TLLineTool,
   TLSelectTool,
+  TLAppConstructorParams,
+  TLBoxShapeModel,
 } from '~lib'
-import { TLEventInfo, TLTargetType } from '~types'
-import { TLTestEditableBox } from './TLTestEditableBox'
+
+export class TestEditableBox extends TLBoxShape<TLBoxShapeModel> {
+  static type = 'editable-box'
+  isEditable = true
+}
+
+export class TestEditableBoxTool extends TLBoxTool<TLBoxShape, any> {
+  static id = 'editable-box'
+  static shortcut = ['x']
+  Shape = TLBoxShape
+}
 
 export class SelectTool extends TLSelectTool {
   static id = 'select'
@@ -68,7 +82,7 @@ interface PointerOptions {
 }
 
 type S =
-  | TLTestEditableBox
+  | TestEditableBox
   | TLBoxShape
   | TLDrawShape
   | TLDotShape
@@ -81,11 +95,33 @@ type S =
 const CANVAS_INFO_TYPE: TLEventInfo<S> = { type: TLTargetType.Canvas }
 
 export class TLTestApp extends TLApp<S> {
-  constructor(serializedApp: TLDocumentModel = defaultModel) {
-    super(
-      serializedApp,
-      [
-        TLTestEditableBox,
+  constructor(params = {} as Partial<TLAppConstructorParams<S>>) {
+    super({
+      document: {
+        selectedIds: [],
+        shapes: [
+          {
+            id: 'box1',
+            type: 'box',
+            point: [0, 0],
+            size: [100, 100],
+          },
+          {
+            id: 'box2',
+            type: 'box',
+            point: [250, 250],
+            size: [100, 100],
+          },
+          {
+            id: 'box3',
+            type: 'box',
+            point: [300, 300], // Overlapping box2
+            size: [100, 100],
+          },
+        ],
+      },
+      shapes: [
+        TestEditableBox,
         TLBoxShape,
         TLDrawShape,
         TLDotShape,
@@ -95,8 +131,10 @@ export class TLTestApp extends TLApp<S> {
         TLPolygonShape,
         TLStarShape,
       ],
-      [BoxTool, EraseTool, LineTool, DotTool, DrawTool]
-    )
+      tools: [BoxTool, EraseTool, LineTool, DotTool, DrawTool, TestEditableBoxTool],
+      ...params,
+    })
+
     this.viewport.updateBounds({
       minX: 0,
       minY: 0,
@@ -206,7 +244,7 @@ export class TLTestApp extends TLApp<S> {
 
   getInfo = (info: string | TLEventInfo<S>): TLEventInfo<S> => {
     return typeof info === 'string'
-      ? { type: TLTargetType.Shape, shape: this.getShapeById(info), order: 0 }
+      ? { type: TLTargetType.Shape, shape: this.getShape(info), order: 0 }
       : info
   }
 
@@ -247,10 +285,20 @@ export class TLTestApp extends TLApp<S> {
   }
 
   getShapesById(ids: string[]) {
-    return ids.map(id => this.getShapeById(id))
+    return ids.map(id => this.getShape(id))
   }
 
   // Tests
+
+  expectHoveredIdToBe = (b: string) => {
+    expect(this.userState.hoveredId).toBe(b)
+    return this
+  }
+
+  expectEditingIdToBe = (b: string) => {
+    expect(this.userState.editingId).toBe(b)
+    return this
+  }
 
   expectSelectedIdsToBe = (b: string[]) => {
     expect(new Set(this.selectedIds)).toEqual(new Set(b))
@@ -258,79 +306,62 @@ export class TLTestApp extends TLApp<S> {
   }
 
   expectSelectedShapesToBe = (b: string[] | S[]) => {
-    if (b[0] && typeof b[0] === 'string') b = b.map(id => this.getShapeById(id as string))
+    if (b[0] && typeof b[0] === 'string') b = b.map(id => this.getShape(id as string))
     expect(new Set(this.selectedShapes)).toEqual(new Set(b as S[]))
     return this
   }
 
-  expectShapesToBeDefined = (ids: string[], pageId?: string) => {
-    ids.forEach(id => expect(this.getShapeById(id, pageId)).toBeDefined())
+  expectShapesToBeDefined = (ids: string[]) => {
+    ids.forEach(id => expect(this.getShape(id)).toBeDefined())
     return this
   }
 
-  expectShapesToBeUndefined = (ids: string[], pageId?: string) => {
-    const page = this.getPageById(pageId ?? this.currentPage.id)!
-    ids.forEach(id => expect(page.shapes.find(s => s.id === id)).toBeUndefined())
+  expectShapesToBeUndefined = (ids: string[]) => {
+    ids.forEach(id => expect(this.getShape(id)).toBeUndefined())
     return this
   }
 
-  expectShapesToBeAtPoints = (shapes: Record<string, number[]>, pageId?: string) => {
+  expectShapesToBeAtPoints = (shapes: Record<string, number[]>) => {
     Object.entries(shapes).forEach(([id, point]) => {
-      expect(this.getShapeById(id, pageId)?.props.point).toEqual(point)
+      expect(this.getShape(id)?.model.point).toEqual(point)
     })
     return this
   }
 
-  expectShapesToHaveProps = <T extends S>(
-    shapes: Record<string, Partial<T['props']>>,
-    pageId?: string
-  ) => {
-    Object.entries(shapes).forEach(([id, props]) => {
-      const shape = this.getShapeById<T>(id, pageId)
+  expectShapesToHaveProps = <T extends S>(shapes: Record<string, Partial<T['model']>>) => {
+    Object.entries(shapes).forEach(([id, model]) => {
+      const shape = this.getShape<T>(id)
       if (!shape) throw Error('That shape does not exist.')
-      Object.entries(props).forEach(([key, value]) => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        expect(shape.props[key]).toEqual(value)
+      Object.entries(model).forEach(([key, value]) => {
+        expect(shape.model[key]).toEqual(value)
       })
     })
     return this
   }
 
   expectShapesInOrder = (...ids: string[]) => {
-    ids.forEach((id, i) => expect(this.shapes.indexOf(this.getShapeById(id))).toBe(i))
+    ids.forEach((id, i) => expect(this.document.shapes.indexOf(this.getShape(id).model)).toBe(i))
     return this
   }
-}
 
-const defaultModel: TLDocumentModel = {
-  currentPageId: 'page1',
-  selectedIds: [],
-  pages: [
-    {
-      name: 'Page',
-      id: 'page1',
-      shapes: [
-        {
-          id: 'box1',
-          type: 'box',
-          parentId: 'page1',
-          point: [0, 0],
-        },
-        {
-          id: 'box2',
-          type: 'box',
-          parentId: 'page1',
-          point: [250, 250],
-        },
-        {
-          id: 'box3',
-          type: 'editable-box',
-          parentId: 'page1',
-          point: [300, 300], // Overlapping box2
-        },
-      ],
-      bindings: [],
-    },
-  ],
+  expectToBeIn = (path: string) => {
+    expect(this.isIn(path)).toBe(true)
+    return this
+  }
+
+  expectUserStateToBe = (partial: Partial<TLUserState>) => {
+    for (const key in partial) {
+      expect(this.userState[key as keyof TLUserState]).toEqual(partial[key as keyof TLUserState])
+    }
+    return this
+  }
+
+  expectDisplayStateToBe = (partial: Partial<TLDisplayState>) => {
+    for (const key in partial) {
+      expect(this.displayState[key as keyof TLDisplayState]).toEqual(
+        partial[key as keyof TLDisplayState]
+      )
+    }
+    return this
+  }
 }

@@ -13,7 +13,7 @@ export interface EllipseShapeProps extends TLEllipseShapeProps, CustomStyleProps
 export class EllipseShape extends TLEllipseShape<EllipseShapeProps> {
   static id = 'ellipse'
 
-  static defaultProps: EllipseShapeProps = {
+  static defaultModel: EllipseShapeProps = {
     id: 'ellipse',
     parentId: 'page',
     type: 'ellipse',

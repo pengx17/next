@@ -17,9 +17,9 @@ export abstract class TLBoxTool<
   cursor = TLCursor.Cross
 
   abstract Shape: {
-    new (props: Partial<T['props']>): T
+    new (app: TLApp, id: string): T
+    type: string
     aspectRatio?: number
-    id: string
-    defaultProps: T['props']
+    defaultModel: T['model']
   }
 }

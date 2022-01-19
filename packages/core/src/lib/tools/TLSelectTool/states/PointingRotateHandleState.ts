@@ -25,7 +25,9 @@ export class PointingRotateHandleState<
   }
 
   onPointerMove: TLEvents<S>['pointer'] = () => {
-    const { currentPoint, originPoint } = this.app.inputs
+    const {
+      userState: { currentPoint, originPoint },
+    } = this.app
     if (Vec.dist(currentPoint, originPoint) > 5) {
       this.tool.transition('rotating', { handle: this.handle })
     }
@@ -40,6 +42,10 @@ export class PointingRotateHandleState<
   }
 
   private updateCursor() {
-    this.app.cursors.setCursor(CURSORS[this.handle], this.app.selectionRotation)
+    const {
+      cursors,
+      userState: { selectionRotation },
+    } = this.app
+    cursors.setCursor(CURSORS[this.handle], selectionRotation)
   }
 }

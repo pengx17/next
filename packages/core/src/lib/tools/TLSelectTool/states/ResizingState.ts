@@ -18,7 +18,7 @@ export class ResizingState<
   private snapshots: Record<
     string,
     {
-      props: TLShapeModel<S['props']>
+      model: TLShapeModel
       bounds: TLBounds
       transformOrigin: number[]
       innerTransformOrigin: number[]
@@ -62,7 +62,7 @@ export class ResizingState<
       selectedShapesArray.map(shape => BoundsUtils.getBoundsCenter(shape.bounds))
     )
     this.isSingle = selectedShapesArray.length === 1
-    this.selectionRotation = this.isSingle ? selectedShapesArray[0].props.rotation ?? 0 : 0
+    this.selectionRotation = this.isSingle ? selectedShapesArray[0].model.rotation ?? 0 : 0
     this.initialCommonBounds = { ...selectionBounds }
     this.snapshots = Object.fromEntries(
       selectedShapesArray.map(shape => {
@@ -71,7 +71,7 @@ export class ResizingState<
         return [
           shape.id,
           {
-            props: shape.serialized,
+            model: shape.model,
             bounds,
             transformOrigin: [
               (cx - this.initialCommonBounds.minX) / this.initialCommonBounds.width,
@@ -82,8 +82,8 @@ export class ResizingState<
               (cy - initialInnerBounds.minY) / initialInnerBounds.height,
             ],
             isAspectRatioLocked:
-              shape.props.isAspectRatioLocked ||
-              Boolean(!shape.canChangeAspectRatio || shape.props.rotation),
+              shape.model.isAspectRatioLocked ||
+              Boolean(!shape.canChangeAspectRatio || shape.model.rotation),
           },
         ]
       })
@@ -105,7 +105,7 @@ export class ResizingState<
 
   onPointerMove: TLEvents<S>['pointer'] = () => {
     const {
-      inputs: { altKey, shiftKey, ctrlKey, originPoint, currentPoint },
+      userState: { altKey, shiftKey, ctrlKey, originPoint, currentPoint },
     } = this.app
     const { handle, snapshots, initialCommonBounds } = this
     let delta = Vec.sub(currentPoint, originPoint)
@@ -117,8 +117,8 @@ export class ResizingState<
       shiftKey ||
       (this.isSingle &&
         (ctrlKey
-          ? !('clipping' in firstShape.props)
-          : !firstShape.canChangeAspectRatio || firstShape.props.isAspectRatioLocked))
+          ? !('clipping' in firstShape.model)
+          : !firstShape.canChangeAspectRatio || firstShape.model.isAspectRatioLocked))
     let nextBounds = BoundsUtils.getTransformedBoundingBox(
       initialCommonBounds,
       handle,
@@ -150,7 +150,7 @@ export class ResizingState<
     this.app.selectedShapes.forEach(shape => {
       const {
         isAspectRatioLocked,
-        props: initialShapeProps,
+        model: initialShapeProps,
         bounds: initialShapeBounds,
         transformOrigin,
         innerTransformOrigin,
@@ -163,7 +163,7 @@ export class ResizingState<
         scaleY < 0
       )
       // If the shape can't resize and it's the only shape selected, bail
-      if (!(shape.canResize || shape.props.isSizeLocked) && this.isSingle) {
+      if (!(shape.canResize || shape.model.isSizeLocked) && this.isSingle) {
         return
       }
       let scale = [scaleX, scaleY]
@@ -182,7 +182,7 @@ export class ResizingState<
         rotation *= -1
       }
       // If the shape is aspect ratio locked or size locked...
-      if (isAspectRatioLocked || !shape.canResize || shape.props.isSizeLocked) {
+      if (isAspectRatioLocked || !shape.canResize || shape.model.isSizeLocked) {
         relativeBounds.width = initialShapeBounds.width
         relativeBounds.height = initialShapeBounds.height
         if (isAspectRatioLocked) {
@@ -219,7 +219,7 @@ export class ResizingState<
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
     this.app.history.resume()
-    this.app.persist()
+    // this.app.persist()
     this.tool.transition('idle')
   }
 
@@ -227,7 +227,7 @@ export class ResizingState<
     switch (e.key) {
       case 'Escape': {
         this.app.selectedShapes.forEach(shape => {
-          shape.update({ ...this.snapshots[shape.id].props })
+          shape.update({ ...this.snapshots[shape.id].model })
         })
         this.tool.transition('idle')
         break
@@ -238,15 +238,18 @@ export class ResizingState<
   private updateCursor(scaleX: number, scaleY: number) {
     const isFlippedX = scaleX < 0 && scaleY >= 0
     const isFlippedY = scaleY < 0 && scaleX >= 0
+    const {
+      userState: { cursor },
+    } = this.app
     switch (this.handle) {
       case TLResizeCorner.TopLeft:
       case TLResizeCorner.BottomRight: {
         if (isFlippedX || isFlippedY) {
-          if (this.app.cursors.cursor === TLCursor.NwseResize) {
+          if (cursor === TLCursor.NwseResize) {
             this.app.cursors.setCursor(TLCursor.NeswResize, this.app.selectionBounds?.rotation)
           }
         } else {
-          if (this.app.cursors.cursor === TLCursor.NeswResize) {
+          if (cursor === TLCursor.NeswResize) {
             this.app.cursors.setCursor(TLCursor.NwseResize, this.app.selectionBounds?.rotation)
           }
         }
@@ -255,11 +258,11 @@ export class ResizingState<
       case TLResizeCorner.TopRight:
       case TLResizeCorner.BottomLeft: {
         if (isFlippedX || isFlippedY) {
-          if (this.app.cursors.cursor === TLCursor.NeswResize) {
+          if (cursor === TLCursor.NeswResize) {
             this.app.cursors.setCursor(TLCursor.NwseResize, this.app.selectionBounds?.rotation)
           }
         } else {
-          if (this.app.cursors.cursor === TLCursor.NwseResize) {
+          if (cursor === TLCursor.NwseResize) {
             this.app.cursors.setCursor(TLCursor.NeswResize, this.app.selectionBounds?.rotation)
           }
         }

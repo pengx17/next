@@ -6,26 +6,26 @@ import {
   intersectPolylineBounds,
   TLBounds,
 } from '@tldraw/intersect'
-import type { TLHandle } from '~types'
 import { BoundsUtils, PointUtils, PolygonUtils } from '~utils'
-import { TLShapeProps, TLResizeInfo, TLShape } from '../TLShape'
+import { TLShape, TLShapeModel, TLResizeInfo } from '../../TLShape'
+import type { TLApp } from '../../TLApp'
+import type { TLHandle } from '~types'
 
-export interface TLPolylineShapeProps extends TLShapeProps {
+export interface TLPolylineShapeModel extends TLShapeModel {
   handles: TLHandle[]
 }
 
 export class TLPolylineShape<
-  P extends TLPolylineShapeProps = TLPolylineShapeProps,
-  M = any
-> extends TLShape<P, M> {
-  constructor(props = {} as Partial<P>) {
-    super(props)
+  P extends TLPolylineShapeModel = TLPolylineShapeModel
+> extends TLShape<P> {
+  constructor(public app: TLApp, public id: string) {
+    super(app, id)
     makeObservable(this)
   }
 
-  static id = 'polyline'
+  static type = 'polyline'
 
-  static defaultProps: TLPolylineShapeProps = {
+  static defaultModel: TLPolylineShapeModel = {
     id: 'polyline',
     type: 'polyline',
     parentId: 'page',
@@ -34,7 +34,7 @@ export class TLPolylineShape<
   }
 
   @computed get points() {
-    return this.props.handles.map(h => h.point)
+    return this.model.handles.map(h => h.point)
   }
 
   @computed get centroid() {
@@ -45,16 +45,17 @@ export class TLPolylineShape<
   @computed get rotatedPoints() {
     const {
       centroid,
-      props: { handles, rotation },
+      points,
+      model: { handles, rotation },
     } = this
-    if (!rotation) return this.points
+    if (!rotation) return points
     return handles.map(h => Vec.rotWith(h.point, centroid, rotation))
   }
 
   getBounds = (): TLBounds => {
     const {
       points,
-      props: { point },
+      model: { point },
     } = this
     return BoundsUtils.translateBounds(BoundsUtils.getBoundsFromPoints(points), point)
   }
@@ -62,7 +63,7 @@ export class TLPolylineShape<
   getRotatedBounds = (): TLBounds => {
     const {
       rotatedPoints,
-      props: { point },
+      model: { point },
     } = this
     return BoundsUtils.translateBounds(BoundsUtils.getBoundsFromPoints(rotatedPoints), point)
   }
@@ -71,10 +72,10 @@ export class TLPolylineShape<
 
   onResizeStart = () => {
     const {
-      props: { handles },
+      model: { handles },
       bounds,
     } = this
-    this.scale = [...(this.props.scale ?? [1, 1])]
+    this.scale = [...(this.model.scale ?? [1, 1])]
     const size = [bounds.width, bounds.height]
     this.normalizedHandles = handles.map(h => Vec.divV(h.point, size))
     return this
@@ -86,7 +87,7 @@ export class TLPolylineShape<
       scale: [scaleX, scaleY],
     } = info
     const {
-      props: { handles },
+      model: { handles },
       normalizedHandles,
     } = this
     const size = [bounds.width, bounds.height]
@@ -105,14 +106,14 @@ export class TLPolylineShape<
 
   hitTestPoint = (point: number[]): boolean => {
     const { points } = this
-    return PointUtils.pointNearToPolyline(Vec.sub(point, this.props.point), points)
+    return PointUtils.pointNearToPolyline(Vec.sub(point, this.model.point), points)
   }
 
   hitTestLineSegment = (A: number[], B: number[]): boolean => {
     const {
       bounds,
       points,
-      props: { point },
+      model: { point },
     } = this
     if (
       PointUtils.pointInBounds(A, bounds) ||
@@ -133,7 +134,7 @@ export class TLPolylineShape<
     const {
       rotatedBounds,
       points,
-      props: { point },
+      model: { point },
     } = this
     const oBounds = BoundsUtils.translateBounds(bounds, Vec.neg(point))
     return (
@@ -144,9 +145,9 @@ export class TLPolylineShape<
     )
   }
 
-  validateProps = (props: Partial<P>) => {
-    if (props.point) props.point = [0, 0]
-    if (props.handles !== undefined && props.handles.length < 1) props.handles = [{ point: [0, 0] }]
-    return props
+  validateProps = (model: Partial<P>) => {
+    if (model.point) model.point = [0, 0]
+    if (model.handles !== undefined && model.handles.length < 1) model.handles = [{ point: [0, 0] }]
+    return model
   }
 }

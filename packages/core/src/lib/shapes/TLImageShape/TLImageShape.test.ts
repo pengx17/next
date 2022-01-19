@@ -1,28 +1,47 @@
-import type { TLImageShapeProps } from '.'
-import { TLImageShape } from './TLImageShape'
+import { TLImageShapeModel, TLImageShape } from './TLImageShape'
+import { TLApp } from '~lib'
+
+export interface ImageShapeModel extends TLImageShapeModel {
+  stroke: string
+}
+
+export class ImageShape extends TLImageShape<ImageShapeModel> {
+  static type = 'image'
+
+  static defaultModel: ImageShapeModel = {
+    id: 'image',
+    type: 'image',
+    point: [0, 0],
+    size: [100, 100],
+    clipping: 0,
+    objectFit: 'fill',
+    assetId: '',
+    stroke: 'black',
+  }
+}
 
 describe('A minimal test', () => {
   it('Creates the shape', () => {
-    interface ImageShapeProps extends TLImageShapeProps {
-      stroke: string
-    }
+    const app = new TLApp({
+      document: {
+        shapes: [
+          {
+            id: 'image1',
+            type: 'image',
+            point: [0, 0],
+            size: [100, 100],
+            clipping: 0,
+            objectFit: 'fill',
+            assetId: '',
+            stroke: 'black',
+          },
+        ],
+        selectedIds: [],
+      },
+      shapes: [ImageShape],
+    })
 
-    class Shape extends TLImageShape<ImageShapeProps> {
-      static defaultProps: ImageShapeProps = {
-        id: 'image',
-        type: 'image',
-        parentId: 'page',
-        point: [0, 0],
-        size: [100, 100],
-        stroke: 'black',
-        clipping: 0,
-        objectFit: 'none',
-        assetId: '',
-      }
-    }
-
-    const shape = new Shape()
-    expect(shape).toBeDefined()
-    expect(shape.props.stroke).toBe('black')
+    expect(app.getShape('image1')).toBeDefined()
+    expect(app.getShape('image1').model.stroke).toBe('black')
   })
 })

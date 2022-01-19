@@ -12,7 +12,7 @@ interface PolygonShapeProps extends TLPolygonShapeProps, CustomStyleProps {
 export class PolygonShape extends TLPolygonShape<PolygonShapeProps> {
   static id = 'polygon'
 
-  static defaultProps: PolygonShapeProps = {
+  static defaultModel: PolygonShapeProps = {
     id: 'polygon',
     parentId: 'page',
     type: 'polygon',

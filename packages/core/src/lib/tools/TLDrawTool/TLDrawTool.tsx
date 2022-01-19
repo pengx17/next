@@ -1,5 +1,5 @@
 import { IdleState, CreatingState } from './states'
-import { TLTool, TLApp, TLShape, TLDrawShape, TLDrawShapeProps } from '~lib'
+import { TLTool, TLApp, TLShape, TLDrawShape, TLDrawShapeModel } from '~lib'
 import { TLCursor, TLEventMap } from '~types'
 
 export abstract class TLDrawTool<
@@ -25,7 +25,8 @@ export abstract class TLDrawTool<
   previousShape?: T
 
   abstract Shape: {
-    new (props: TLDrawShapeProps): T
-    id: string
+    new (app: TLApp, id: string): T
+    type: string
+    defaultModel: T['model']
   }
 }

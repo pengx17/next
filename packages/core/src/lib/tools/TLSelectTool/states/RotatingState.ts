@@ -39,23 +39,28 @@ export class RotatingState<
   handle = '' as TLSelectionHandle
 
   onEnter = (info: TLEventSelectionInfo) => {
-    const { history, selectedShapesArray, selectionBounds } = this.app
+    const {
+      history,
+      selectedShapesArray,
+      selectionBounds,
+      userState: { selectionRotation, currentPoint },
+    } = this.app
 
     if (!selectionBounds) throw Error('Expected selected bounds.')
 
     history.pause()
     this.handle = info.handle
-    this.initialSelectionRotation = this.app.selectionRotation
+    this.initialSelectionRotation = selectionRotation
     this.initialCommonBounds = { ...selectionBounds }
     this.initialCommonCenter = BoundsUtils.getBoundsCenter(selectionBounds)
-    this.initialAngle = Vec.angle(this.initialCommonCenter, this.app.inputs.currentPoint)
+    this.initialAngle = Vec.angle(this.initialCommonCenter, currentPoint)
     this.snapshot = Object.fromEntries(
       selectedShapesArray.map(shape => [
         shape.id,
         {
-          point: [...shape.props.point],
+          point: [...shape.model.point],
           center: [...shape.center],
-          rotation: shape.props.rotation,
+          rotation: shape.model.rotation,
           handles: 'handles' in shape ? deepCopy((shape as any).handles) : undefined,
         },
       ])
@@ -76,7 +81,7 @@ export class RotatingState<
   onPointerMove: TLEvents<S>['pointer'] = () => {
     const {
       selectedShapes,
-      inputs: { shiftKey, currentPoint },
+      userState: { shiftKey, currentPoint },
     } = this.app
 
     const { snapshot, initialCommonCenter, initialAngle, initialSelectionRotation } = this
@@ -127,15 +132,17 @@ export class RotatingState<
     })
 
     const selectionRotation = GeomUtils.clampRadians(initialSelectionRotation + angleDelta)
-    this.app.setSelectionRotation(
-      shiftKey ? GeomUtils.snapAngleToSegments(selectionRotation, 24) : selectionRotation
-    )
+    this.app.updateUserState({
+      selectionRotation: shiftKey
+        ? GeomUtils.snapAngleToSegments(selectionRotation, 24)
+        : selectionRotation,
+    })
     this.updateCursor()
   }
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
     this.app.history.resume()
-    this.app.persist()
+    // this.app.persist()
     this.tool.transition('idle')
   }
 
@@ -152,6 +159,10 @@ export class RotatingState<
   }
 
   private updateCursor() {
-    this.app.cursors.setCursor(CURSORS[this.handle], this.app.selectionRotation)
+    const {
+      cursors,
+      userState: { selectionRotation },
+    } = this.app
+    cursors.setCursor(CURSORS[this.handle], selectionRotation)
   }
 }

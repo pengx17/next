@@ -12,26 +12,32 @@ export class PointingState<
   static id = 'pointing'
 
   onEnter = () => {
-    const { currentPoint } = this.app.inputs
+    const {
+      userState: { currentPoint },
+      displayState: { shapesInViewport },
+    } = this.app
 
-    this.app.setErasingShapes(
-      this.app.shapesInViewport.filter(shape => shape.hitTestPoint(currentPoint))
-    )
+    this.app.updateUserState({
+      erasingShapeIds: shapesInViewport
+        .filter(shape => shape.hitTestPoint(currentPoint))
+        .map(shape => shape.id),
+    })
   }
 
   onPointerMove: TLStateEvents<S, K>['onPointerDown'] = () => {
-    const { currentPoint, originPoint } = this.app.inputs
+    const {
+      userState: { currentPoint, originPoint },
+    } = this.app
     if (Vec.dist(currentPoint, originPoint) > 5) {
       this.tool.transition('erasing')
-
       this.app.setSelectedShapes([])
     }
   }
 
   onPointerUp: TLStateEvents<S, K>['onPointerUp'] = () => {
-    const shapesToDelete = [...this.app.erasingShapes]
-    this.app.setErasingShapes([])
-    this.app.deleteShapes(shapesToDelete)
+    const shapeIdsToDelete = [...this.app.userState.erasingShapeIds]
+    this.app.updateUserState({ erasingShapeIds: [] })
+    this.app.deleteShapes(shapeIdsToDelete.map(id => this.app.getShape(id)))
     this.tool.transition('idle')
   }
 }

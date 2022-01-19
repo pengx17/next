@@ -19,20 +19,23 @@ export class CreatingState<
 
   onEnter = () => {
     const { Shape } = this.tool
-    this.offset = [Shape.defaultProps.radius, Shape.defaultProps.radius]
-    const shape = new Shape({
-      id: uniqueId(),
-      parentId: this.app.currentPage.id,
-      point: Vec.sub(this.app.inputs.originPoint, this.offset),
+    this.offset = [Shape.defaultModel.radius, Shape.defaultModel.radius]
+    const id = uniqueId()
+    this.tool.app.createShape<S>({
+      id,
+      type: Shape.type,
+      point: Vec.sub(this.app.userState.originPoint, this.offset),
     })
+    const shape = this.tool.app.getShape<T>(id)
     this.creatingShape = shape
-    this.app.currentPage.addShapes(shape)
     this.app.setSelectedShapes([shape])
   }
 
   onPointerMove: TLStateEvents<S, K>['onPointerMove'] = () => {
     if (!this.creatingShape) throw Error('Expected a creating shape.')
-    const { currentPoint } = this.app.inputs
+    const {
+      userState: { currentPoint },
+    } = this.app
     this.creatingShape.update({
       point: Vec.sub(currentPoint, this.offset),
     })
@@ -43,7 +46,7 @@ export class CreatingState<
     if (this.creatingShape) {
       this.app.setSelectedShapes([this.creatingShape])
     }
-    if (!this.app.settings.isToolLocked) {
+    if (!this.app.userState.isToolLocked) {
       this.app.transition('select')
     }
   }

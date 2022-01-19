@@ -1,6 +1,6 @@
-import { TLApp, TLBush, TLSelectTool, TLToolState, TLShape } from '~lib'
+import { TLApp, TLBush, TLSelectTool, TLShape, TLToolState } from '~lib'
+import type { TLEvents, TLEventMap } from '~types'
 import { BoundsUtils } from '~utils'
-import type { TLEventMap, TLEvents } from '~types'
 
 export class BrushingState<
   S extends TLShape,
@@ -17,10 +17,10 @@ export class BrushingState<
   private tree: TLBush<S> = new TLBush()
 
   onEnter = () => {
-    const { selectedShapes, currentPage, selectedIds } = this.app
+    const { selectedShapes, selectedIds, document } = this.app
     this.initialSelectedIds = Array.from(selectedIds.values())
     this.initialSelectedShapes = Array.from(selectedShapes.values())
-    this.tree.load(currentPage.shapes)
+    this.tree.load(document.shapes.map(s => this.app.getShape(s.id)))
   }
 
   onExit = () => {
@@ -34,12 +34,12 @@ export class BrushingState<
 
   onPointerMove: TLEvents<S>['pointer'] = () => {
     const {
-      inputs: { shiftKey, ctrlKey, originPoint, currentPoint },
+      userState: { shiftKey, ctrlKey, originPoint, currentPoint },
     } = this.app
 
     const brushBounds = BoundsUtils.getBoundsFromPoints([currentPoint, originPoint], 0)
 
-    this.app.setBrush(brushBounds)
+    this.app.updateUserState({ brush: brushBounds })
 
     const hits = this.tree
       .search(brushBounds)
@@ -66,14 +66,14 @@ export class BrushingState<
   }
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
-    this.app.setBrush(undefined)
+    this.app.updateUserState({ brush: undefined })
     this.tool.transition('idle')
   }
 
   handleModifierKey: TLEvents<S>['keyboard'] = (info, e) => {
     switch (e.key) {
       case 'Escape': {
-        this.app.setBrush(undefined)
+        this.app.updateUserState({ brush: undefined })
         this.app.setSelectedShapes(this.initialSelectedIds)
         this.tool.transition('idle')
         break

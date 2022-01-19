@@ -1,16 +1,18 @@
-import type { TLTextShapeProps } from '.'
-import { TLTextShape } from './TLTextShape'
+import { TLTextShapeModel, TLTextShape } from './TLTextShape'
+import { TLApp } from '~lib'
 
-export interface TextShapeProps extends TLTextShapeProps {
+export interface TextShapeModel extends TLTextShapeModel {
   stroke: string
 }
 
-export class TextShape extends TLTextShape<TextShapeProps> {
-  static defaultProps: TextShapeProps = {
+export class TextShape extends TLTextShape<TextShapeModel> {
+  static type = 'text'
+
+  static defaultModel: TextShapeModel = {
     id: 'text',
     type: 'text',
-    parentId: 'page',
     point: [0, 0],
+    size: [100, 100],
     text: 'hello world',
     stroke: 'black',
   }
@@ -18,8 +20,24 @@ export class TextShape extends TLTextShape<TextShapeProps> {
 
 describe('A minimal test', () => {
   it('Creates the shape', () => {
-    const shape = new TextShape()
-    expect(shape).toBeDefined()
-    expect(shape.props.stroke).toBe('black')
+    const app = new TLApp({
+      document: {
+        shapes: [
+          {
+            id: 'text1',
+            type: 'text',
+            point: [0, 0],
+            size: [100, 100],
+            text: 'hello world',
+            stroke: 'black',
+          },
+        ],
+        selectedIds: [],
+      },
+      shapes: [TextShape],
+    })
+
+    expect(app.getShape('text1')).toBeDefined()
+    expect(app.getShape('text1').model.stroke).toBe('black')
   })
 })

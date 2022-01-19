@@ -1,24 +1,24 @@
-import { makeObservable } from 'mobx'
 import { intersectLineSegmentEllipse, intersectEllipseBounds, TLBounds } from '@tldraw/intersect'
+import { makeObservable } from 'mobx'
+import type { TLApp } from '../../TLApp'
 import { BoundsUtils, PointUtils } from '~utils'
-import { TLBoxShape, TLBoxShapeProps } from '../TLBoxShape'
+import { TLBoxShape, TLBoxShapeModel } from '../TLBoxShape'
 
-export interface TLEllipseShapeProps extends TLBoxShapeProps {
+export interface TLEllipseShapeModel extends TLBoxShapeModel {
   point: number[]
 }
 
 export class TLEllipseShape<
-  P extends TLEllipseShapeProps = TLEllipseShapeProps,
-  M = any
-> extends TLBoxShape<P, M> {
-  constructor(props = {} as Partial<P>) {
-    super(props)
+  P extends TLEllipseShapeModel = TLEllipseShapeModel
+> extends TLBoxShape<P> {
+  constructor(public app: TLApp, public id: string) {
+    super(app, id)
     makeObservable(this)
   }
 
-  static id = 'ellipse'
+  static type = 'ellipse'
 
-  static defaultProps: TLEllipseShapeProps = {
+  static defaultModel: TLEllipseShapeModel = {
     id: 'ellipse',
     type: 'ellipse',
     parentId: 'page',
@@ -28,7 +28,7 @@ export class TLEllipseShape<
 
   getBounds = (): TLBounds => {
     const {
-      props: {
+      model: {
         point: [x, y],
         size: [w, h],
       },
@@ -38,7 +38,7 @@ export class TLEllipseShape<
 
   getRotatedBounds = (): TLBounds => {
     const {
-      props: {
+      model: {
         point: [x, y],
         size: [w, h],
         rotation,
@@ -49,7 +49,7 @@ export class TLEllipseShape<
 
   hitTestPoint = (point: number[]) => {
     const {
-      props: { size, rotation },
+      model: { size, rotation },
       center,
     } = this
     return PointUtils.pointInEllipse(point, center, size[0], size[1], rotation || 0)
@@ -57,7 +57,7 @@ export class TLEllipseShape<
 
   hitTestLineSegment = (A: number[], B: number[]): boolean => {
     const {
-      props: {
+      model: {
         size: [w, h],
         rotation = 0,
       },
@@ -68,7 +68,7 @@ export class TLEllipseShape<
 
   hitTestBounds = (bounds: TLBounds): boolean => {
     const {
-      props: {
+      model: {
         size: [w, h],
         rotation = 0,
       },

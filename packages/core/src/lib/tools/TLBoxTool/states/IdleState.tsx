@@ -4,7 +4,7 @@ import type { TLEventMap, TLStateEvents } from '~types'
 
 export class IdleState<
   S extends TLShape,
-  T extends TLBoxShape,
+  T extends S & TLBoxShape,
   K extends TLEventMap,
   R extends TLApp<S, K>,
   P extends TLBoxTool<T, S, K, R>

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { TLApp, TLShape } from '~lib'
+import type { TLApp } from '../lib/TLApp'
+import type { TLShape } from '../lib/TLShape'
 import type { TLEventMap } from './TLEventMap'
 import type { TLHandle } from './TLHandle'
 
@@ -113,6 +114,10 @@ export type TLSubscriptionEvent =
       info: null
     }
   | {
+      event: 'commit'
+      info: null
+    }
+  | {
       event: 'persist'
       info: null
     }
@@ -133,7 +138,7 @@ export type TLSubscriptionEvent =
       info: null
     }
   | {
-      event: 'load'
+      event: 'open'
       info: null
     }
   | {

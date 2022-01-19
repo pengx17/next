@@ -14,7 +14,7 @@ export interface CodeSandboxShapeProps extends TLBoxShapeProps, CustomStyleProps
 export class CodeSandboxShape extends TLReactBoxShape<CodeSandboxShapeProps> {
   static id = 'code'
 
-  static defaultProps: CodeSandboxShapeProps = {
+  static defaultModel: CodeSandboxShapeProps = {
     id: 'code',
     type: 'code',
     parentId: 'page',

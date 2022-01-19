@@ -13,11 +13,9 @@ export class TranslatingHandleState<
   static id = 'translatingHandle'
   cursor = TLCursor.Grabbing
 
-  private offset = [0, 0]
-  private initialTopLeft = [0, 0]
   private index = 0
   private shape: S = {} as S
-  private initialShape: S['props'] = {} as S['props']
+  private initialShape: S['model'] = {} as S['model']
   private handles: TLHandle[] = []
   private initialHandles: TLHandle[] = []
 
@@ -27,17 +25,14 @@ export class TranslatingHandleState<
     } & TLEventHandleInfo<S>
   ) => {
     this.app.history.pause()
-    this.offset = [0, 0]
     this.index = info.index
     this.shape = info.shape
-    this.initialShape = { ...this.shape.props }
-    this.handles = deepCopy(info.shape.props.handles!)
-    this.initialHandles = deepCopy(info.shape.props.handles!)
-    this.initialTopLeft = [...info.shape.props.point]
+    this.initialShape = { ...this.shape.model }
+    this.initialHandles = deepCopy(info.shape.model.handles!)
   }
 
   onExit = () => {
-    this.app.history.resume()
+    this.app.resume()
   }
 
   onWheel: TLEvents<S>['wheel'] = (info, e) => {
@@ -46,7 +41,7 @@ export class TranslatingHandleState<
 
   onPointerMove: TLEvents<S>['pointer'] = () => {
     const {
-      inputs: { shiftKey, previousPoint, originPoint, currentPoint },
+      userState: { shiftKey, previousPoint, originPoint, currentPoint },
     } = this.app
     if (Vec.isEqual(previousPoint, currentPoint)) return
     const delta = Vec.sub(currentPoint, originPoint)
@@ -63,7 +58,7 @@ export class TranslatingHandleState<
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
     this.app.history.resume()
-    this.app.persist()
+    // this.app.history.persist()
     this.tool.transition('idle')
   }
 

@@ -1,23 +1,21 @@
 import { makeObservable } from 'mobx'
+import type { TLApp } from '../../TLApp'
 import type { TLHandle } from '~types'
-import { TLPolylineShape, TLPolylineShapeProps } from '../TLPolylineShape'
+import { TLPolylineShape, TLPolylineShapeModel } from '../TLPolylineShape'
 
-export interface TLLineShapeProps extends TLPolylineShapeProps {
+export interface TLLineShapeModel extends TLPolylineShapeModel {
   handles: TLHandle[]
 }
 
-export class TLLineShape<
-  P extends TLLineShapeProps = TLLineShapeProps,
-  M = any
-> extends TLPolylineShape<P, M> {
-  constructor(props = {} as Partial<P>) {
-    super(props)
+export class TLLineShape<P extends TLLineShapeModel = TLLineShapeModel> extends TLPolylineShape<P> {
+  constructor(public app: TLApp, public id: string) {
+    super(app, id)
     makeObservable(this)
   }
 
-  static id = 'line'
+  static type = 'line'
 
-  static defaultProps: TLLineShapeProps = {
+  static defaultModel: TLLineShapeModel = {
     id: 'line',
     type: 'line',
     parentId: 'page',
@@ -28,9 +26,9 @@ export class TLLineShape<
     ],
   }
 
-  validateProps = (props: Partial<P>) => {
-    if (props.point) props.point = [0, 0]
-    if (props.handles !== undefined && props.handles.length < 1) props.handles = [{ point: [0, 0] }]
-    return props
+  validateModel = (model: Partial<P>) => {
+    if (model.point) model.point = [0, 0]
+    if (model.handles !== undefined && model.handles.length < 1) model.handles = [{ point: [0, 0] }]
+    return model
   }
 }

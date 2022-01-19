@@ -1,4 +1,5 @@
-import type { TLRootState, TLShape, TLState } from '~lib'
+import type { TLShape } from '../lib/TLShape'
+import type { TLRootState, TLState } from '../lib/TLState'
 import type { TLEventMap } from './TLEventMap'
 
 export type TLShortcut<

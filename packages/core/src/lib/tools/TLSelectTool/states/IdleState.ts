@@ -1,6 +1,6 @@
 import { TLShape, TLApp, TLSelectTool, TLToolState } from '~lib'
 import { TLEventMap, TLEvents, TLShortcut, TLTargetType } from '~types'
-import { PointUtils } from '~utils'
+import { getFirstFromSet, PointUtils } from '~utils'
 
 export class IdleState<
   S extends TLShape,
@@ -13,7 +13,7 @@ export class IdleState<
   static shortcuts: TLShortcut<TLShape, TLEventMap, TLApp>[] = [
     {
       keys: ['delete', 'backspace'],
-      fn: app => app.api.deleteShapes(),
+      fn: app => app.deleteShapes(app.selectedShapesArray),
     },
   ]
 
@@ -47,7 +47,7 @@ export class IdleState<
   onPointerDown: TLEvents<S>['pointer'] = (info, event) => {
     const {
       selectedShapes,
-      inputs: { ctrlKey },
+      userState: { ctrlKey },
     } = this.app
 
     // Holding ctrlKey should ignore shapes
@@ -80,8 +80,11 @@ export class IdleState<
         if (selectedShapes.has(info.shape)) {
           this.tool.transition('pointingSelectedShape', info)
         } else {
-          const { selectionBounds, inputs } = this.app
-          if (selectionBounds && PointUtils.pointInBounds(inputs.currentPoint, selectionBounds)) {
+          const {
+            selectionBounds,
+            userState: { currentPoint },
+          } = this.app
+          if (selectionBounds && PointUtils.pointInBounds(currentPoint, selectionBounds)) {
             this.tool.transition('pointingShapeBehindBounds', info)
           } else {
             this.tool.transition('pointingShape', info)
@@ -104,7 +107,7 @@ export class IdleState<
     if (info.order) return
 
     if (info.type === TLTargetType.Shape) {
-      if (this.app.hoveredId) {
+      if (this.app.userState.hoveredId) {
         this.app.setHoveredShape(undefined)
       }
     }
@@ -116,18 +119,17 @@ export class IdleState<
 
   onDoubleClick: TLEvents<S>['pointer'] = info => {
     if (info.order) return
-
-    if (this.app.selectedShapesArray.length !== 1) return
-    const selectedShape = this.app.selectedShapesArray[0]
+    const { selectedShapes } = this.app
+    if (selectedShapes.size !== 1) return
+    const selectedShape = getFirstFromSet(selectedShapes)
     if (!selectedShape.canEdit) return
-
     switch (info.type) {
       case TLTargetType.Shape: {
         this.tool.transition('editingShape', info)
         break
       }
       case TLTargetType.Selection: {
-        if (this.app.selectedShapesArray.length === 1) {
+        if (selectedShapes.size === 1) {
           this.tool.transition('editingShape', {
             type: TLTargetType.Shape,
             target: selectedShape,
@@ -139,20 +141,23 @@ export class IdleState<
   }
 
   onKeyDown: TLEvents<S>['keyboard'] = (info, e) => {
-    const { selectedShapesArray } = this.app
+    const { selectedShapes } = this.app
     switch (e.key) {
       case 'Enter': {
-        if (selectedShapesArray.length === 1 && selectedShapesArray[0].canEdit) {
-          this.tool.transition('editingShape', {
-            type: TLTargetType.Shape,
-            shape: selectedShapesArray[0],
-            order: 0,
-          })
+        if (selectedShapes.size === 1) {
+          const shape = getFirstFromSet(selectedShapes)
+          if (shape.canEdit) {
+            this.tool.transition('editingShape', {
+              type: TLTargetType.Shape,
+              shape,
+              order: 0,
+            })
+          }
         }
         break
       }
       case 'Escape': {
-        if (selectedShapesArray.length > 0) {
+        if (selectedShapes.size > 0) {
           this.app.setSelectedShapes([])
         }
         break

@@ -1,25 +1,42 @@
-import type { TLEllipseShapeProps } from '.'
-import { TLEllipseShape } from './TLEllipseShape'
+import { TLEllipseShapeModel, TLEllipseShape } from './TLEllipseShape'
+import { TLApp } from '~lib'
+
+export interface EllispeShapeModel extends TLEllipseShapeModel {
+  stroke: string
+}
+
+export class EllispeShape extends TLEllipseShape<EllispeShapeModel> {
+  static type = 'ellipse'
+
+  static defaultModel: EllispeShapeModel = {
+    id: 'ellipse',
+    parentId: 'page',
+    type: 'ellipse',
+    point: [0, 0],
+    size: [100, 100],
+    stroke: 'black',
+  }
+}
 
 describe('A minimal test', () => {
   it('Creates the shape', () => {
-    interface EllipseShapeProps extends TLEllipseShapeProps {
-      stroke: string
-    }
+    const app = new TLApp({
+      document: {
+        shapes: [
+          {
+            id: 'ellipse1',
+            type: 'ellipse',
+            point: [0, 0],
+            size: [100, 100],
+            stroke: 'black',
+          },
+        ],
+        selectedIds: [],
+      },
+      shapes: [EllispeShape],
+    })
 
-    class Shape extends TLEllipseShape<EllipseShapeProps> {
-      static defaultProps: EllipseShapeProps = {
-        id: 'ellipse',
-        type: 'ellipse',
-        parentId: 'page',
-        point: [0, 0],
-        size: [100, 100],
-        stroke: 'black',
-      }
-    }
-
-    const shape = new Shape()
-    expect(shape).toBeDefined()
-    expect(shape.props.stroke).toBe('black')
+    expect(app.getShape('ellipse1')).toBeDefined()
+    expect(app.getShape('ellipse1').model.stroke).toBe('black')
   })
 })

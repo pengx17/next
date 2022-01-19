@@ -1,14 +1,15 @@
-import type { TLBoxShapeProps } from '.'
-import { TLBoxShape } from './TLBoxShape'
+import { TLBoxShapeModel, TLBoxShape } from './TLBoxShape'
+import { TLApp } from '~lib'
 
-export interface BoxShapeProps extends TLBoxShapeProps {
+export interface BoxShapeModel extends TLBoxShapeModel {
   stroke: string
 }
 
-export class BoxShape extends TLBoxShape<BoxShapeProps> {
-  static defaultProps: BoxShapeProps = {
+export class BoxShape extends TLBoxShape<BoxShapeModel> {
+  static type = 'box'
+
+  static defaultModel: BoxShapeModel = {
     id: 'box',
-    parentId: 'page',
     type: 'box',
     point: [0, 0],
     size: [100, 100],
@@ -18,8 +19,22 @@ export class BoxShape extends TLBoxShape<BoxShapeProps> {
 
 describe('A minimal test', () => {
   it('Creates the shape', () => {
-    const shape = new BoxShape()
-    expect(shape).toBeDefined()
-    expect(shape.props.stroke).toBe('black')
+    const app = new TLApp({
+      document: {
+        shapes: [
+          {
+            id: 'box1',
+            type: 'box',
+            point: [0, 0],
+            size: [100, 100],
+            stroke: 'black',
+          },
+        ],
+        selectedIds: [],
+      },
+      shapes: [BoxShape],
+    })
+    expect(app.getShape('box1')).toBeDefined()
+    expect(app.getShape('box1').model.stroke).toBe('black')
   })
 })

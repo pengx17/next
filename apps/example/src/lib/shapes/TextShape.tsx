@@ -19,7 +19,7 @@ export interface TextShapeProps extends TLTextShapeProps, CustomStyleProps {
 export class TextShape extends TLTextShape<TextShapeProps> {
   static id = 'text'
 
-  static defaultProps: TextShapeProps = {
+  static defaultModel: TextShapeProps = {
     id: 'box',
     parentId: 'page',
     type: 'text',

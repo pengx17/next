@@ -13,7 +13,7 @@ interface LineShapeProps extends CustomStyleProps, TLLineShapeProps {
 export class LineShape extends TLLineShape<LineShapeProps> {
   static id = 'line'
 
-  static defaultProps: LineShapeProps = {
+  static defaultModel: LineShapeProps = {
     id: 'line',
     parentId: 'page',
     type: 'line',

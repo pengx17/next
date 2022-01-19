@@ -1,7 +1,6 @@
 import { Vec } from '@tldraw/vec'
 import { TLApp, TLSelectTool, TLShape, TLToolState } from '~lib'
 import { TLCursor, TLEventMap, TLEvents } from '~types'
-import { uniqueId } from '~utils'
 
 export class TranslatingState<
   S extends TLShape,
@@ -27,13 +26,10 @@ export class TranslatingState<
   private moveSelectedShapesToPointer() {
     const {
       selectedShapes,
-      inputs: { shiftKey, originPoint, currentPoint },
+      userState: { shiftKey, originPoint, currentPoint },
     } = this.app
-
     const { initialPoints } = this
-
     const delta = Vec.sub(currentPoint, originPoint)
-
     if (shiftKey) {
       if (Math.abs(delta[0]) < Math.abs(delta[1])) {
         delta[0] = 0
@@ -41,54 +37,36 @@ export class TranslatingState<
         delta[1] = 0
       }
     }
-
     selectedShapes.forEach(shape =>
       shape.update({ point: Vec.add(initialPoints[shape.id], delta) })
     )
   }
 
   private startCloning() {
+    const { selectedShapesArray } = this.app
     if (!this.didClone) {
       // Create the clones
-      this.clones = this.app.selectedShapesArray.map(shape => {
-        const ShapeClass = this.app.getShapeClass(shape.type)
-        if (!ShapeClass) throw Error('Could not find that shape class.')
-        const clone = new ShapeClass({
-          ...shape.serialized,
-          id: uniqueId(),
-          type: shape.type,
+      this.clones = selectedShapesArray.map(shape => {
+        return shape.clone().update({
           point: this.initialPoints[shape.id],
-          rotation: shape.props.rotation,
         })
-        return clone
       })
-
       this.initialClonePoints = Object.fromEntries(
-        this.clones.map(({ id, props: { point } }) => [id, point.slice()])
+        this.clones.map(({ id, model: { point } }) => [id, point.slice()])
       )
-
       this.didClone = true
     }
-
     // Move shapes back to their start positions
-    this.app.selectedShapes.forEach(shape => {
-      shape.update({ point: this.initialPoints[shape.id] })
-    })
-
+    selectedShapesArray.forEach(shape => shape.update({ point: this.initialPoints[shape.id] }))
     // Set the initial points to the original clone points
     this.initialPoints = this.initialClonePoints
-
     // Add the clones to the page
-    this.app.currentPage.addShapes(...this.clones)
-
+    this.app.addShapes(this.clones)
     // Select the clones
     this.app.setSelectedShapes(Object.keys(this.initialClonePoints))
-
     // Move the clones to the pointer
     this.moveSelectedShapesToPointer()
-
     this.isCloning = true
-
     this.moveSelectedShapesToPointer()
   }
 
@@ -97,14 +75,17 @@ export class TranslatingState<
     this.app.history.pause()
 
     // Set initial data
-    const { selectedShapesArray, inputs } = this.app
+    const {
+      selectedShapesArray,
+      userState: { altKey },
+    } = this.app
 
     this.initialShapePoints = Object.fromEntries(
-      selectedShapesArray.map(({ id, props: { point } }) => [id, point.slice()])
+      selectedShapesArray.map(({ id, model: { point } }) => [id, point.slice()])
     )
     this.initialPoints = this.initialShapePoints
 
-    if (inputs.altKey) {
+    if (altKey) {
       this.startCloning()
     } else {
       this.moveSelectedShapesToPointer()
@@ -134,7 +115,7 @@ export class TranslatingState<
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
     this.app.history.resume()
-    this.app.persist()
+    // this.app.persist()
     this.tool.transition('idle')
   }
 
@@ -159,20 +140,15 @@ export class TranslatingState<
       case 'Alt': {
         if (!this.isCloning) throw Error('Expected to be cloning.')
 
-        const { currentPage, selectedShapes } = this.app
-
+        const { selectedShapesArray } = this.app
         // Remove the selected shapes (our clones)
-        currentPage.removeShapes(...selectedShapes)
-
+        this.app.deleteShapes(selectedShapesArray)
         // Set the initial points to the original shape points
         this.initialPoints = this.initialShapePoints
-
         // Select the original shapes again
         this.app.setSelectedShapes(Object.keys(this.initialPoints))
-
         // Move the original shapes to the pointer
         this.moveSelectedShapesToPointer()
-
         this.isCloning = false
         break
       }

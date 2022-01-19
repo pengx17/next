@@ -1,8 +1,8 @@
 import { makeObservable } from 'mobx'
-import type { TLResizeInfo } from '~lib'
-import type { TLAsset, TLBounds } from '~types'
-import type { TLResetBoundsInfo } from '..'
-import { TLBoxShape, TLBoxShapeProps } from '../TLBoxShape'
+import type { TLResizeInfo, TLResetBoundsInfo } from '../../TLShape'
+import type { TLApp } from '../../TLApp'
+import type { TLAsset } from '~types'
+import { TLBoxShape, TLBoxShapeModel } from '../TLBoxShape'
 
 export interface TLImageAsset extends TLAsset {
   type: 'image'
@@ -10,24 +10,21 @@ export interface TLImageAsset extends TLAsset {
   src: string
 }
 
-export interface TLImageShapeProps extends TLBoxShapeProps {
+export interface TLImageShapeModel extends TLBoxShapeModel {
   clipping: number | number[]
   objectFit: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down'
   assetId: string
 }
 
-export class TLImageShape<
-  P extends TLImageShapeProps = TLImageShapeProps,
-  M = any
-> extends TLBoxShape<P, M> {
-  constructor(props = {} as Partial<P>) {
-    super(props)
+export class TLImageShape<P extends TLImageShapeModel = TLImageShapeModel> extends TLBoxShape<P> {
+  constructor(public app: TLApp, public id: string) {
+    super(app, id)
     makeObservable(this)
   }
 
-  static id = 'ellipse'
+  static type = 'ellipse'
 
-  static defaultProps: TLImageShapeProps = {
+  static defaultModel: TLImageShapeModel = {
     id: 'ellipse',
     type: 'ellipse',
     parentId: 'page',
@@ -39,7 +36,9 @@ export class TLImageShape<
   }
 
   onResetBounds = (info: TLResetBoundsInfo<TLImageAsset>) => {
-    const { clipping, size, point } = this.props
+    const {
+      model: { clipping, size, point },
+    } = this
     if (clipping) {
       const [t, r, b, l] = Array.isArray(clipping)
         ? clipping
@@ -64,16 +63,18 @@ export class TLImageShape<
     return this
   }
 
-  onResize = (initialProps: any, info: TLResizeInfo) => {
+  onResize = (initialModel: P, info: TLResizeInfo) => {
+    let {
+      model: { clipping },
+    } = this
     const { bounds, clip, scale } = info
-    let { clipping } = this.props
-    const { clipping: iClipping } = initialProps
+    const { clipping: iClipping } = initialModel
 
     if (clip) {
       const {
         point: [x, y],
         size: [w, h],
-      } = initialProps
+      } = initialModel
 
       const [t, r, b, l] = iClipping
         ? Array.isArray(iClipping)

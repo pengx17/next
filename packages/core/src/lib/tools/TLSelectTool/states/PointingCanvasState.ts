@@ -11,7 +11,9 @@ export class PointingCanvasState<
   static id = 'pointingCanvas'
 
   onEnter = () => {
-    const { shiftKey } = this.app.inputs
+    const {
+      userState: { shiftKey },
+    } = this.app
     if (!shiftKey) this.app.setSelectedShapes([])
   }
 
@@ -20,14 +22,19 @@ export class PointingCanvasState<
   }
 
   onPointerMove: TLEvents<S>['pointer'] = () => {
-    const { currentPoint, originPoint } = this.app.inputs
+    const {
+      userState: { currentPoint, originPoint },
+    } = this.app
     if (Vec.dist(currentPoint, originPoint) > 5) {
       this.tool.transition('brushing')
     }
   }
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
-    if (!this.app.inputs.shiftKey) {
+    const {
+      userState: { shiftKey },
+    } = this.app
+    if (!shiftKey) {
       this.app.setSelectedShapes([])
     }
     this.tool.transition('idle')

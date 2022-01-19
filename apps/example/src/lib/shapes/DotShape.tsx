@@ -11,7 +11,7 @@ export interface DotShapeProps extends TLDotShapeProps, CustomStyleProps {
 export class DotShape extends TLDotShape<DotShapeProps> {
   static id = 'dot'
 
-  static defaultProps: DotShapeProps = {
+  static defaultModel: DotShapeProps = {
     id: 'dot',
     parentId: 'page',
     type: 'dot',

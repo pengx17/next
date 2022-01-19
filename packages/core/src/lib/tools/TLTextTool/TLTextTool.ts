@@ -20,6 +20,6 @@ export abstract class TLTextTool<
     new (props: Partial<T['props']>): T
     aspectRatio?: number
     id: string
-    defaultProps: T['props']
+    defaultModel: T['props']
   }
 }

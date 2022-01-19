@@ -1,16 +1,14 @@
 import { makeObservable } from 'mobx'
-import { TLBoxShape, TLBoxShapeProps } from '../TLBoxShape'
+import type { TLApp } from '../../TLApp'
+import { TLBoxShape, TLBoxShapeModel } from '../TLBoxShape'
 
-export interface TLTextShapeProps extends TLBoxShapeProps {
+export interface TLTextShapeModel extends TLBoxShapeModel {
   text: string
 }
 
-export class TLTextShape<P extends TLTextShapeProps = TLTextShapeProps, M = any> extends TLBoxShape<
-  P,
-  M
-> {
-  constructor(props = {} as Partial<P>) {
-    super(props)
+export class TLTextShape<P extends TLTextShapeModel = TLTextShapeModel> extends TLBoxShape<P> {
+  constructor(public app: TLApp, public id: string) {
+    super(app, id)
     makeObservable(this)
   }
 
@@ -20,7 +18,7 @@ export class TLTextShape<P extends TLTextShapeProps = TLTextShapeProps, M = any>
 
   static id = 'text'
 
-  static defaultProps: TLTextShapeProps = {
+  static defaultModel: TLTextShapeModel = {
     id: 'text',
     type: 'text',
     parentId: 'page',

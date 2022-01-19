@@ -1,5 +1,5 @@
 import { IdleState, PointingState, CreatingState } from './states'
-import { TLTool, TLApp, TLShape, TLLineShape, TLLineShapeProps } from '~lib'
+import { TLTool, TLApp, TLShape, TLLineShape } from '~lib'
 import { TLEventMap, TLCursor } from '~types'
 
 // shape tools need to have two generics: a union of all shapes in
@@ -20,8 +20,8 @@ export abstract class TLLineTool<
   cursor = TLCursor.Cross
 
   abstract Shape: {
-    new (props: Partial<TLLineShapeProps>): T
-    id: string
-    defaultProps: TLLineShapeProps
+    new (app: TLApp, id: string): T
+    type: string
+    defaultModel: T['model']
   }
 }

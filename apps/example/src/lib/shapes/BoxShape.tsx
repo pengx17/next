@@ -13,7 +13,7 @@ export interface BoxShapeProps extends TLBoxShapeProps, CustomStyleProps {
 export class BoxShape extends TLBoxShape<BoxShapeProps> {
   static id = 'box'
 
-  static defaultProps: BoxShapeProps = {
+  static defaultModel: BoxShapeProps = {
     id: 'box',
     parentId: 'page',
     type: 'box',

@@ -18,7 +18,7 @@ export class HighlighterShape extends TLDrawShape<HighlighterShapeProps> {
 
   static id = 'highlighter'
 
-  static defaultProps: HighlighterShapeProps = {
+  static defaultModel: HighlighterShapeProps = {
     id: 'highlighter',
     parentId: 'page',
     type: 'highlighter',

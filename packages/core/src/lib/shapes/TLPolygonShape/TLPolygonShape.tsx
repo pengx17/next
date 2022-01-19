@@ -1,28 +1,26 @@
 import { Vec } from '@tldraw/vec'
 import { computed, makeObservable } from 'mobx'
-import type { TLResizeInfo } from '~lib'
 import { intersectLineSegmentPolyline, intersectPolygonBounds, TLBounds } from '@tldraw/intersect'
 import { BoundsUtils, PointUtils, PolygonUtils } from '~utils'
-import { TLBoxShape, TLBoxShapeProps } from '../TLBoxShape'
+import { TLBoxShape, TLBoxShapeModel } from '../TLBoxShape'
+import type { TLApp } from '~lib'
 
-export interface TLPolygonShapeProps extends TLBoxShapeProps {
+export interface TLPolygonShapeModel extends TLBoxShapeModel {
   sides: number
   ratio: number
-  isFlippedY: boolean
 }
 
 export class TLPolygonShape<
-  P extends TLPolygonShapeProps = TLPolygonShapeProps,
-  M = any
-> extends TLBoxShape<P, M> {
-  constructor(props = {} as Partial<P>) {
-    super(props)
+  P extends TLPolygonShapeModel = TLPolygonShapeModel
+> extends TLBoxShape<P> {
+  constructor(public app: TLApp, public id: string) {
+    super(app, id)
     makeObservable(this)
   }
 
-  static id = 'polygon'
+  static type = 'polygon'
 
-  static defaultProps: TLPolygonShapeProps = {
+  static defaultModel: TLPolygonShapeModel = {
     id: 'polygon',
     type: 'polygon',
     parentId: 'page',
@@ -30,7 +28,6 @@ export class TLPolygonShape<
     size: [100, 100],
     sides: 5,
     ratio: 1,
-    isFlippedY: false,
   }
 
   @computed get vertices() {
@@ -39,7 +36,7 @@ export class TLPolygonShape<
 
   @computed get pageVertices() {
     const {
-      props: { point },
+      model: { point },
       vertices,
     } = this
     return vertices.map(vert => Vec.add(vert, point))
@@ -54,7 +51,7 @@ export class TLPolygonShape<
     const {
       vertices,
       centroid,
-      props: { rotation },
+      model: { rotation },
     } = this
     if (!rotation) return vertices
     return vertices.map(v => Vec.rotWith(v, centroid, rotation))
@@ -63,7 +60,7 @@ export class TLPolygonShape<
   getRotatedBounds = (): TLBounds => {
     const {
       rotatedVertices,
-      props: { point },
+      model: { point },
       offset,
     } = this
     return BoundsUtils.translateBounds(
@@ -74,7 +71,7 @@ export class TLPolygonShape<
 
   @computed get offset() {
     const {
-      props: {
+      model: {
         size: [w, h],
       },
     } = this
@@ -83,28 +80,25 @@ export class TLPolygonShape<
   }
 
   getVertices(padding = 0): number[][] {
-    const { ratio, sides, size, scale } = this.props
+    const {
+      model: { ratio, sides, size },
+    } = this
     const vertices =
       sides === 3
         ? PolygonUtils.getTriangleVertices(size, padding, ratio)
         : PolygonUtils.getPolygonVertices(size, sides, padding, ratio)
-
-    // if (scale && scale[1] < 0) {
-    //   return vertices.map(point => [point[0], size[1] - point[1]])
-    // }
-
     return vertices
   }
 
   hitTestPoint = (point: number[]): boolean => {
-    const { vertices } = this
-    return PointUtils.pointInPolygon(Vec.add(point, this.props.point), vertices)
+    const { vertices, model } = this
+    return PointUtils.pointInPolygon(Vec.add(point, model.point), vertices)
   }
 
   hitTestLineSegment = (A: number[], B: number[]): boolean => {
     const {
       vertices,
-      props: { point },
+      model: { point },
     } = this
     return intersectLineSegmentPolyline(Vec.sub(A, point), Vec.sub(B, point), vertices).didIntersect
   }
@@ -114,7 +108,7 @@ export class TLPolygonShape<
       rotatedBounds,
       offset,
       rotatedVertices,
-      props: { point },
+      model: { point },
     } = this
     const oBounds = BoundsUtils.translateBounds(bounds, Vec.neg(Vec.add(point, offset)))
     return (
@@ -124,9 +118,9 @@ export class TLPolygonShape<
     )
   }
 
-  validateProps = (props: Partial<P>) => {
-    if (props.point) props.point = [0, 0]
-    if (props.sides !== undefined && props.sides < 3) props.sides = 3
-    return props
+  validateModel = (model: Partial<P>) => {
+    if (model.point) model.point = [0, 0]
+    if (model.sides !== undefined && model.sides < 3) model.sides = 3
+    return model
   }
 }

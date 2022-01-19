@@ -14,7 +14,7 @@ export class PolylineShape extends TLPolylineShape<PolylineShapeProps> {
 
   static id = 'polyline'
 
-  static defaultProps: PolylineShapeProps = {
+  static defaultModel: PolylineShapeProps = {
     id: 'box',
     parentId: 'page',
     type: 'polyline',

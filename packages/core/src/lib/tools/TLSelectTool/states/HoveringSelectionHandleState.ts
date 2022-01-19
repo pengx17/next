@@ -66,9 +66,10 @@ export class HoveringSelectionHandleState<
 
   onDoubleClick: TLEvents<S>['pointer'] = info => {
     if (info.order) return
-    const isSingle = this.app.selectedShapes.size === 1
+    const { selectedShapes } = this.app
+    const isSingle = selectedShapes.size === 1
     if (!isSingle) return
-    const selectedShape = getFirstFromSet(this.app.selectedShapes)
+    const selectedShape = getFirstFromSet(selectedShapes)
 
     if (selectedShape.canEdit) {
       switch (info.type) {
@@ -78,7 +79,7 @@ export class HoveringSelectionHandleState<
         }
         case TLTargetType.Selection: {
           selectedShape.onResetBounds?.({})
-          if (this.app.selectedShapesArray.length === 1) {
+          if (selectedShapes.size === 1) {
             this.tool.transition('editingShape', {
               type: TLTargetType.Shape,
               target: selectedShape,
@@ -88,11 +89,11 @@ export class HoveringSelectionHandleState<
         }
       }
     } else {
-      const asset = selectedShape.props.assetId
-        ? this.app.assets[selectedShape.props.assetId]
-        : undefined
-      selectedShape.onResetBounds({ asset })
-      this.tool.transition('idle')
+      // const asset = selectedShape.props.assetId
+      //   ? this.app.assets[selectedShape.props.assetId]
+      //   : undefined
+      // selectedShape.onResetBounds({ asset })
+      // this.tool.transition('idle')
     }
   }
 }

@@ -1,28 +1,45 @@
-import type { TLPolygonShapeProps } from '.'
-import { TLPolygonShape } from './TLPolygonShape'
+import { TLPolygonShapeModel, TLPolygonShape } from './TLPolygonShape'
+import { TLApp } from '~lib'
+
+export interface PolygonShapeModel extends TLPolygonShapeModel {
+  stroke: string
+}
+
+export class PolygonShape extends TLPolygonShape<PolygonShapeModel> {
+  static type = 'polygon'
+
+  static defaultModel: PolygonShapeModel = {
+    id: 'polygon',
+    type: 'polygon',
+    point: [0, 0],
+    size: [100, 100],
+    sides: 5,
+    ratio: 1,
+    stroke: 'black',
+  }
+}
 
 describe('A minimal test', () => {
   it('Creates the shape', () => {
-    interface PolygonShapeProps extends TLPolygonShapeProps {
-      stroke: string
-    }
+    const app = new TLApp({
+      document: {
+        shapes: [
+          {
+            id: 'polygon1',
+            type: 'polygon',
+            point: [0, 0],
+            size: [100, 100],
+            sides: 5,
+            ratio: 1,
+            stroke: 'black',
+          },
+        ],
+        selectedIds: [],
+      },
+      shapes: [PolygonShape],
+    })
 
-    class Shape extends TLPolygonShape<PolygonShapeProps> {
-      static defaultProps: PolygonShapeProps = {
-        id: 'dot',
-        type: 'dot',
-        parentId: 'page',
-        point: [0, 0],
-        size: [100, 100],
-        sides: 3,
-        ratio: 0.5,
-        isFlippedY: false,
-        stroke: 'black',
-      }
-    }
-
-    const shape = new Shape()
-    expect(shape).toBeDefined()
-    expect(shape.props.stroke).toBe('black')
+    expect(app.getShape('polygon1')).toBeDefined()
+    expect(app.getShape('polygon1').model.stroke).toBe('black')
   })
 })

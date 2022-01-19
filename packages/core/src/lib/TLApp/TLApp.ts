@@ -1,87 +1,125 @@
-/* eslint-disable @typescript-eslint/no-extra-semi */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Vec } from '@tldraw/vec'
-import { action, computed, makeObservable, observable } from 'mobx'
-import { BoundsUtils, KeyUtils } from '~utils'
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { action, computed, makeObservable, observable, toJS, transaction } from 'mobx'
+import { TLBounds, TLCursor, TLEventMap, TLEvents, TLShortcut, TLStateEvents } from '../../types'
+import type { TLShape, TLShapeConstructor } from '../shapes'
+import type { TLToolConstructor } from '../TLTool'
 import {
-  TLSelectTool,
-  TLInputs,
-  TLPage,
-  TLViewport,
-  TLShape,
-  TLPageModel,
-  TLToolConstructor,
-  TLShapeConstructor,
-  TLShapeModel,
-} from '~lib'
-import type {
-  TLBounds,
-  TLEvents,
-  TLSubscription,
-  TLSubscriptionEventInfo,
-  TLSubscriptionEventName,
-  TLCallback,
-  TLShortcut,
-  TLEventMap,
-  TLStateEvents,
-  TLAsset,
-} from '~types'
-import { TLHistory } from '../TLHistory'
-import { TLSettings } from '../TLSettings'
+  TLHistoryManager,
+  TLEventManager,
+  TLDisplayManager,
+  TLInputManager,
+  TLCursorManager,
+} from './managers'
 import { TLRootState } from '../TLState'
-import { TLApi } from '~lib/TLApi'
-import { TLCursors } from '~lib/TLCursors'
+import { TLViewportManager } from './managers'
+import { TLSelectTool } from '../tools'
+import { BoundsUtils, KeyUtils, uniqueId } from '~utils'
+import { TLResizeCorner } from '~types'
+import * as fsp from 'fast-json-patch'
 
-export interface TLDocumentModel<S extends TLShape = TLShape, A extends TLAsset = TLAsset> {
-  currentPageId: string
-  selectedIds: string[]
-  pages: TLPageModel<S>[]
-  assets?: A[]
+/* -------------------------------------------------- */
+/*                        TLApp                       */
+/* -------------------------------------------------- */
+
+export type TLPatch = fsp.Operation[]
+
+export interface TLAssetModel {
+  id: string
+  type: any
+  src: string
 }
+
+export interface TLUserState {
+  camera: number[]
+  bounds: TLBounds
+  selectionRotation: number
+  isToolLocked: boolean
+  erasingShapeIds: string[]
+  editingId?: string
+  hoveredId?: string
+  brush?: TLBounds
+  shiftKey: boolean
+  ctrlKey: boolean
+  altKey: boolean
+  spaceKey: boolean
+  isPinching: boolean
+  currentScreenPoint: number[]
+  currentPoint: number[]
+  previousScreenPoint: number[]
+  previousPoint: number[]
+  originScreenPoint: number[]
+  originPoint: number[]
+}
+
+export interface TLDisplayState<S extends TLShape = TLShape> {
+  cursor: TLCursor
+  cursorRotation: number
+  shapesInViewport: S[]
+  selectionDirectionHint?: number[]
+  showSelection: boolean
+  showSelectionDetail: boolean
+  showSelectionRotation: boolean
+  showContextBar: boolean
+  showRotateHandles: boolean
+  showResizeHandles: boolean
+}
+
+export interface TLUserSettings {
+  mode: 'light' | 'dark'
+  showGrid: boolean
+}
+
+export interface TLDocumentModel<S extends TLShape = TLShape> {
+  shapes: S['model'][]
+  selectedIds: string[]
+}
+
+export interface TLAppConstructorParams<
+  S extends TLShape = TLShape,
+  K extends TLEventMap = TLEventMap
+> {
+  id: string
+  document: TLDocumentModel<S>
+  shapes: TLShapeConstructor<S>[]
+  tools: TLToolConstructor<S, K>[]
+  userState: TLUserState
+  settings: TLUserSettings
+  debug: boolean
+}
+
+/* -------------------------------------------------- */
+/*                         App                        */
+/* -------------------------------------------------- */
 
 export class TLApp<
   S extends TLShape = TLShape,
   K extends TLEventMap = TLEventMap
 > extends TLRootState<S, K> {
-  constructor(
-    serializedApp?: TLDocumentModel<S>,
-    Shapes?: TLShapeConstructor<S>[],
-    Tools?: TLToolConstructor<S, K>[]
-  ) {
+  constructor(params = {} as Partial<TLAppConstructorParams<S>>) {
     super()
-    this.history.pause()
-    if (this.states && this.states.length > 0) {
-      this.registerStates(this.states)
-      const initialId = this.initial ?? this.states[0].id
-      const state = this.children.get(initialId)
-      if (state) {
-        this.currentState = state
-        this.currentState?._events.onEnter({ fromId: 'initial' })
-      }
-    }
-    if (Shapes) this.registerShapes(Shapes)
-    if (Tools) this.registerTools(Tools)
+    const { document, userState, settings, debug = false, shapes = [], tools = [] } = params
+    this.debug = debug
     const ownShortcuts: TLShortcut<S, K>[] = [
       {
         keys: 'mod+shift+g',
-        fn: () => this.api.toggleGrid(),
+        fn: () => this.toggleGrid(),
       },
       {
         keys: 'shift+0',
-        fn: () => this.api.resetZoom(),
+        fn: () => this.resetZoom(),
       },
       {
         keys: 'mod+-',
-        fn: () => this.api.zoomToSelection(),
+        fn: () => this.zoomToSelection(),
       },
       {
         keys: 'mod+-',
-        fn: () => this.api.zoomOut(),
+        fn: () => this.zoomOut(),
       },
       {
         keys: 'mod+=',
-        fn: () => this.api.zoomIn(),
+        fn: () => this.zoomIn(),
       },
       {
         keys: 'mod+z',
@@ -115,21 +153,19 @@ export class TLApp<
           if (selectedTool.id !== 'select') {
             this.selectTool('select')
           }
-          this.api.selectAll()
+          this.selectAll()
         },
       },
       {
         keys: 'mod+s',
         fn: () => {
           this.save()
-          this.notify('save', null)
         },
       },
       {
         keys: 'mod+shift+s',
         fn: () => {
           this.saveAs()
-          this.notify('saveAs', null)
         },
       },
     ]
@@ -143,220 +179,109 @@ export class TLApp<
         })
       })
     )
-    this.api = new TLApi(this)
-    this.history.resume()
-    if (serializedApp) this.history.deserialize(serializedApp)
+    this.inputs = new TLInputManager(this)
+    this.viewport = new TLViewportManager(this)
+    this.cursors = new TLCursorManager(this)
+    this.history = new TLHistoryManager(this)
+    this.display = new TLDisplayManager(this)
+    this.events = new TLEventManager(this)
+    this.shapes.clear()
+    if (shapes) this.registerShapes(shapes)
+    if (tools) this.registerTools(tools)
+    if (userState) this.updateUserState(userState)
+    if (settings) this.updateUserSettings(settings)
+    if (document) this.loadDocument(document)
+    if (this.states && this.states.length > 0) {
+      this.registerStates(this.states)
+      const initialId = this.initial ?? this.states[0].id
+      const state = this.children.get(initialId)
+      if (state) {
+        this.currentState = state
+        this.currentState?._events.onEnter({ fromId: 'initial' })
+      }
+    }
     makeObservable(this)
-    this.notify('mount', null)
+    this.history.start()
   }
 
   static id = 'app'
+
   static states: TLToolConstructor<any, any>[] = [TLSelectTool]
+
   static initial = 'select'
 
-  readonly api: TLApi<S, K>
-  readonly inputs = new TLInputs<K>()
-  readonly cursors = new TLCursors()
-  readonly viewport = new TLViewport()
-  readonly settings = new TLSettings()
+  debug: boolean
 
-  /* --------------------- History -------------------- */
-
-  history = new TLHistory<S, K>(this)
-
-  persist = this.history.persist
-
-  undo = this.history.undo
-
-  redo = this.history.redo
-
-  saving = false // used to capture direct mutations as part of the history stack
-
-  saveState = () => {
-    if (this.history.isPaused) return
-    this.saving = true
-    requestAnimationFrame(() => {
-      if (this.saving) {
-        this.persist()
-        this.saving = false
-      }
-    })
+  @observable document: TLDocumentModel<S> = {
+    shapes: [],
+    selectedIds: [],
   }
 
-  /* -------------------------------------------------- */
-  /*                      Document                      */
-  /* -------------------------------------------------- */
-
-  loadDocumentModel(model: TLDocumentModel<S>): this {
-    this.history.deserialize(model)
-    if (model.assets) this.addAssets(model.assets)
-    return this
+  @observable userState: TLUserState = {
+    camera: [0, 0, 1],
+    erasingShapeIds: [],
+    bounds: {
+      minX: 0,
+      minY: 0,
+      maxX: 1080,
+      maxY: 720,
+      width: 1080,
+      height: 720,
+    },
+    selectionRotation: 0,
+    isToolLocked: false,
+    shiftKey: false,
+    ctrlKey: false,
+    altKey: false,
+    spaceKey: false,
+    isPinching: false,
+    currentScreenPoint: [0, 0],
+    currentPoint: [0, 0],
+    previousScreenPoint: [0, 0],
+    previousPoint: [0, 0],
+    originScreenPoint: [0, 0],
+    originPoint: [0, 0],
   }
 
-  load = (): this => {
-    // todo
-    this.notify('load', null)
-    return this
+  @observable displayState: TLDisplayState<S> = {
+    cursor: TLCursor.Default,
+    cursorRotation: 0,
+    shapesInViewport: [],
+    selectionDirectionHint: undefined,
+    showSelection: false,
+    showSelectionDetail: false,
+    showSelectionRotation: false,
+    showContextBar: false,
+    showRotateHandles: false,
+    showResizeHandles: false,
   }
 
-  save = (): this => {
-    // todo
-    this.notify('save', null)
-    return this
+  @observable userSettings: TLUserSettings = {
+    mode: 'light',
+    showGrid: false,
   }
 
-  saveAs = (): this => {
-    // todo
-    this.notify('saveAs', null)
-    return this
-  }
+  @observable shapes = new Map<string, S>()
 
-  @computed get serialized(): TLDocumentModel<S> {
-    return {
-      currentPageId: this.currentPageId,
-      selectedIds: Array.from(this.selectedIds.values()),
-      pages: Array.from(this.pages.values()).map(page => page.serialized),
-    }
-  }
+  /** A manager for user inputs, e.g. keys and pointers */
+  inputs: TLInputManager<S, K>
 
-  /* ---------------------- Pages --------------------- */
+  /** A manager for the viewport and actions like pan and zoom */
+  viewport: TLViewportManager<S, K>
 
-  @observable pages: Map<string, TLPage<S, K>> = new Map([
-    ['page', new TLPage(this, { id: 'page', name: 'page', shapes: [], bindings: [] })],
-  ])
+  /** A manager for the user's cursor */
+  cursors: TLCursorManager<S, K>
 
-  @observable currentPageId = 'page'
+  /** A manager for history, i.e. undo and redo */
+  history: TLHistoryManager<S, K>
 
-  @computed get currentPage(): TLPage<S, K> {
-    return this.getPageById(this.currentPageId)
-  }
+  /** A manager for the display state, e.g. showing selection bounds */
+  display: TLDisplayManager<S, K>
 
-  getPageById = (pageId: string): TLPage<S, K> => {
-    const page = this.pages.get(pageId)
-    if (!page) throw Error(`Could not find a page named ${pageId}.`)
-    return page
-  }
+  /** A manager for the events and subscriptions */
+  events: TLEventManager<S, K, this>
 
-  @action setCurrentPage(page: string | TLPage<S, K>): this {
-    this.currentPageId = typeof page === 'string' ? page : page.id
-    return this
-  }
-
-  @action addPages(pages: TLPage<S, K>[]): this {
-    pages.forEach(page => this.pages.set(page.id, page))
-    this.persist()
-    return this
-  }
-
-  @action removePages(pages: TLPage<S, K>[]): this {
-    pages.forEach(page => this.pages.delete(page.id))
-    this.persist()
-    return this
-  }
-
-  /* --------------------- Shapes --------------------- */
-
-  getShapeById = <T extends S>(id: string, pageId = this.currentPage.id): T => {
-    const shape = this.getPageById(pageId)?.shapes.find(shape => shape.id === id) as T
-    if (!shape) throw Error(`Could not find that shape: ${id} on page ${pageId}`)
-    return shape
-  }
-
-  @action readonly createShapes = (shapes: S[] | TLShapeModel[]): this => {
-    const newShapes = this.currentPage.addShapes(...shapes)
-    if (newShapes) this.notify('create-shapes', newShapes)
-    this.persist()
-    return this
-  }
-
-  @action updateShapes = <T extends S>(shapes: ({ id: string } & Partial<T['props']>)[]): this => {
-    shapes.forEach(shape => this.getShapeById(shape.id)?.update(shape))
-    this.persist()
-    return this
-  }
-
-  @action readonly deleteShapes = (shapes: S[] | string[]): this => {
-    if (shapes.length === 0) return this
-    let ids: Set<string>
-    if (typeof shapes[0] === 'string') {
-      ids = new Set(shapes as string[])
-    } else {
-      ids = new Set((shapes as S[]).map(shape => shape.id))
-    }
-    this.setSelectedShapes(this.selectedShapesArray.filter(shape => !ids.has(shape.id)))
-    const removedShapes = this.currentPage.removeShapes(...shapes)
-    if (removedShapes) this.notify('delete-shapes', removedShapes)
-    this.persist()
-    return this
-  }
-
-  bringForward = (shapes: S[] | string[] = this.selectedShapesArray): this => {
-    if (shapes.length > 0) this.currentPage.bringForward(shapes)
-    return this
-  }
-
-  sendBackward = (shapes: S[] | string[] = this.selectedShapesArray): this => {
-    if (shapes.length > 0) this.currentPage.sendBackward(shapes)
-    return this
-  }
-
-  sendToBack = (shapes: S[] | string[] = this.selectedShapesArray): this => {
-    if (shapes.length > 0) this.currentPage.sendToBack(shapes)
-    return this
-  }
-
-  bringToFront = (shapes: S[] | string[] = this.selectedShapesArray): this => {
-    if (shapes.length > 0) this.currentPage.bringToFront(shapes)
-    return this
-  }
-
-  flipHorizontal = (shapes: S[] | string[] = this.selectedShapesArray): this => {
-    this.currentPage.flip(shapes, 'horizontal')
-    return this
-  }
-
-  flipVertical = (shapes: S[] | string[] = this.selectedShapesArray): this => {
-    this.currentPage.flip(shapes, 'vertical')
-    return this
-  }
-
-  /* --------------------- Assets --------------------- */
-
-  @observable assets: Record<string, TLAsset> = {}
-
-  @action addAssets<T extends TLAsset>(assets: T[]): this {
-    assets.forEach(asset => (this.assets[asset.id] = asset))
-    this.persist()
-    return this
-  }
-
-  @action removeAssets<T extends TLAsset>(assets: T[] | string[]): this {
-    if (typeof assets[0] === 'string')
-      (assets as string[]).forEach(asset => delete this.assets[asset])
-    else (assets as T[]).forEach(asset => delete this.assets[(asset as T).id])
-    this.persist()
-    return this
-  }
-
-  createAssets<T extends TLAsset>(assets: T[]): this {
-    this.addAssets(assets)
-    this.notify('create-assets', { assets })
-    this.persist()
-    return this
-  }
-
-  dropFiles = (files: FileList, point?: number[]) => {
-    this.notify('drop-files', {
-      files: Array.from(files),
-      point: point
-        ? this.viewport.getPagePoint(point)
-        : BoundsUtils.getBoundsCenter(this.viewport.currentView),
-    })
-    // This callback may be over-written manually, see useSetup.ts in React.
-    return void null
-  }
-
-  /* ---------------------- Tools --------------------- */
+  /* ------------------- Tool States ------------------ */
 
   @computed get selectedTool() {
     return this.currentState
@@ -366,309 +291,274 @@ export class TLApp<
 
   registerTools = this.registerStates
 
-  /* ------------------ Editing Shape ----------------- */
+  /* -------------------- Document -------------------- */
 
-  @observable editingId?: string
-
-  @computed get editingShape(): S | undefined {
-    const { editingId, currentPage } = this
-    return editingId ? currentPage.shapes.find(shape => shape.id === editingId) : undefined
-  }
-
-  @action readonly setEditingShape = (shape?: string | S): this => {
-    this.editingId = typeof shape === 'string' ? shape : shape?.id
+  /** Load a document model. */
+  @action loadDocument(model: TLDocumentModel<S>) {
+    if (this.display.state !== 'stopped') this.display.stop()
+    transaction(() => {
+      try {
+        this.document.selectedIds = []
+        this.document.shapes = []
+        this.addShapes(model.shapes)
+        this.setSelectedShapes(model.selectedIds)
+      } catch (e) {
+        console.error(e)
+      }
+    })
+    if (this.history.state === 'playing') this.history.reset()
+    if (this.display.state === 'stopped') this.display.start()
     return this
   }
 
-  readonly clearEditingShape = (): this => {
-    return this.setEditingShape()
+  /** Apply a JSON patch to the current document */
+  @action patchDocument(patch: TLPatch) {
+    fsp.applyPatch(this.document, patch)
   }
 
-  /* ------------------ Hovered Shape ----------------- */
+  /* -------------------- States -------------------- */
 
-  @observable hoveredId?: string
-
-  @computed get hoveredShape(): S | undefined {
-    const { hoveredId, currentPage } = this
-    return hoveredId ? currentPage.shapes.find(shape => shape.id === hoveredId) : undefined
-  }
-
-  @action readonly setHoveredShape = (shape?: string | S): this => {
-    this.hoveredId = typeof shape === 'string' ? shape : shape?.id
+  /** Apply a change to the user state. */
+  @action updateUserState(userState: Partial<TLUserState>) {
+    Object.assign(this.userState, userState)
     return this
+  }
+
+  /** Apply a change to the user state. */
+  @action updateDisplayState(displayState: Partial<TLDisplayState>) {
+    Object.assign(this.displayState, displayState)
+    return this
+  }
+
+  /** Apply a change to the user settings. */
+  @action updateUserSettings(userSettings: Partial<TLUserSettings>) {
+    Object.assign(this.userSettings, userSettings)
+    return this
+  }
+
+  /** The part of the document currently in view */
+  @computed get currentView(): TLBounds {
+    const {
+      userState: { bounds, camera },
+    } = this
+    const [cx, cy, cz] = camera
+    const w = bounds.width / cz
+    const h = bounds.height / cz
+    return {
+      minX: -cx,
+      minY: -cy,
+      maxX: w - cx,
+      maxY: h - cy,
+      width: w,
+      height: h,
+    }
+  }
+
+  /* --------------- Shape Constructors --------------- */
+
+  /** A map of registered shape constructors */
+  private registeredShapes = new Map<string, TLShapeConstructor<S>>()
+
+  /** Register a shape constructor. */
+  @action registerShapes(shapeCtors: TLShapeConstructor<S>[]) {
+    shapeCtors.forEach(shapeCtor => this.registeredShapes.set(shapeCtor.type, shapeCtor))
+    return this
+  }
+
+  getShapeConstructor = (shape: S | S['model']): TLShapeConstructor<S> => {
+    const model = 'getBounds' in shape ? (shape as S).model : (shape as S['model'])
+    const ShapeCtor = this.registeredShapes.get(model.type)
+    if (!ShapeCtor) throw new Error(`Shape type "${model.type}" is not registered.`)
+    return ShapeCtor
+  }
+
+  /* --------------------- Shapes --------------------- */
+
+  private parseModelsFromShapeArg = (shapesArg: S[] | S['model'][]): S['model'][] => {
+    return 'getBounds' in shapesArg[0]
+      ? (shapesArg as S[]).map(s => s.model)
+      : (shapesArg as S['model'][])
+  }
+
+  private parseShapesFromShapeArg<S>(shapesArg: S[] | string[]) {
+    if (typeof shapesArg[0] === 'string') {
+      return (shapesArg as string[]).map(id => this.getShape(id))
+    } else {
+      return shapesArg as S[]
+    }
+  }
+
+  /** Add shapes to the document model. */
+  @action addShapes(shapeModels: S[] | S['model'][], index = this.document.shapes.length) {
+    const models = this.parseModelsFromShapeArg(shapeModels)
+    models.forEach(model => {
+      const ShapeCtor = this.getShapeConstructor(model)
+      this.shapes.set(model.id, new ShapeCtor(this, model.id))
+    })
+    this.document.shapes.splice(index, 0, ...models)
+    return this
+  }
+
+  /** Update shapes in the document model. */
+  @action updateShapes(shapeModels: S[] | S['model'][]) {
+    const models = this.parseModelsFromShapeArg(shapeModels)
+    models.forEach(model => {
+      const shape = this.shapes.get(model.id)
+      if (shape) shape.update(model)
+    })
+    return this
+  }
+
+  /** Delete shapes from the document model. */
+  @action deleteShapes(shapeModels: S[] | S['model'][]) {
+    const { shapes, document } = this
+    this.parseModelsFromShapeArg(shapeModels).forEach(model => {
+      shapes.delete(model.id)
+      document.shapes.splice(document.shapes.indexOf(model), 1)
+    })
+    return this
+  }
+
+  /** Get the model for a shape by its Id. */
+  getShapeModel = (id: string): S['model'] => {
+    return this.getShape(id).model
+  }
+
+  /** Get a shape by its Id. */
+  getShape = <T extends S>(id: string): T => {
+    const shape = this.shapes.get(id) as T
+    if (!shape) throw new Error(`Shape "${id}" not found.`)
+    return shape
+  }
+
+  /** Get an array of shapes by their Ids. */
+  getShapes = <T extends S>(ids: string[]): T[] => {
+    return ids.map(id => this.getShape(id))
+  }
+
+  /** Get an array of all shapes on the page. */
+  getShapesArray = () => {
+    return this.document.shapes.map(shape => this.getShape(shape.id))
   }
 
   /* ----------------- Selected Shapes ---------------- */
 
-  @observable selectedIds: Set<string> = new Set()
-
-  @observable selectedShapes: Set<S> = new Set()
-
-  @observable selectionRotation = 0
-
-  @computed get selectedShapesArray() {
-    const { selectedShapes, selectedTool } = this
-    const stateId = selectedTool.id
-    if (stateId !== 'select') return []
-    return Array.from(selectedShapes.values())
+  /** An array of selected shape Ids. */
+  @computed get selectedIds() {
+    return this.document.selectedIds
   }
 
-  @action setSelectedShapes = (shapes: S[] | string[]): this => {
-    const { selectedIds, selectedShapes } = this
-    selectedIds.clear()
-    selectedShapes.clear()
-    if (shapes[0] && typeof shapes[0] === 'string') {
-      ;(shapes as string[]).forEach(s => selectedIds.add(s))
-    } else {
-      ;(shapes as S[]).forEach(s => selectedIds.add(s.id))
-    }
-    const newSelectedShapes = this.currentPage.shapes.filter(shape => selectedIds.has(shape.id))
-    newSelectedShapes.forEach(s => selectedShapes.add(s))
-    if (newSelectedShapes.length === 1) {
-      this.selectionRotation = newSelectedShapes[0].props.rotation ?? 0
-    } else {
-      this.selectionRotation = 0
-    }
-    return this
-  }
+  /** An array of selected shapes. */
+  @observable selectedShapesArray: S[] = []
 
-  @action setSelectionRotation(radians: number) {
-    this.selectionRotation = radians
-  }
+  /** A set of selected shapes. */
+  @observable selectedShapes = new Set<S>()
 
-  /* ------------------ Erasing Shape ----------------- */
-
-  @observable erasingIds: Set<string> = new Set()
-
-  @observable erasingShapes: Set<S> = new Set()
-
-  @computed get erasingShapesArray() {
-    return Array.from(this.erasingShapes.values())
-  }
-
-  @action readonly setErasingShapes = (shapes: S[] | string[]): this => {
-    const { erasingIds, erasingShapes } = this
-    erasingIds.clear()
-    erasingShapes.clear()
-    if (shapes[0] && typeof shapes[0] === 'string') {
-      ;(shapes as string[]).forEach(s => erasingIds.add(s))
-    } else {
-      ;(shapes as S[]).forEach(s => erasingIds.add(s.id))
-    }
-    const newErasingShapes = this.currentPage.shapes.filter(shape => erasingIds.has(shape.id))
-    newErasingShapes.forEach(s => erasingShapes.add(s))
-    return this
-  }
-
-  /* ---------------------- Brush --------------------- */
-
-  @observable brush?: TLBounds
-
-  @action readonly setBrush = (brush?: TLBounds): this => {
-    this.brush = brush
-    return this
-  }
-
-  /* --------------------- Camera --------------------- */
-
-  @action setCamera = (point?: number[], zoom?: number): this => {
-    this.viewport.update({ point, zoom })
-    return this
-  }
-
-  readonly getPagePoint = (point: number[]): number[] => {
-    const { camera } = this.viewport
-    return Vec.sub(Vec.div(point, camera.zoom), camera.point)
-  }
-
-  readonly getScreenPoint = (point: number[]): number[] => {
-    const { camera } = this.viewport
-    return Vec.mul(Vec.add(point, camera.point), camera.zoom)
-  }
-
-  /* --------------------- Display -------------------- */
-
-  @computed get shapes(): S[] {
-    const {
-      currentPage: { shapes },
-    } = this
-    return Array.from(shapes.values())
-  }
-
-  @computed get shapesInViewport(): S[] {
-    const {
-      selectedShapes,
-      currentPage,
-      viewport: { currentView },
-    } = this
-    return currentPage.shapes.filter(shape => {
-      return (
-        shape.props.parentId === currentPage.id &&
-        (!shape.canUnmount ||
-          selectedShapes.has(shape) ||
-          BoundsUtils.boundsContain(currentView, shape.rotatedBounds) ||
-          BoundsUtils.boundsCollide(currentView, shape.rotatedBounds))
-      )
-    })
-  }
-
-  @computed get selectionDirectionHint(): number[] | undefined {
-    const {
-      selectionBounds,
-      viewport: { currentView },
-    } = this
-    if (
-      !selectionBounds ||
-      BoundsUtils.boundsContain(currentView, selectionBounds) ||
-      BoundsUtils.boundsCollide(currentView, selectionBounds)
-    ) {
-      return
-    }
-    const center = BoundsUtils.getBoundsCenter(selectionBounds)
-    return Vec.clampV(
-      [
-        (center[0] - currentView.minX - currentView.width / 2) / currentView.width,
-        (center[1] - currentView.minY - currentView.height / 2) / currentView.height,
-      ],
-      -1,
-      1
-    )
-  }
-
+  /** The bounding box of the currently selected shapes, if any. */
   @computed get selectionBounds(): TLBounds | undefined {
     const { selectedShapesArray } = this
     if (selectedShapesArray.length === 0) return undefined
     if (selectedShapesArray.length === 1) {
-      return { ...selectedShapesArray[0].bounds, rotation: selectedShapesArray[0].props.rotation }
+      return { ...selectedShapesArray[0].bounds, rotation: selectedShapesArray[0].model.rotation }
     }
-    return BoundsUtils.getCommonBounds(this.selectedShapesArray.map(shape => shape.rotatedBounds))
+    return BoundsUtils.getCommonBounds(selectedShapesArray.map(shape => shape.rotatedBounds))
   }
 
-  @computed get showSelection() {
-    const { selectedShapesArray } = this
-    return (
-      this.isIn('select') &&
-      ((selectedShapesArray.length === 1 && !selectedShapesArray[0]?.hideSelection) ||
-        selectedShapesArray.length > 1)
-    )
-  }
-
-  @computed get showSelectionDetail() {
-    return (
-      this.isIn('select') &&
-      this.selectedShapes.size > 0 &&
-      !this.selectedShapesArray.every(shape => shape.hideSelectionDetail)
-    )
-  }
-
-  @computed get showSelectionRotation() {
-    return (
-      this.showSelectionDetail && this.isInAny('select.rotating', 'select.pointingRotateHandle')
-    )
-  }
-
-  @computed get showContextBar() {
-    const {
-      selectedShapesArray,
-      inputs: { ctrlKey },
-    } = this
-    return (
-      !ctrlKey &&
-      this.isInAny('select.idle', 'select.hoveringSelectionHandle') &&
-      selectedShapesArray.length > 0 &&
-      !selectedShapesArray.every(shape => shape.hideContextBar)
-    )
-  }
-
-  @computed get showRotateHandles() {
-    const { selectedShapesArray } = this
-    return (
-      this.isInAny(
-        'select.idle',
-        'select.hoveringSelectionHandle',
-        'select.pointingRotateHandle',
-        'select.pointingResizeHandle'
-      ) &&
-      selectedShapesArray.length > 0 &&
-      !selectedShapesArray.every(shape => shape.hideRotateHandle)
-    )
-  }
-
-  @computed get showResizeHandles() {
-    const { selectedShapesArray } = this
-    return (
-      this.isInAny(
-        'select.idle',
-        'select.hoveringSelectionHandle',
-        'select.pointingShape',
-        'select.pointingSelectedShape',
-        'select.pointingRotateHandle',
-        'select.pointingResizeHandle'
-      ) &&
-      selectedShapesArray.length > 0 &&
-      !selectedShapesArray.every(shape => shape.hideResizeHandles)
-    )
-  }
-
-  /* ------------------ Shape Classes ----------------- */
-
-  Shapes = new Map<string, TLShapeConstructor<S>>()
-
-  registerShapes = (Shapes: TLShapeConstructor<S>[]) => {
-    Shapes.forEach(Shape => this.Shapes.set(Shape.id, Shape))
-  }
-
-  deregisterShapes = (Shapes: TLShapeConstructor<S>[]) => {
-    Shapes.forEach(Shape => this.Shapes.delete(Shape.id))
-  }
-
-  getShapeClass = (type: string): TLShapeConstructor<S> => {
-    if (!type) throw Error('No shape type provided.')
-    const Shape = this.Shapes.get(type)
-    if (!Shape) throw Error(`Could not find shape class for ${type}`)
-    return Shape
-  }
-
-  /* ------------------ Subscriptions ----------------- */
-
-  private subscriptions = new Set<TLSubscription<S, K, this, any>>([])
-
-  subscribe = <E extends TLSubscriptionEventName>(
-    event: E,
-    callback: TLCallback<S, K, this, E>
-  ) => {
-    if (callback === undefined) throw Error('Callback is required.')
-    const subscription: TLSubscription<S, K, this, E> = { event, callback }
-    this.subscriptions.add(subscription)
-    return () => this.unsubscribe(subscription)
-  }
-
-  unsubscribe = (subscription: TLSubscription<S, K, this, any>) => {
-    this.subscriptions.delete(subscription)
-    return this
-  }
-
-  notify = <E extends TLSubscriptionEventName>(event: E, info: TLSubscriptionEventInfo<E>) => {
-    this.subscriptions.forEach(subscription => {
-      if (subscription.event === event) {
-        subscription.callback(this, info)
-      }
+  /** Set the user's selected shapes. */
+  @action setSelectedShapes(shapes: string[] | S[]) {
+    let shapesArray: S[]
+    let ids: string[]
+    if (typeof shapes[0] === 'string') {
+      ids = shapes as string[]
+      shapesArray = ids.map(id => this.getShape(id))
+    } else {
+      shapesArray = shapes as S[]
+      ids = shapesArray.map(shape => shape.id)
+    }
+    transaction(() => {
+      // Set selected ids
+      this.document.selectedIds = ids
+      // Set selected shapes array
+      this.selectedShapesArray = shapesArray
+      // Set selection rotation
+      this.userState.selectionRotation =
+        shapesArray.length === 1 ? shapesArray[0].model.rotation ?? 0 : 0
+      // Set selected shapes (set)
+      this.selectedShapes.clear()
+      shapesArray.forEach(shape => this.selectedShapes.add(shape))
     })
     return this
   }
 
-  /* ----------------- Event Handlers ----------------- */
-
-  readonly onTransition: TLStateEvents<S, K>['onTransition'] = () => {
-    this.settings.update({ isToolLocked: false })
+  /** Select no shapes. */
+  clearSelectedShapes = (): this => {
+    return this.setSelectedShapes([])
   }
 
-  readonly onWheel: TLEvents<S, K>['wheel'] = (info, e) => {
+  /* ------------------ Hovered Shape ----------------- */
+
+  /** The user's current hovered shape id. */
+  @computed get hoveredId() {
+    return this.userState.hoveredId
+  }
+
+  /** The user's current hovered shape. */
+  @computed get HoveredShape(): S | undefined {
+    const {
+      userState: { hoveredId },
+    } = this
+    return hoveredId ? this.shapes.get(hoveredId) : undefined
+  }
+
+  /** Set the user's hovered shape. */
+  @action setHoveredShape = (shape?: string | S): this => {
+    this.userState.hoveredId = typeof shape === 'string' ? shape : shape?.id
+    return this
+  }
+
+  /** Clear the user's hovered shape. */
+  clearHoveredShape = (): this => {
+    return this.setHoveredShape()
+  }
+
+  /* ------------------ Editing Shape ----------------- */
+
+  /** The user's current editing shape id. */
+  @computed get editingId() {
+    return this.userState.editingId
+  }
+
+  /** The currently editing shape, if any. */
+  @computed get editingShape(): S | undefined {
+    const {
+      userState: { editingId },
+    } = this
+    return editingId ? this.shapes.get(editingId) : undefined
+  }
+
+  /** Set the user's editing shape. */
+  @action setEditingShape = (shape?: string | S): this => {
+    this.userState.editingId = typeof shape === 'string' ? shape : shape?.id
+    return this
+  }
+
+  /** Clear the user's editing shape. */
+  clearEditingShape = (): this => {
+    return this.setEditingShape()
+  }
+
+  /* ----------------- Event Handlers ----------------- */
+
+  onTransition: TLStateEvents<S, K>['onTransition'] = () => {
+    this.updateUserState({ isToolLocked: false })
+  }
+
+  onWheel: TLEvents<S, K>['wheel'] = (info, e) => {
     this.viewport.panCamera(info.delta)
     this.inputs.onWheel([...this.viewport.getPagePoint([e.clientX, e.clientY]), 0.5], e)
   }
 
-  readonly onPointerDown: TLEvents<S, K>['pointer'] = (info, e) => {
+  onPointerDown: TLEvents<S, K>['pointer'] = (info, e) => {
     if ('clientX' in e) {
       this.inputs.onPointerDown(
         [...this.viewport.getPagePoint([e.clientX, e.clientY]), 0.5],
@@ -677,7 +567,7 @@ export class TLApp<
     }
   }
 
-  readonly onPointerUp: TLEvents<S, K>['pointer'] = (info, e) => {
+  onPointerUp: TLEvents<S, K>['pointer'] = (info, e) => {
     if ('clientX' in e) {
       this.inputs.onPointerUp(
         [...this.viewport.getPagePoint([e.clientX, e.clientY]), 0.5],
@@ -686,29 +576,325 @@ export class TLApp<
     }
   }
 
-  readonly onPointerMove: TLEvents<S, K>['pointer'] = (info, e) => {
+  onPointerMove: TLEvents<S, K>['pointer'] = (info, e) => {
     if ('clientX' in e) {
       this.inputs.onPointerMove([...this.viewport.getPagePoint([e.clientX, e.clientY]), 0.5], e)
     }
   }
 
-  readonly onKeyDown: TLEvents<S, K>['keyboard'] = (info, e) => {
+  onKeyDown: TLEvents<S, K>['keyboard'] = (info, e) => {
     this.inputs.onKeyDown(e)
   }
 
-  readonly onKeyUp: TLEvents<S, K>['keyboard'] = (info, e) => {
+  onKeyUp: TLEvents<S, K>['keyboard'] = (info, e) => {
     this.inputs.onKeyUp(e)
   }
 
-  readonly onPinchStart: TLEvents<S, K>['pinch'] = (info, e) => {
+  onPinchStart: TLEvents<S, K>['pinch'] = (info, e) => {
     this.inputs.onPinchStart([...this.viewport.getPagePoint(info.point), 0.5], e)
   }
 
-  readonly onPinch: TLEvents<S, K>['pinch'] = (info, e) => {
+  onPinch: TLEvents<S, K>['pinch'] = (info, e) => {
     this.inputs.onPinch([...this.viewport.getPagePoint(info.point), 0.5], e)
   }
 
-  readonly onPinchEnd: TLEvents<S, K>['pinch'] = (info, e) => {
+  onPinchEnd: TLEvents<S, K>['pinch'] = (info, e) => {
     this.inputs.onPinchEnd([...this.viewport.getPagePoint(info.point), 0.5], e)
+  }
+
+  /* ----------------------- API ---------------------- */
+
+  /** Open a new document. */
+  open = (): this => {
+    // todo
+    this.events.notify('open', null)
+    return this
+  }
+
+  /** Save the current document. */
+  save = (): this => {
+    // todo
+    this.events.notify('save', null)
+    return this
+  }
+
+  /** Save the current document as a new document. */
+  saveAs = (): this => {
+    // todo
+    this.events.notify('saveAs', null)
+    return this
+  }
+
+  /**
+   * Set the hovered shape.
+   *
+   * @param shape The new hovered shape or shape id.
+   */
+  hoverShape = (shape: string | S | undefined): this => {
+    this.setHoveredShape(shape)
+    return this
+  }
+
+  /** Create shapes based on partial models, requiring only the shape's type. */
+  createShapes = (partials: (Partial<S['model']> & { type: S['model']['type'] })[]) => {
+    return this.addShapes(
+      partials.map(partial => {
+        const shapeCtor = this.registeredShapes.get(partial.type)
+        if (!shapeCtor) throw new Error(`No shape registered for type ${partial.type}`)
+        const id = partial.id ?? uniqueId()
+        return { ...shapeCtor.defaultModel, ...partial, id }
+      })
+    )
+  }
+
+  /**
+   * Create one or more shapes on the current page.
+   *
+   * @param shapes One or more new partial shape models. Must include a type for each shape.
+   */
+  createShape = <T extends S>(
+    ...partials: (Partial<T['model']> & { type: T['model']['type'] })[]
+  ): this => {
+    this.createShapes(partials)
+    return this
+  }
+
+  /**
+   * Update one or more shapes on the current page.
+   *
+   * @param shapes One or more oserialized shape changes to apply. Must include an id for each shape.
+   */
+  updateShape = <T extends S>(...partials: (Partial<T['model']> & { id: string })[]): this => {
+    this.updateShapes(partials.map(partial => this.getShape(partial.id).model))
+    return this
+  }
+
+  /**
+   * Delete one or more shapes from the current page.
+   *
+   * @param shapes The shapes or shape ids to delete.
+   */
+  deleteShape = (...shapes: S[] | S['model'][]): this => {
+    this.deleteShapes(shapes.length ? shapes : this.selectedShapesArray)
+    return this
+  }
+
+  /**
+   * Select one or more shapes on the current page.
+   *
+   * @param shapes The shapes or shape ids to select.
+   */
+  selectShapes = (...shapes: S[] | string[]): this => {
+    this.setSelectedShapes(shapes)
+    return this
+  }
+
+  /**
+   * Deselect one or more selected shapes on the current page.
+   *
+   * @param ids The shapes or shape ids to deselect.
+   */
+  deselectShapes = (...shapes: S[] | string[]): this => {
+    const ids =
+      typeof shapes[0] === 'string' ? (shapes as string[]) : (shapes as S[]).map(shape => shape.id)
+    this.setSelectedShapes(this.selectedShapesArray.filter(shape => !ids.includes(shape.id)))
+    return this
+  }
+
+  /** Select all shapes on the current page. */
+  selectAll = (): this => {
+    this.setSelectedShapes(Array.from(this.shapes.keys()))
+    return this
+  }
+
+  /** Deselect all shapes on the current page. */
+  deselectAll = (): this => {
+    this.setSelectedShapes([])
+    return this
+  }
+
+  /** Bring shapes forward in the shape stack. */
+  @action bringForward = (shapes?: S[] | string[]): this => {
+    const { document } = this
+    const modelsToMove = this.parseShapesFromShapeArg(shapes ?? this.selectedShapesArray).map(
+      shape => shape.model
+    )
+    modelsToMove
+      .sort((a, b) => document.shapes.indexOf(b) - document.shapes.indexOf(a))
+      .map(model => document.shapes.indexOf(model))
+      .forEach(index => {
+        if (index === document.shapes.length - 1) return
+        const next = document.shapes[index + 1]
+        if (modelsToMove.includes(next)) return
+        const t = document.shapes[index]
+        document.shapes[index] = document.shapes[index + 1]
+        document.shapes[index + 1] = t
+      })
+    return this
+  }
+
+  /** Send shapes backward in the shape stack. */
+  @action sendBackward = (shapes?: S[] | string[]): this => {
+    const { document } = this
+    const modelsToMove = this.parseShapesFromShapeArg(shapes ?? this.selectedShapesArray).map(
+      shape => shape.model
+    )
+    modelsToMove
+      .sort((a, b) => document.shapes.indexOf(a) - document.shapes.indexOf(b))
+      .map(shape => document.shapes.indexOf(shape))
+      .forEach(index => {
+        if (index === 0) return
+        const next = document.shapes[index - 1]
+        if (modelsToMove.includes(next)) return
+        const t = document.shapes[index]
+        document.shapes[index] = document.shapes[index - 1]
+        document.shapes[index - 1] = t
+      })
+    return this
+  }
+
+  /** Bring shapes to the front of the shape stack. */
+  @action bringToFront = (shapes?: S[] | string[]): this => {
+    const { document } = this
+    const modelsToMove = this.parseShapesFromShapeArg(shapes ?? this.selectedShapesArray).map(
+      shape => shape.model
+    )
+    document.shapes = document.shapes
+      .filter(model => !modelsToMove.includes(model))
+      .concat(modelsToMove)
+    return this
+  }
+
+  /** Send shapes to the back of the shape stack. */
+  @action sendToBack = (shapes?: S[] | string[]): this => {
+    const { document } = this
+    const modelsToMove = this.parseShapesFromShapeArg(shapes ?? this.selectedShapesArray).map(
+      shape => shape.model
+    )
+    document.shapes = modelsToMove.concat(
+      document.shapes.filter(shape => !modelsToMove.includes(shape))
+    )
+    return this
+  }
+
+  /** Flip shapes horizontally or vertically. */
+  flip = (direction: 'horizontal' | 'vertical', shapes?: S[] | string[]): this => {
+    const shapesToMove = this.parseShapesFromShapeArg(shapes ?? this.selectedShapesArray)
+    const commonBounds = BoundsUtils.getCommonBounds(shapesToMove.map(shape => shape.bounds))
+    shapesToMove.forEach(shape => {
+      const relativeBounds = BoundsUtils.getRelativeTransformedBoundingBox(
+        commonBounds,
+        commonBounds,
+        shape.bounds,
+        direction === 'horizontal',
+        direction === 'vertical'
+      )
+      shape.onResize(shape.model, {
+        bounds: relativeBounds,
+        center: BoundsUtils.getBoundsCenter(relativeBounds),
+        rotation: shape.model.rotation ?? 0 * -1,
+        type: TLResizeCorner.TopLeft,
+        scale:
+          shape.canFlip && shape.model.scale
+            ? direction === 'horizontal'
+              ? [-shape.model.scale[0], 1]
+              : [1, -shape.model.scale[1]]
+            : [1, 1],
+        clip: false,
+        transformOrigin: [0.5, 0.5],
+      })
+    })
+    return this
+  }
+
+  /** Flip shapes horizontally. */
+  flipHorizontal = (shapes: S[] | string[] = this.selectedShapesArray): this => {
+    this.flip('horizontal', shapes)
+    return this
+  }
+
+  /** Flip shapes vertically. */
+  flipVertical = (shapes: S[] | string[] = this.selectedShapesArray): this => {
+    this.flip('vertical', shapes)
+    return this
+  }
+
+  /** Zoom the camera in. */
+  zoomIn = (): this => {
+    this.viewport.zoomIn()
+    return this
+  }
+
+  /** Zoom the camera out. */
+  zoomOut = (): this => {
+    this.viewport.zoomOut()
+    return this
+  }
+
+  /** Reset the camera to 100%. */
+  resetZoom = (): this => {
+    this.viewport.resetZoom()
+    return this
+  }
+
+  /** Zoom to fit all of the current page's shapes in the viewport. */
+  zoomToFit = (): this => {
+    const { shapes } = this
+    if (shapes.size === 0) return this
+    const commonBounds = BoundsUtils.getCommonBounds(
+      Array.from(shapes.values()).map(shape => shape.bounds)
+    )
+    this.viewport.zoomToBounds(commonBounds)
+    return this
+  }
+
+  /** Zoom to fit the current selection in the viewport. */
+  zoomToSelection = (): this => {
+    const { selectionBounds } = this
+    if (!selectionBounds) return this
+    this.viewport.zoomToBounds(selectionBounds)
+    return this
+  }
+
+  /** Toggle the grid setting. */
+  toggleGrid = (): this => {
+    const { showGrid } = this.userSettings
+    this.updateUserSettings({ showGrid: !showGrid })
+    return this
+  }
+
+  /** Toggle the tool lock state. */
+  toggleToolLock = (): this => {
+    const { isToolLocked } = this.userState
+    this.updateUserState({ isToolLocked: !isToolLocked })
+    return this
+  }
+
+  setCamera = (camera: number[]): this => {
+    this.viewport.update(camera)
+    return this
+  }
+
+  /** Undo to the previous frame. */
+  undo = () => this.history.undo()
+
+  /** Redo to the next frame. */
+  redo = () => this.history.redo()
+
+  /** Pause the history. Any further changes will be coalesced into the current frame. */
+  pause = () => this.history.pause()
+
+  /** Unpause the history. The next change will produce a new frame. */
+  resume = () => this.history.resume()
+
+  /** Clone a new instance of the app. */
+  clone = (): TLApp<S, K> => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return new this.constructor({
+      id: this.id,
+      document: toJS(this.document),
+      shapes: Array.from(this.registeredShapes.values()),
+    })
   }
 }

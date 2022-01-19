@@ -1,27 +1,41 @@
-import { TLPolylineShapeProps, TLPolylineShape } from './TLPolylineShape'
+import { TLPolylineShapeModel, TLPolylineShape } from './TLPolylineShape'
+import { TLApp } from '~lib'
+
+export interface PolylineShapeModel extends TLPolylineShapeModel {
+  stroke: string
+}
+
+export class PolylineShape extends TLPolylineShape<PolylineShapeModel> {
+  static type = 'polyline'
+
+  static defaultModel: PolylineShapeModel = {
+    id: 'polyline',
+    type: 'polyline',
+    point: [0, 0],
+    handles: [{ point: [0, 0] }, { point: [100, 100] }],
+    stroke: 'black',
+  }
+}
 
 describe('A minimal test', () => {
   it('Creates the shape', () => {
-    interface PolylineShapeProps extends TLPolylineShapeProps {
-      stroke: string
-    }
-
-    class Shape extends TLPolylineShape<PolylineShapeProps> {
-      static defaultProps: PolylineShapeProps = {
-        id: 'dot',
-        type: 'dot',
-        parentId: 'page',
-        point: [0, 0],
-        handles: [
-          { id: 'start', point: [0, 0] },
-          { id: 'end', point: [0, 0] },
+    const app = new TLApp({
+      document: {
+        shapes: [
+          {
+            id: 'polyline1',
+            type: 'polyline',
+            point: [0, 0],
+            handles: [{ point: [0, 0] }, { point: [100, 100] }],
+            stroke: 'black',
+          },
         ],
-        stroke: 'black',
-      }
-    }
+        selectedIds: [],
+      },
+      shapes: [PolylineShape],
+    })
 
-    const shape = new Shape()
-    expect(shape).toBeDefined()
-    expect(shape.props.stroke).toBe('black')
+    expect(app.getShape('polyline1')).toBeDefined()
+    expect(app.getShape('polyline1').model.stroke).toBe('black')
   })
 })

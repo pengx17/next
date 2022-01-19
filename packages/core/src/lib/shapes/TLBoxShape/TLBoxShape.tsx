@@ -1,34 +1,31 @@
-import type { TLBounds } from '@tldraw/intersect'
 import { makeObservable } from 'mobx'
-import { TLResizeInfo, TLShape, TLShapeProps } from '../TLShape'
+import type { TLBounds } from '@tldraw/intersect'
 import { BoundsUtils } from '~utils'
+import { TLShape, TLShapeModel, TLResizeInfo } from '../../TLShape'
+import type { TLApp } from '../../TLApp'
 
-export interface TLBoxShapeProps extends TLShapeProps {
+export interface TLBoxShapeModel extends TLShapeModel {
   size: number[]
 }
 
-export class TLBoxShape<P extends TLBoxShapeProps = TLBoxShapeProps, M = any> extends TLShape<
-  P,
-  M
-> {
-  constructor(props = {} as Partial<P>) {
-    super(props)
+export class TLBoxShape<P extends TLBoxShapeModel = TLBoxShapeModel> extends TLShape<P> {
+  constructor(public app: TLApp, public id: string) {
+    super(app, id)
     makeObservable(this)
   }
 
-  static id = 'box'
+  static type = 'box'
 
-  static defaultProps: TLBoxShapeProps = {
+  static defaultModel: TLBoxShapeModel = {
     id: 'box',
     type: 'box',
-    parentId: 'page',
     point: [0, 0],
     size: [100, 100],
   }
 
   getBounds = (): TLBounds => {
-    const [x, y] = this.props.point
-    const [width, height] = this.props.size
+    const [x, y] = this.model.point
+    const [width, height] = this.model.size
     return {
       minX: x,
       minY: y,
@@ -41,20 +38,18 @@ export class TLBoxShape<P extends TLBoxShapeProps = TLBoxShapeProps, M = any> ex
 
   getRotatedBounds = (): TLBounds => {
     return BoundsUtils.getBoundsFromPoints(
-      BoundsUtils.getRotatedCorners(this.bounds, this.props.rotation)
+      BoundsUtils.getRotatedCorners(this.bounds, this.model.rotation)
     )
   }
 
   onResize = (initialProps: any, info: TLResizeInfo): this => {
     const {
       bounds,
-      rotation,
       scale: [scaleX, scaleY],
     } = info
     const nextScale = [...this.scale]
     if (scaleX < 0) nextScale[0] *= -1
     if (scaleY < 0) nextScale[1] *= -1
-    this.update({ point: [bounds.minX, bounds.minY], scale: nextScale, rotation })
     return this.update({
       point: [bounds.minX, bounds.minY],
       size: [Math.max(1, bounds.width), Math.max(1, bounds.height)],
@@ -62,11 +57,11 @@ export class TLBoxShape<P extends TLBoxShapeProps = TLBoxShapeProps, M = any> ex
     })
   }
 
-  validateProps = (props: Partial<P>) => {
-    if (props.size !== undefined) {
-      props.size[0] = Math.max(props.size[0], 1)
-      props.size[1] = Math.max(props.size[1], 1)
+  validateModel = (model: Partial<P>) => {
+    if (model.size !== undefined) {
+      model.size[0] = Math.max(model.size[0], 1)
+      model.size[1] = Math.max(model.size[1], 1)
     }
-    return props
+    return model
   }
 }

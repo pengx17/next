@@ -15,21 +15,26 @@ export class ErasingState<
   private hitShapes: Set<S> = new Set()
 
   onEnter: TLStateEvents<S, K>['onEnter'] = () => {
-    const { originPoint } = this.app.inputs
+    const {
+      userState: { originPoint },
+    } = this.app
     this.points = [originPoint]
     this.hitShapes.clear()
   }
 
   onPointerMove: TLStateEvents<S, K>['onPointerMove'] = () => {
-    const { currentPoint, previousPoint } = this.app.inputs
+    const {
+      userState: { currentPoint, previousPoint },
+      displayState: { shapesInViewport },
+    } = this.app
     if (Vec.isEqual(previousPoint, currentPoint)) return
     this.points.push(currentPoint)
-
-    this.app.shapesInViewport
+    shapesInViewport
       .filter(shape => shape.hitTestLineSegment(previousPoint, currentPoint))
       .forEach(shape => this.hitShapes.add(shape))
-
-    this.app.setErasingShapes(Array.from(this.hitShapes.values()))
+    this.app.updateUserState({
+      erasingShapeIds: Array.from(this.hitShapes.values()).map(shape => shape.id),
+    })
   }
 
   onPointerUp: TLStateEvents<S, K>['onPointerUp'] = () => {
@@ -44,7 +49,7 @@ export class ErasingState<
   onKeyDown: TLStateEvents<S>['onKeyDown'] = (info, e) => {
     switch (e.key) {
       case 'Escape': {
-        this.app.setErasingShapes([])
+        this.app.updateUserState({ erasingShapeIds: [] })
         this.tool.transition('idle')
         break
       }

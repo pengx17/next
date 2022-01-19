@@ -6,8 +6,8 @@ import type { TLBounds } from '@tldraw/intersect'
 import { BoundsUtils, uniqueId } from '~utils'
 
 export class CreatingState<
-  T extends TLBoxShape,
   S extends TLShape,
+  T extends S & TLBoxShape,
   K extends TLEventMap,
   R extends TLApp<S, K>,
   P extends TLBoxTool<T, S, K, R>
@@ -21,17 +21,17 @@ export class CreatingState<
 
   onEnter = () => {
     const {
-      currentPage,
-      inputs: { originPoint, currentPoint },
+      userState: { originPoint, currentPoint },
     } = this.app
     const { Shape } = this.tool
-    const shape = new Shape({
-      id: uniqueId(),
-      type: Shape.id,
-      parentId: currentPage.id,
+    const id = uniqueId()
+    this.app.createShape<T>({
+      id,
+      type: Shape.type,
       point: [...originPoint],
       size: Vec.abs(Vec.sub(currentPoint, originPoint)),
     })
+    const shape = this.app.getShape<T>(id)
     this.initialBounds = {
       minX: originPoint[0],
       minY: originPoint[1],
@@ -40,7 +40,6 @@ export class CreatingState<
       width: 1,
       height: 1,
     }
-    // toJS(shape.bounds)
     if (!shape.canChangeAspectRatio) {
       if (shape.aspectRatio) {
         this.aspectRatio = shape.aspectRatio
@@ -54,22 +53,23 @@ export class CreatingState<
       this.initialBounds.maxY = this.initialBounds.minY + this.initialBounds.height
     }
     this.creatingShape = shape
-    this.app.currentPage.addShapes(shape as unknown as S)
-    this.app.setSelectedShapes([shape as unknown as S])
+    this.app.setSelectedShapes([shape])
   }
 
   onPointerMove: TLStateEvents<S, K>['onPointerMove'] = info => {
     if (info.order) return
     if (!this.creatingShape) throw Error('Expected a creating shape.')
     const { initialBounds } = this
-    const { currentPoint, originPoint, shiftKey } = this.app.inputs
+    const {
+      userState: { currentPoint, originPoint, shiftKey },
+    } = this.app
     const bounds = BoundsUtils.getTransformedBoundingBox(
       initialBounds,
       TLResizeCorner.BottomRight,
       Vec.sub(currentPoint, originPoint),
       0,
       shiftKey ||
-        this.creatingShape.props.isAspectRatioLocked ||
+        this.creatingShape.model.isAspectRatioLocked ||
         !this.creatingShape.canChangeAspectRatio
     )
 
@@ -84,7 +84,7 @@ export class CreatingState<
     if (this.creatingShape) {
       this.app.setSelectedShapes([this.creatingShape as unknown as S])
     }
-    if (!this.app.settings.isToolLocked) {
+    if (!this.app.userState.isToolLocked) {
       this.app.transition('select')
     }
   }

@@ -17,18 +17,21 @@ describe('When using the tool', () => {
   })
   it('Creates a shape and transitions to select.idle after pointer up', () => {
     const app = new TLTestApp()
-    app.deleteShapes(app.shapes)
-    expect(app.shapes.length).toBe(0)
-    app.selectTool('line').pointerDown([100, 100]).pointerMove([100, 150]).pointerUp()
+    app
+      .deleteShapes([...app.document.shapes])
+      .selectTool('line')
+      .pointerDown([100, 100])
+      .pointerMove([100, 150])
+      .pointerUp()
     expect(app.isIn('select.idle')).toBe(true)
-    expect(app.shapes.length).toBe(1)
-    app.shapes[0].update({ id: 'test_line' })
-    expect(app.shapes[0]).toMatchSnapshot('created line')
+    expect(app.shapes.size).toBe(1)
+    app.getShapesArray()[0].update({ id: 'test_line' })
+    expect(app.getShapesArray()[0]).toMatchSnapshot('created line')
   })
   it('Cancels creating a shape when escape is pressed', () => {
     const app = new TLTestApp()
-    app.deleteShapes(app.shapes)
-    expect(app.shapes.length).toBe(0)
+    app.deleteShapes([...app.document.shapes])
+    expect(app.shapes.size).toBe(0)
     app
       .selectTool('line')
       .pointerDown([100, 100])
@@ -36,7 +39,7 @@ describe('When using the tool', () => {
       .keyDown('Escape')
       .pointerUp()
     expect(app.isIn('line.idle')).toBe(true)
-    expect(app.shapes.length).toBe(0)
+    expect(app.shapes.size).toBe(0)
   })
   it('Transitions from idle to select.idle on Escape', () => {
     const app = new TLTestApp().selectTool('line')

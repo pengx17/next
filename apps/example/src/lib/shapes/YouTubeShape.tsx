@@ -14,7 +14,7 @@ export interface YouTubeShapeProps extends TLBoxShapeProps, CustomStyleProps {
 export class YouTubeShape extends TLBoxShape<YouTubeShapeProps> {
   static id = 'youtube'
 
-  static defaultProps: YouTubeShapeProps = {
+  static defaultModel: YouTubeShapeProps = {
     id: 'youtube',
     type: 'youtube',
     parentId: 'page',

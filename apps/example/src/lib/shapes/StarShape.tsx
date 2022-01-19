@@ -12,7 +12,7 @@ interface StarShapeProps extends CustomStyleProps, TLStarShapeProps {
 export class StarShape extends TLStarShape<StarShapeProps> {
   static id = 'star'
 
-  static defaultProps: StarShapeProps = {
+  static defaultModel: StarShapeProps = {
     id: 'star',
     parentId: 'page',
     type: 'star',

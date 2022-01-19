@@ -1,24 +1,22 @@
 import type { TLBounds } from '@tldraw/intersect'
 import { makeObservable } from 'mobx'
-import { TLShape, TLResizeInfo, TLShapeProps } from '../TLShape'
+import { TLShape, TLShapeModel, TLResizeInfo } from '../../TLShape'
+import type { TLApp } from '../../TLApp'
 import { BoundsUtils } from '~utils'
 
-export interface TLDotShapeProps extends TLShapeProps {
+export interface TLDotShapeModel extends TLShapeModel {
   radius: number
 }
 
-export class TLDotShape<P extends TLDotShapeProps = TLDotShapeProps, M = any> extends TLShape<
-  P,
-  M
-> {
-  constructor(props = {} as Partial<P>) {
-    super(props)
+export class TLDotShape<P extends TLDotShapeModel = TLDotShapeModel> extends TLShape<P> {
+  constructor(public app: TLApp, public id: string) {
+    super(app, id)
     makeObservable(this)
   }
 
-  static id = 'dot'
+  static type = 'dot'
 
-  static defaultProps: TLDotShapeProps = {
+  static defaultModel: TLDotShapeModel = {
     id: 'dot',
     type: 'dot',
     parentId: 'page',
@@ -33,7 +31,7 @@ export class TLDotShape<P extends TLDotShapeProps = TLDotShapeProps, M = any> ex
 
   getBounds = (): TLBounds => {
     const {
-      props: {
+      model: {
         point: [x, y],
         radius,
       },
@@ -50,13 +48,13 @@ export class TLDotShape<P extends TLDotShapeProps = TLDotShapeProps, M = any> ex
 
   getRotatedBounds = (): TLBounds => {
     return BoundsUtils.getBoundsFromPoints(
-      BoundsUtils.getRotatedCorners(this.bounds, this.props.rotation)
+      BoundsUtils.getRotatedCorners(this.bounds, this.model.rotation)
     )
   }
 
-  onResize = (initialProps: any, info: TLResizeInfo): this => {
+  onResize = (initialModel: P, info: TLResizeInfo): this => {
     const {
-      props: { radius },
+      model: { radius },
     } = this
     return this.update({
       point: [
