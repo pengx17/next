@@ -18,6 +18,7 @@ import {
   TLAppConstructorParams,
 } from '~lib/refactor'
 import { TLEventInfo, TLTargetType } from '~lib/refactor/_types'
+import type { TLDisplayState, TLUserState } from '../_TLApp'
 import { TLTestEditableBox } from './TLTestEditableBox'
 
 export class SelectTool extends TLSelectTool {
@@ -89,20 +90,20 @@ export class TLTestApp extends TLApp<S> {
           {
             id: 'box1',
             type: 'box',
-            parentId: 'page1',
             point: [0, 0],
+            size: [100, 100],
           },
           {
             id: 'box2',
             type: 'box',
-            parentId: 'page1',
             point: [250, 250],
+            size: [100, 100],
           },
           {
             id: 'box3',
             type: 'editable-box',
-            parentId: 'page1',
             point: [300, 300], // Overlapping box2
+            size: [100, 100],
           },
         ],
       },
@@ -332,6 +333,22 @@ export class TLTestApp extends TLApp<S> {
 
   expectToBeIn = (path: string) => {
     expect(this.isIn(path)).toBe(true)
+    return this
+  }
+
+  expectUserStateToBe = (partial: Partial<TLUserState>) => {
+    for (const key in partial) {
+      expect(this.userState[key as keyof TLUserState]).toEqual(partial[key as keyof TLUserState])
+    }
+    return this
+  }
+
+  expectDisplayStateToBe = (partial: Partial<TLDisplayState>) => {
+    for (const key in partial) {
+      expect(this.displayState[key as keyof TLDisplayState]).toEqual(
+        partial[key as keyof TLDisplayState]
+      )
+    }
     return this
   }
 }

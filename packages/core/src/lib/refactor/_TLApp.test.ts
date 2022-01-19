@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { TLTestApp } from './_test'
 import { TLApp } from './_TLApp'
 import { Box, testApp } from './tests/shared'
 
@@ -208,9 +209,9 @@ describe('TLApp.deleteShapes', () => {
   })
 })
 
-describe('app.setBrush', () => {
+describe('userState.brush', () => {
   it('Sets brush when passed a bounding box', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     app.updateUserState({
       brush: {
         minX: 0,
@@ -232,7 +233,7 @@ describe('app.setBrush', () => {
   })
 
   it('Clears brush when passed undefined', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     app.updateUserState({
       brush: {
         minX: 0,
@@ -245,5 +246,37 @@ describe('app.setBrush', () => {
     })
     app.updateUserState({ brush: undefined })
     expect(app.userState.brush).toBeUndefined()
+  })
+})
+
+describe('TLApp.loadDocument', () => {
+  it('Loads a document model', () => {
+    const app = new TLTestApp()
+    app.loadDocument({
+      selectedIds: ['jbox'],
+      shapes: [
+        {
+          id: 'jbox',
+          type: 'box',
+          point: [0, 0],
+          size: [100, 100],
+        },
+      ],
+    })
+    expect(app.getShape('jbox')).toBeDefined()
+    expect(app.selectedIds).toMatchObject(['jbox'])
+    expect(app.selectedShapesArray[0]).toBe(app.getShape('jbox'))
+  })
+
+  it('Fails with warning if given a malformed document', () => {
+    const app = new TLTestApp()
+    const warn = jest.fn()
+    jest.spyOn(console, 'error').mockImplementation(warn)
+    app.loadDocument({
+      selectedIds: [],
+      // @ts-expect-error - we're testing the warning
+      shapes: 'frog dog',
+    })
+    expect(warn).toHaveBeenCalled()
   })
 })

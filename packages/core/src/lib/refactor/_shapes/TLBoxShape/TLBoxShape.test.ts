@@ -1,14 +1,14 @@
 import { TLBoxShapeModel, TLBoxShape } from './TLBoxShape'
 import { TLApp } from '../../_TLApp'
 
-export interface BoxShapeProps extends TLBoxShapeModel {
+export interface BoxShapeModel extends TLBoxShapeModel {
   stroke: string
 }
 
-export class BoxShape extends TLBoxShape<BoxShapeProps> {
+export class BoxShape extends TLBoxShape<BoxShapeModel> {
   static type = 'box'
 
-  static defaultModel: BoxShapeProps = {
+  static defaultModel: BoxShapeModel = {
     id: 'box',
     type: 'box',
     point: [0, 0],

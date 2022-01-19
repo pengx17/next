@@ -189,3 +189,15 @@ describe('When pausing the history', () => {
     expect(app.getShape('box1').model.point).toMatchObject([1, 1])
   })
 })
+
+describe('TLHistoryManager.restore', () => {
+  it('Restores a document', () => {
+    const app = testApp.clone()
+    app.getShape('box1').update({ point: [1, 1] })
+    app.pause()
+    app.getShape('box1').update({ point: [2, 2] })
+    app.getShape('box1').update({ point: [3, 3] })
+    app.history.restore()
+    expect(app.getShape('box1').model.point).toMatchObject([1, 1])
+  })
+})

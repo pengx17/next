@@ -58,6 +58,7 @@ export interface TLDisplayState<S extends TLShape = TLShape> {
   selectionDirectionHint?: number[]
   showSelection: boolean
   showSelectionDetail: boolean
+  showSelectionRotation: boolean
   showContextBar: boolean
   showRotateHandles: boolean
   showResizeHandles: boolean
@@ -96,12 +97,6 @@ export class TLApp<
     const { document, userState, settings, debug = false, shapes = [] } = params
     makeObservable(this)
     this.debug = debug
-    this.inputs = new TLInputManager(this)
-    this.viewport = new TLViewportManager(this)
-    this.cursors = new TLCursorManager(this)
-    this.history = new TLHistoryManager(this)
-    this.display = new TLDisplayManager(this)
-    this.events = new TLEventManager(this)
     const ownShortcuts: TLShortcut<S, K>[] = [
       {
         keys: 'mod+shift+g',
@@ -181,6 +176,12 @@ export class TLApp<
         })
       })
     )
+    this.inputs = new TLInputManager(this)
+    this.viewport = new TLViewportManager(this)
+    this.cursors = new TLCursorManager(this)
+    this.history = new TLHistoryManager(this)
+    this.display = new TLDisplayManager(this)
+    this.events = new TLEventManager(this)
     if (this.states && this.states.length > 0) {
       this.registerStates(this.states)
       const initialId = this.initial ?? this.states[0].id
@@ -243,6 +244,7 @@ export class TLApp<
     selectionDirectionHint: undefined,
     showSelection: false,
     showSelectionDetail: false,
+    showSelectionRotation: false,
     showContextBar: false,
     showRotateHandles: false,
     showResizeHandles: false,
@@ -287,13 +289,20 @@ export class TLApp<
 
   /** Load a document model. */
   @action loadDocument(model: TLDocumentModel<S>) {
+    if (this.display.state !== 'stopped') this.display.stop()
     transaction(() => {
-      this.document.shapes = []
-      this.document.selectedIds = []
-      this.addShapes(model.shapes)
-      this.setSelectedShapes(model.selectedIds)
+      try {
+        this.document.selectedIds = []
+        this.document.shapes = []
+        this.addShapes(model.shapes)
+        this.setSelectedShapes(model.selectedIds)
+      } catch (e) {
+        this.history.restore()
+        console.error(e)
+      }
     })
     if (this.history.state === 'playing') this.history.reset()
+    if (this.display.state === 'stopped') this.display.start()
     return this
   }
 
@@ -374,26 +383,14 @@ export class TLApp<
     }
   }
 
-  /** Create shapes based on partial models, requiring only the shape's type. */
-  createShapes = (partials: (Partial<S['model']> & { type: S['model']['type'] })[]) => {
-    return this.addShapes(
-      partials.map(partial => {
-        const shapeCtor = this.registeredShapes.get(partial.type)
-        if (!shapeCtor) throw new Error(`No shape registered for type ${partial.type}`)
-        const id = partial.id ?? uniqueId()
-        return { ...shapeCtor.defaultModel, ...partial, id }
-      })
-    )
-  }
-
   /** Add shapes to the document model. */
   @action addShapes(shapeModels: S[] | S['model'][], index = this.document.shapes.length) {
     const models = this.parseModelsFromShapeArg(shapeModels)
-    this.document.shapes.splice(index, 0, ...models)
     models.forEach(model => {
       const ShapeCtor = this.getShapeConstructor(model)
       this.shapes.set(model.id, new ShapeCtor(this, model.id))
     })
+    this.document.shapes.splice(index, 0, ...models)
     return this
   }
 
@@ -428,6 +425,11 @@ export class TLApp<
     const shape = this.shapes.get(id) as T
     if (!shape) throw new Error(`Shape "${id}" not found.`)
     return shape
+  }
+
+  /** Get an array of shapes by their Ids. */
+  getShapes = <T extends S>(ids: string[]): T[] => {
+    return ids.map(id => this.getShape(id))
   }
 
   /* ----------------- Selected Shapes ---------------- */
@@ -593,6 +595,113 @@ export class TLApp<
 
   /* ----------------------- API ---------------------- */
 
+  /** Open a new document. */
+  open = (): this => {
+    // todo
+    this.events.notify('open', null)
+    return this
+  }
+
+  /** Save the current document. */
+  save = (): this => {
+    // todo
+    this.events.notify('save', null)
+    return this
+  }
+
+  /** Save the current document as a new document. */
+  saveAs = (): this => {
+    // todo
+    this.events.notify('saveAs', null)
+    return this
+  }
+
+  /**
+   * Set the hovered shape.
+   *
+   * @param shape The new hovered shape or shape id.
+   */
+  hoverShape = (shape: string | S | undefined): this => {
+    this.setHoveredShape(shape)
+    return this
+  }
+
+  /** Create shapes based on partial models, requiring only the shape's type. */
+  createShapes = (partials: (Partial<S['model']> & { type: S['model']['type'] })[]) => {
+    return this.addShapes(
+      partials.map(partial => {
+        const shapeCtor = this.registeredShapes.get(partial.type)
+        if (!shapeCtor) throw new Error(`No shape registered for type ${partial.type}`)
+        const id = partial.id ?? uniqueId()
+        return { ...shapeCtor.defaultModel, ...partial, id }
+      })
+    )
+  }
+
+  /**
+   * Create one or more shapes on the current page.
+   *
+   * @param shapes One or more new partial shape models. Must include a type for each shape.
+   */
+  createShape = (...partials: (Partial<S['model']> & { type: S['model']['type'] })[]): this => {
+    this.createShapes(partials)
+    return this
+  }
+
+  /**
+   * Update one or more shapes on the current page.
+   *
+   * @param shapes One or more oserialized shape changes to apply. Must include an id for each shape.
+   */
+  updateShape = <T extends S>(...partials: (Partial<T['model']> & { id: string })[]): this => {
+    this.updateShapes(partials.map(partial => this.getShape(partial.id).model))
+    return this
+  }
+
+  /**
+   * Delete one or more shapes from the current page.
+   *
+   * @param shapes The shapes or shape ids to delete.
+   */
+  deleteShape = (...shapes: S[] | S['model'][]): this => {
+    this.deleteShapes(shapes.length ? shapes : this.selectedShapesArray)
+    return this
+  }
+
+  /**
+   * Select one or more shapes on the current page.
+   *
+   * @param shapes The shapes or shape ids to select.
+   */
+  selectShapes = (...shapes: S[] | string[]): this => {
+    this.setSelectedShapes(shapes)
+    return this
+  }
+
+  /**
+   * Deselect one or more selected shapes on the current page.
+   *
+   * @param ids The shapes or shape ids to deselect.
+   */
+  deselectShapes = (...shapes: S[] | string[]): this => {
+    const ids =
+      typeof shapes[0] === 'string' ? (shapes as string[]) : (shapes as S[]).map(shape => shape.id)
+    this.setSelectedShapes(this.selectedShapesArray.filter(shape => !ids.includes(shape.id)))
+    return this
+  }
+
+  /** Select all shapes on the current page. */
+  selectAll = (): this => {
+    this.setSelectedShapes(Array.from(this.shapes.keys()))
+    return this
+  }
+
+  /** Deselect all shapes on the current page. */
+  deselectAll = (): this => {
+    this.setSelectedShapes([])
+    return this
+  }
+
   /** Bring shapes forward in the shape stack. */
   @action bringForward = (shapes?: S[] | string[]): this => {
     const { document } = this
@@ -699,101 +808,6 @@ export class TLApp<
     return this
   }
 
-  /** Open a new document. */
-  open = (): this => {
-    // todo
-    this.events.notify('open', null)
-    return this
-  }
-
-  /** Save the current document. */
-  save = (): this => {
-    // todo
-    this.events.notify('save', null)
-    return this
-  }
-
-  /** Save the current document as a new document. */
-  saveAs = (): this => {
-    // todo
-    this.events.notify('saveAs', null)
-    return this
-  }
-
-  /**
-   * Set the hovered shape.
-   *
-   * @param shape The new hovered shape or shape id.
-   */
-  hoverShape = (shape: string | S | undefined): this => {
-    this.setHoveredShape(shape)
-    return this
-  }
-
-  /**
-   * Create one or more shapes on the current page.
-   *
-   * @param shapes One or more new partial shape models. Must include a type for each shape.
-   */
-  createShape = (...partials: (Partial<S['model']> & { type: S['model']['type'] })[]): this => {
-    this.createShapes(partials)
-    return this
-  }
-
-  /**
-   * Update one or more shapes on the current page.
-   *
-   * @param shapes One or more oserialized shape changes to apply. Must include an id for each shape.
-   */
-  updateShape = <T extends S>(...partials: (Partial<T['model']> & { id: string })[]): this => {
-    this.updateShapes(partials.map(partial => this.getShape(partial.id).model))
-    return this
-  }
-
-  /**
-   * Delete one or more shapes from the current page.
-   *
-   * @param shapes The shapes or shape ids to delete.
-   */
-  deleteShape = (...shapes: S[] | S['model'][]): this => {
-    this.deleteShapes(shapes.length ? shapes : this.selectedShapesArray)
-    return this
-  }
-
-  /**
-   * Select one or more shapes on the current page.
-   *
-   * @param shapes The shapes or shape ids to select.
-   */
-  selectShapes = (...shapes: S[] | string[]): this => {
-    this.setSelectedShapes(shapes)
-    return this
-  }
-
-  /**
-   * Deselect one or more selected shapes on the current page.
-   *
-   * @param ids The shapes or shape ids to deselect.
-   */
-  deselectShapes = (...shapes: S[] | string[]): this => {
-    const ids =
-      typeof shapes[0] === 'string' ? (shapes as string[]) : (shapes as S[]).map(shape => shape.id)
-    this.setSelectedShapes(this.selectedShapesArray.filter(shape => !ids.includes(shape.id)))
-    return this
-  }
-
-  /** Select all shapes on the current page. */
-  selectAll = (): this => {
-    this.setSelectedShapes(Array.from(this.shapes.keys()))
-    return this
-  }
-
-  /** Deselect all shapes on the current page. */
-  deselectAll = (): this => {
-    this.setSelectedShapes([])
-    return this
-  }
-
   /** Zoom the camera in. */
   zoomIn = (): this => {
     this.viewport.zoomIn()
@@ -842,6 +856,11 @@ export class TLApp<
   toggleToolLock = (): this => {
     const { isToolLocked } = this.userState
     this.updateUserState({ isToolLocked: !isToolLocked })
+    return this
+  }
+
+  setCamera = (camera: number[]): this => {
+    this.viewport.update(camera)
     return this
   }
 

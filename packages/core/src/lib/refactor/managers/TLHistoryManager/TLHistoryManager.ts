@@ -120,4 +120,8 @@ export class TLHistoryManager<S extends TLShape = TLShape, K extends TLEventMap 
       this.didChangeWhilePaused = false
     }
   }
+
+  restore = () => {
+    this.app.loadDocument(this.prev)
+  }
 }

@@ -1,5 +1,5 @@
 import Vec from '@tldraw/vec'
-import { autorun, computed, makeObservable } from 'mobx'
+import { autorun, reaction } from 'mobx'
 import { BoundsUtils } from '~utils'
 import type { TLApp, TLShape } from '../..'
 import type { TLEventMap } from '../../_types'
@@ -7,73 +7,58 @@ import type { TLEventMap } from '../../_types'
 export class TLDisplayManager<S extends TLShape = TLShape, K extends TLEventMap = TLEventMap> {
   app: TLApp<S, K>
 
+  state: 'stopped' | 'started' = 'stopped'
+
   constructor(app: TLApp<S, K>) {
     this.app = app
-    makeObservable(this)
-
-    autorun(() => {
-      const {
-        document: { shapes },
-        selectedShapes,
-        currentView,
-      } = this.app
-
-      this.app.updateDisplayState({
-        shapesInViewport: shapes
-          .map(shape => this.app.getShape(shape.id))
-          .filter(shape => {
-            return (
-              shape.model.parentId === undefined &&
-              (!shape.canUnmount ||
-                selectedShapes.has(shape) ||
-                BoundsUtils.boundsContain(currentView, shape.rotatedBounds) ||
-                BoundsUtils.boundsCollide(currentView, shape.rotatedBounds))
-            )
-          }),
-      })
-    })
   }
 
-  // @computed get shapesInViewport(): S[] {
-  //   const {
-  //     document: { shapes },
-  //     selectedShapes,
-  //     currentView,
-  //   } = this.app
-  //   return shapes
-  //     .map(shape => this.app.getShape(shape.id))
-  //     .filter(shape => {
-  //       return (
-  //         shape.model.parentId === undefined &&
-  //         (!shape.canUnmount ||
-  //           selectedShapes.has(shape) ||
-  //           BoundsUtils.boundsContain(currentView, shape.rotatedBounds) ||
-  //           BoundsUtils.boundsCollide(currentView, shape.rotatedBounds))
-  //       )
-  //     })
-  // }
+  getShapesInViewport = () => {
+    const {
+      document: { shapes },
+      selectedShapes,
+      currentView,
+    } = this.app
 
-  @computed get selectionDirectionHint(): number[] | undefined {
-    const { selectionBounds, currentView } = this.app
-    if (
-      !selectionBounds ||
-      BoundsUtils.boundsContain(currentView, selectionBounds) ||
-      BoundsUtils.boundsCollide(currentView, selectionBounds)
-    ) {
-      return
+    if (this.state === 'stopped') {
+      console.log('oh shit!')
     }
-    const center = BoundsUtils.getBoundsCenter(selectionBounds)
-    return Vec.clampV(
-      [
-        (center[0] - currentView.minX - currentView.width / 2) / currentView.width,
-        (center[1] - currentView.minY - currentView.height / 2) / currentView.height,
-      ],
-      -1,
-      1
-    )
+
+    return shapes
+      .map(shape => this.app.getShape(shape.id))
+      .filter(shape => {
+        return (
+          shape.model.parentId === undefined &&
+          (!shape.canUnmount ||
+            selectedShapes.has(shape) ||
+            BoundsUtils.boundsContain(currentView, shape.rotatedBounds) ||
+            BoundsUtils.boundsCollide(currentView, shape.rotatedBounds))
+        )
+      })
   }
 
-  @computed get showSelection() {
+  getSelectionDirectionHint = () => {
+    const { selectionBounds, currentView } = this.app
+    let selectionDirectionHint: number[] | undefined
+    if (
+      selectionBounds &&
+      !(
+        BoundsUtils.boundsContain(currentView, selectionBounds) ||
+        BoundsUtils.boundsCollide(currentView, selectionBounds)
+      )
+    ) {
+      const [cx, cy] = BoundsUtils.getBoundsCenter(selectionBounds)
+      const { minX, minY, width, height } = currentView
+      selectionDirectionHint = Vec.clampV(
+        [(cx - minX - width / 2) / width, (cy - minY - height / 2) / height],
+        -1,
+        1
+      )
+    }
+    return selectionDirectionHint
+  }
+
+  getShowSelection = () => {
     const { selectedShapesArray } = this.app
     return (
       this.app.isIn('select') &&
@@ -82,7 +67,14 @@ export class TLDisplayManager<S extends TLShape = TLShape, K extends TLEventMap 
     )
   }
 
-  @computed get showSelectionDetail() {
+  getShowSelectionRotation = () => {
+    const {
+      displayState: { showSelectionDetail },
+    } = this.app
+    return showSelectionDetail && this.app.isInAny('select.rotating', 'select.pointingRotateHandle')
+  }
+
+  getShowSelectionDetail = () => {
     const { selectedShapes, selectedShapesArray } = this.app
     return (
       this.app.isIn('select') &&
@@ -91,13 +83,7 @@ export class TLDisplayManager<S extends TLShape = TLShape, K extends TLEventMap 
     )
   }
 
-  @computed get showSelectionRotation() {
-    return (
-      this.showSelectionDetail && this.app.isInAny('select.rotating', 'select.pointingRotateHandle')
-    )
-  }
-
-  @computed get showContextBar() {
+  getShowContextBar = () => {
     const {
       selectedShapesArray,
       userState: { ctrlKey },
@@ -110,23 +96,25 @@ export class TLDisplayManager<S extends TLShape = TLShape, K extends TLEventMap 
     )
   }
 
-  @computed get showRotateHandles() {
+  getShowRotateHandles = () => {
     const { selectedShapesArray } = this.app
     return (
+      selectedShapesArray.length > 0 &&
+      !selectedShapesArray.every(shape => shape.hideRotateHandle) &&
       this.app.isInAny(
         'select.idle',
         'select.hoveringSelectionHandle',
         'select.pointingRotateHandle',
         'select.pointingResizeHandle'
-      ) &&
-      selectedShapesArray.length > 0 &&
-      !selectedShapesArray.every(shape => shape.hideRotateHandle)
+      )
     )
   }
 
-  @computed get showResizeHandles() {
+  getShowResizeHandles = () => {
     const { selectedShapesArray } = this.app
     return (
+      selectedShapesArray.length > 0 &&
+      !selectedShapesArray.every(shape => shape.hideResizeHandles) &&
       this.app.isInAny(
         'select.idle',
         'select.hoveringSelectionHandle',
@@ -134,9 +122,45 @@ export class TLDisplayManager<S extends TLShape = TLShape, K extends TLEventMap 
         'select.pointingSelectedShape',
         'select.pointingRotateHandle',
         'select.pointingResizeHandle'
-      ) &&
-      selectedShapesArray.length > 0 &&
-      !selectedShapesArray.every(shape => shape.hideResizeHandles)
+      )
     )
+  }
+
+  disposables: (() => void)[] = []
+
+  start = () => {
+    this.state = 'started'
+    this.disposables.push(
+      reaction(this.getShapesInViewport, result =>
+        this.app.updateDisplayState({ shapesInViewport: result })
+      ),
+      reaction(this.getSelectionDirectionHint, result =>
+        this.app.updateDisplayState({ selectionDirectionHint: result })
+      ),
+      reaction(this.getShowSelection, result =>
+        this.app.updateDisplayState({ showSelection: result })
+      ),
+      reaction(this.getShowSelectionRotation, result =>
+        this.app.updateDisplayState({ showSelectionRotation: result })
+      ),
+      reaction(this.getShowSelectionDetail, result =>
+        this.app.updateDisplayState({ showSelectionDetail: result })
+      ),
+      reaction(this.getShowContextBar, result =>
+        this.app.updateDisplayState({ showContextBar: result })
+      ),
+      reaction(this.getShowRotateHandles, result =>
+        this.app.updateDisplayState({ showRotateHandles: result })
+      ),
+      reaction(this.getShowResizeHandles, result =>
+        this.app.updateDisplayState({ showResizeHandles: result })
+      )
+    )
+  }
+
+  stop = () => {
+    this.disposables.forEach(disposable => disposable())
+    this.disposables = []
+    this.state = 'stopped'
   }
 }
