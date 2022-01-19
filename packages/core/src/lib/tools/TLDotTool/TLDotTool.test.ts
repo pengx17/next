@@ -11,8 +11,7 @@ describe('When using the tool', () => {
     app.pointerDown([100, 100])
     expect(app.shapes.size).toBe(1)
     const shape = app.getShapesArray()[0]
-    shape.model.id = 'test_dot'
-    expect(shape.model).toMatchSnapshot('created dot')
+    expect({ ...shape.model, id: 'test_dot' }).toMatchSnapshot('created dot')
   })
   it('Cancels creating a shape when escape is pressed', () => {
     const app = new TLTestApp()

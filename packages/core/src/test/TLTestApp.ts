@@ -20,19 +20,7 @@ import {
   TLLineTool,
   TLSelectTool,
   TLAppConstructorParams,
-  TLBoxShapeModel,
 } from '~lib'
-
-export class TestEditableBox extends TLBoxShape<TLBoxShapeModel> {
-  static type = 'editable-box'
-  isEditable = true
-}
-
-export class TestEditableBoxTool extends TLBoxTool<TLBoxShape, any> {
-  static id = 'editable-box'
-  static shortcut = ['x']
-  Shape = TLBoxShape
-}
 
 export class SelectTool extends TLSelectTool {
   static id = 'select'
@@ -82,7 +70,6 @@ interface PointerOptions {
 }
 
 type S =
-  | TestEditableBox
   | TLBoxShape
   | TLDrawShape
   | TLDotShape
@@ -121,7 +108,6 @@ export class TLTestApp extends TLApp<S> {
         ],
       },
       shapes: [
-        TestEditableBox,
         TLBoxShape,
         TLDrawShape,
         TLDotShape,
@@ -131,7 +117,7 @@ export class TLTestApp extends TLApp<S> {
         TLPolygonShape,
         TLStarShape,
       ],
-      tools: [BoxTool, EraseTool, LineTool, DotTool, DrawTool, TestEditableBoxTool],
+      tools: [BoxTool, EraseTool, LineTool, DotTool, DrawTool],
       ...params,
     })
 

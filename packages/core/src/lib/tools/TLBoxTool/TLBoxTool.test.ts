@@ -27,8 +27,7 @@ describe('When using the box tool', () => {
       .expectToBeIn('select.idle')
     expect(app.shapes.size).toBe(1)
     const shapes = app.getShapesArray()
-    shapes[0].model.id = 'test_box'
-    expect(shapes[0].model).toMatchSnapshot('created box')
+    expect({ ...shapes[0].model, id: 'test_box' }).toMatchSnapshot('created box')
   })
   it('Cancels creating a shape when escape is pressed', () => {
     const app = new TLTestApp()

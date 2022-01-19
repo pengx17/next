@@ -1,5 +1,7 @@
+import { TLBoxShape, TLBoxShapeModel } from '~lib'
 import { TLTestApp } from '~test'
 import { TLTargetType } from '~types'
+import { TLBoxTool } from '..'
 
 describe('When in the idle state', () => {
   it('Clears selected shapes when Escape is pressed', () => {
@@ -23,10 +25,30 @@ describe('When in the idle state', () => {
 })
 
 describe('editing shape', () => {
+  class TestEditableBox extends TLBoxShape<TLBoxShapeModel> {
+    static type = 'editable-box'
+    canEdit = true
+  }
+
+  class TestEditableBoxTool extends TLBoxTool<TLBoxShape, any> {
+    static id = 'editable-box'
+    static shortcut = ['x']
+    Shape = TLBoxShape
+  }
+
   it('Sets editing shape when double clicking an editable shape', () => {
     const app = new TLTestApp()
-    app.doubleClick([10, 10], 'box3')
-    expect(app.userState.editingId).toBe('box3')
+      .registerShapes([TestEditableBox])
+      .registerTools([TestEditableBoxTool])
+      .createShape({
+        id: 'ebox',
+        type: 'editable-box',
+        point: [300, 300],
+        size: [100, 100],
+      })
+      .doubleClick([310, 310], 'ebox')
+
+    expect(app.userState.editingId).toBe('ebox')
   })
 
   it('Does not set editing shape when double clicking a shape that is not editable', () => {
@@ -37,16 +59,32 @@ describe('editing shape', () => {
 
   it('Clears editing shape when clicking outside of the editing shape', () => {
     const app = new TLTestApp()
-    app.doubleClick([10, 10], 'box3')
+      .registerShapes([TestEditableBox])
+      .registerTools([TestEditableBoxTool])
+      .createShape({
+        id: 'ebox',
+        type: 'editable-box',
+        point: [300, 300],
+        size: [100, 100],
+      })
+      .doubleClick([310, 310], 'ebox')
     app.click([-100, -110], { type: TLTargetType.Canvas })
     expect(app.userState.editingId).toBeUndefined()
   })
 
   it('Does not clear editing shape when clicking inside of the editing shape', () => {
     const app = new TLTestApp()
-    app.doubleClick([10, 10], 'box3')
-    app.pointerDown([10, 10], 'box3')
-    expect(app.userState.editingId).toBe('box3')
+      .registerShapes([TestEditableBox])
+      .registerTools([TestEditableBoxTool])
+      .createShape({
+        id: 'ebox',
+        type: 'editable-box',
+        point: [300, 300],
+        size: [100, 100],
+      })
+      .doubleClick([310, 310], 'ebox')
+      .doubleClick([310, 310], 'ebox')
+    expect(app.userState.editingId).toBe('ebox')
   })
 })
 

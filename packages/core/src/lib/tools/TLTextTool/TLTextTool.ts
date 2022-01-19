@@ -17,9 +17,8 @@ export abstract class TLTextTool<
   cursor = TLCursor.Cross
 
   abstract Shape: {
-    new (props: Partial<T['props']>): T
-    aspectRatio?: number
-    id: string
-    defaultModel: T['props']
+    new (app: TLApp, id: string): T
+    type: string
+    defaultModel: T['model']
   }
 }

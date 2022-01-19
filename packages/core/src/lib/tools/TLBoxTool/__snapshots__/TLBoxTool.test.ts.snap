@@ -1,3 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`When using the box tool Creates a shape and transitions to select.idle after pointer up: created box 1`] = `undefined`;
+exports[`When using the box tool Creates a shape and transitions to select.idle after pointer up: created box 1`] = `
+Object {
+  "id": "test_box",
+  "point": Array [
+    100,
+    100,
+    0.5,
+  ],
+  "size": Array [
+    0,
+    50,
+  ],
+  "type": "box",
+}
+`;

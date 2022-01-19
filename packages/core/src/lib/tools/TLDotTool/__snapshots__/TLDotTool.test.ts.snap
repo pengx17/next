@@ -1,3 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`When using the tool Transitions to creating and creates a dot shape on pointer down: created dot 1`] = `undefined`;
+exports[`When using the tool Transitions to creating and creates a dot shape on pointer down: created dot 1`] = `
+Object {
+  "id": "test_dot",
+  "parentId": "page",
+  "point": Array [
+    94,
+    94,
+  ],
+  "radius": 6,
+  "type": "dot",
+}
+`;

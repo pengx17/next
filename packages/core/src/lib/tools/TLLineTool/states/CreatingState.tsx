@@ -15,26 +15,27 @@ export class CreatingState<
   static id = 'creating'
 
   creatingShape = {} as T
-  initialShape = {} as T['props']
+  initialShape = {} as T['model']
 
   onEnter = () => {
     const { Shape } = this.tool
-    const shape = new Shape({
-      id: uniqueId(),
-      type: Shape.id,
-      parentId: this.app.currentPage.id,
-      point: this.app.inputs.originPoint,
-      handles: [{ point: [0, 0] }, { point: [1, 1] }],
-    })
-    this.initialShape = toJS(shape.props)
+    const id = uniqueId()
+    const shape = this.app
+      .createShape<T>({
+        id,
+        type: Shape.type,
+        point: this.app.userState.originPoint,
+        handles: [{ point: [0, 0] }, { point: [1, 1] }],
+      })
+      .getShape<T>(id)
+    this.initialShape = toJS(shape.model)
     this.creatingShape = shape
-    this.app.currentPage.addShapes(shape)
     this.app.setSelectedShapes([shape])
   }
 
   onPointerMove: TLStateEvents<S, K>['onPointerMove'] = () => {
     const {
-      inputs: { shiftKey, previousPoint, originPoint, currentPoint },
+      userState: { shiftKey, previousPoint, originPoint, currentPoint },
     } = this.app
     if (Vec.isEqual(previousPoint, currentPoint)) return
     const delta = Vec.sub(currentPoint, originPoint)
@@ -54,7 +55,7 @@ export class CreatingState<
     if (this.creatingShape) {
       this.app.setSelectedShapes([this.creatingShape])
     }
-    if (!this.app.settings.isToolLocked) {
+    if (!this.app.userState.isToolLocked) {
       this.app.transition('select')
     }
   }

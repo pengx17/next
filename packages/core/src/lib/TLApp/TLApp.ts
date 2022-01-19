@@ -187,20 +187,18 @@ export class TLApp<
     this.events = new TLEventManager(this)
     this.shapes.clear()
     if (shapes) this.registerShapes(shapes)
+    if (this.states) this.registerStates(this.states)
     if (tools) this.registerTools(tools)
     if (userState) this.updateUserState(userState)
     if (settings) this.updateUserSettings(settings)
-    if (document) this.loadDocument(document)
-    if (this.states && this.states.length > 0) {
-      this.registerStates(this.states)
-      const initialId = this.initial ?? this.states[0].id
-      const state = this.children.get(initialId)
-      if (state) {
-        this.currentState = state
-        this.currentState?._events.onEnter({ fromId: 'initial' })
-      }
+    const initialId = this.initial ?? this.states[0].id
+    const state = this.children.get(initialId)
+    if (state) {
+      this.currentState = state
+      this.currentState?._events.onEnter({ fromId: 'initial' })
     }
     makeObservable(this)
+    if (document) this.loadDocument(document)
     this.history.start()
   }
 
@@ -300,6 +298,7 @@ export class TLApp<
       try {
         this.document.selectedIds = []
         this.document.shapes = []
+        this.shapes.clear()
         this.addShapes(model.shapes)
         this.setSelectedShapes(model.selectedIds)
       } catch (e) {

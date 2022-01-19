@@ -7,8 +7,8 @@ import { uniqueId } from '~utils'
 import { transaction } from 'mobx'
 
 export class CreatingState<
-  T extends TLTextShape,
   S extends TLShape,
+  T extends S & TLTextShape,
   K extends TLEventMap,
   R extends TLApp<S, K>,
   P extends TLTextTool<T, S, K, R>
@@ -22,26 +22,26 @@ export class CreatingState<
 
   onEnter = () => {
     const {
-      currentPage,
-      inputs: { originPoint },
+      userState: { originPoint },
     } = this.app
     const { Shape } = this.tool
-    const shape = new Shape({
-      id: uniqueId(),
-      type: Shape.id,
-      parentId: currentPage.id,
-      point: [...originPoint],
-      text: '',
-      size: [16, 32],
-      isSizeLocked: true,
-    })
+    const id = uniqueId()
+    const shape = this.app
+      .createShape<T>({
+        id,
+        type: Shape.type,
+        point: [...originPoint],
+        text: '',
+        size: [16, 32],
+        isSizeLocked: true,
+      })
+      .getShape<T>(id)
     this.creatingShape = shape
     transaction(() => {
-      this.app.currentPage.addShapes(shape as unknown as S)
       const { bounds } = shape
       shape.update({ point: Vec.sub(originPoint, [bounds.width / 2, bounds.height / 2]) })
       this.app.transition('select')
-      this.app.setSelectedShapes([shape as unknown as S])
+      this.app.setSelectedShapes([shape])
       this.app.currentState.transition('editingShape', {
         type: TLTargetType.Shape,
         shape: this.creatingShape,

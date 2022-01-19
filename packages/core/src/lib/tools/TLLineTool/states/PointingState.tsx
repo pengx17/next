@@ -13,10 +13,11 @@ export class PointingState<
   static id = 'pointing'
 
   onPointerMove: TLStateEvents<S, K>['onPointerMove'] = () => {
-    const { currentPoint, originPoint } = this.app.inputs
+    const {
+      userState: { currentPoint, originPoint },
+    } = this.app
     if (Vec.dist(currentPoint, originPoint) > 5) {
       this.tool.transition('creating')
-      this.app.setSelectedShapes(this.app.currentPage.shapes)
     }
   }
 }

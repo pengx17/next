@@ -1,18 +1,21 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { testApp } from '~test'
+import { TLTestApp } from '~test'
 
 describe('When updating the history', () => {
   it('Does change, undo', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
+    expect(app.history.state).toBe('playing')
+    expect(app.history.frame).toBe(-1)
     app.getShape('box1').update({ point: [1, 1] })
+    expect(app.history.frame).toBe(0)
     expect(app.getShape('box1').model.point).toMatchObject([1, 1])
     app.undo()
     expect(app.getShape('box1').model.point).toMatchObject([0, 0])
   })
 
   it('Does change, undo, redo', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     app.getShape('box1').update({ point: [1, 1] })
     app.undo()
     expect(app.getShape('box1').model.point).toMatchObject([0, 0])
@@ -21,7 +24,7 @@ describe('When updating the history', () => {
   })
 
   it('Does change, undo, undo', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     app.getShape('box1').update({ point: [1, 1] })
     app.undo()
     app.undo()
@@ -29,7 +32,7 @@ describe('When updating the history', () => {
   })
 
   it('Does change, change, undo', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     app.getShape('box1').update({ point: [1, 1] })
     app.getShape('box1').update({ point: [2, 2] })
     app.undo()
@@ -37,7 +40,7 @@ describe('When updating the history', () => {
   })
 
   it('Does change, change, undo, undo', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     app.getShape('box1').update({ point: [1, 1] })
     app.getShape('box1').update({ point: [2, 2] })
     app.undo()
@@ -46,7 +49,7 @@ describe('When updating the history', () => {
   })
 
   it('Does change, change, undo, change, undo', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     app.getShape('box1').update({ point: [1, 1] })
     app.getShape('box1').update({ point: [2, 2] })
     app.undo()
@@ -56,7 +59,7 @@ describe('When updating the history', () => {
   })
 
   it('Does change, undo, redo', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     app.getShape('box1').update({ point: [1, 1] })
     app.getShape('box1').update({ point: [2, 2] })
     app.undo()
@@ -65,7 +68,7 @@ describe('When updating the history', () => {
   })
 
   it('Does change, change, undo, undo, redo, redo', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     app.getShape('box1').update({ point: [1, 1] })
     app.getShape('box1').update({ point: [2, 2] })
     app.undo()
@@ -78,7 +81,7 @@ describe('When updating the history', () => {
 
 describe('When pausing the history', () => {
   it('Ignores changes while paused.', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     expect(app.history.frame).toBe(-1)
     app.pause()
     app.getShape('box1').update({ point: [1, 1] })
@@ -94,7 +97,7 @@ describe('When pausing the history', () => {
   })
 
   it('Resumes.', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     app.pause()
     app.getShape('box1').update({ point: [1, 1] })
     app.getShape('box1').update({ point: [2, 2] })
@@ -108,7 +111,7 @@ describe('When pausing the history', () => {
   })
 
   it('Does not update frame if no change occurred while paused.', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     app.getShape('box1').update({ point: [1, 1] })
     app.getShape('box1').update({ point: [2, 2] })
     app.pause()
@@ -121,7 +124,7 @@ describe('When pausing the history', () => {
   })
 
   it('Updates frame if a change occurred while paused.', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     app.getShape('box1').update({ point: [1, 1] })
     app.pause()
     app.getShape('box1').update({ point: [2, 2] })
@@ -134,7 +137,7 @@ describe('When pausing the history', () => {
   })
 
   it('Resumes correctly after resuming.', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     app.getShape('box1').update({ point: [1, 1] })
     app.pause()
     app.getShape('box1').update({ point: [2, 2] })
@@ -150,7 +153,7 @@ describe('When pausing the history', () => {
   })
 
   it('Resumes while deep in undos.', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     app.getShape('box1').update({ point: [1, 1] })
     app.getShape('box1').update({ point: [2, 2] })
     app.getShape('box1').update({ point: [3, 3] })
@@ -163,7 +166,7 @@ describe('When pausing the history', () => {
   })
 
   it('Resumes when undo is called while paused', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     app.getShape('box1').update({ point: [1, 1] })
     app.pause()
     app.getShape('box1').update({ point: [2, 2] })
@@ -176,7 +179,7 @@ describe('When pausing the history', () => {
   })
 
   it('Resumes when redo is called while paused', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     app.getShape('box1').update({ point: [1, 1] })
     app.getShape('box1').update({ point: [2, 2] })
     app.undo()
@@ -192,7 +195,7 @@ describe('When pausing the history', () => {
 
 describe('TLHistoryManager.restore', () => {
   it('Restores a document', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp()
     app.getShape('box1').update({ point: [1, 1] })
     app.pause()
     app.getShape('box1').update({ point: [2, 2] })

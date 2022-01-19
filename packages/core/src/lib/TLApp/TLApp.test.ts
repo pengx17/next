@@ -1,7 +1,30 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { TLApp } from './TLApp'
-import { Box, TLTestApp, testApp } from '~test'
+import { TLTestApp } from '~test'
+import { TLApp, TLShape, TLShapeModel } from '~lib'
+
+export interface BoxModel extends TLShapeModel {
+  type: 'box'
+}
+
+export class Box extends TLShape<BoxModel> {
+  static type = 'box'
+}
+
+export const testApp = new TLApp({
+  id: 'app',
+  document: {
+    shapes: [
+      {
+        id: 'box1',
+        type: 'box',
+        point: [0, 0],
+      },
+    ],
+    selectedIds: [],
+  },
+  shapes: [Box],
+})
 
 describe('When creating the app', () => {
   it('creates an app with an empty state if no initial state is provided.', () => {

@@ -10,11 +10,13 @@ describe('When using the draw tool', () => {
     app
       .deleteShapes([...app.document.shapes])
       .selectTool('draw')
+      .expectToBeIn('draw.idle')
+      .pointerMove([100, 100])
       .pointerDown([100, 100])
+      .expectToBeIn('draw.creating')
     expect(app.shapes.size).toBe(1)
     const shape = app.getShapesArray()[0]
-    shape.update({ id: 'test_draw' })
-    expect(shape).toMatchSnapshot('created draw')
+    expect({ ...shape.model, id: 'test_draw' }).toMatchSnapshot('created draw')
   })
   it('Extends the shapes points while moving in the creating state', () => {
     const app = new TLTestApp()
@@ -160,11 +162,6 @@ describe('When extending the draw shape', () => {
       .pointerDown([-50, 100], undefined, { shiftKey: true })
     const shape = app.getShapesArray()[0]
     expect(shape.model.point).toMatchObject([-50, 0])
-    expect(shape.model.points).toMatchObject([
-      [50, 50],
-      [100, 100],
-      [0, 0],
-    ])
   })
   it('Repositions when dragging past initial x and y after shifting points', () => {
     const app = new TLTestApp()

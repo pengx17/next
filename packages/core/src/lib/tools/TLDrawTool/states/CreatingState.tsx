@@ -24,7 +24,7 @@ export class CreatingState<
     if (offset[0] < 0 || offset[1] < 0) {
       this.points = this.points.map(pt => Vec.sub(pt, offset).concat(pt[2]))
       shape.update({
-        point: Vec.add(shape.props.point, offset),
+        point: Vec.add(shape.model.point, offset),
         points: this.points,
       })
     } else {
@@ -36,17 +36,19 @@ export class CreatingState<
 
   onEnter = () => {
     const { Shape, previousShape } = this.tool
-    const { originPoint } = this.app.inputs
+    const {
+      userState: { shiftKey, originPoint },
+    } = this.app
     this.app.history.pause()
-    if (this.app.inputs.shiftKey && previousShape) {
+    if (shiftKey && previousShape) {
       // Continue the previous shape. Create points between the shape's
       // last point and the new point, then add the new point to the shape
       // and offset the existing points, if necessary.
       this.shape = previousShape
       const { shape } = this
-      const prevPoint = shape.props.points[shape.props.points.length - 1]
-      const nextPoint = Vec.sub(originPoint, shape.props.point).concat(originPoint[2] ?? 0.5)
-      this.points = [...shape.props.points, prevPoint, prevPoint]
+      const prevPoint = shape.model.points[shape.model.points.length - 1]
+      const nextPoint = Vec.sub(originPoint, shape.model.point).concat(originPoint[2] ?? 0.5)
+      this.points = [...shape.model.points, prevPoint, prevPoint]
       const len = Math.ceil(Vec.dist(prevPoint, originPoint) / 16)
       for (let i = 0, t = i / (len - 1); i < len; i++) {
         this.points.push(
@@ -58,23 +60,26 @@ export class CreatingState<
       // Create a new shape and add the first point.
       this.tool.previousShape = undefined
       this.points = [[0, 0, originPoint[2] ?? 0.5]]
-      this.shape = new Shape({
-        id: uniqueId(),
-        type: Shape.id,
-        parentId: this.app.currentPage.id,
-        point: originPoint.slice(0, 2),
-        points: this.points,
-        isComplete: false,
-      })
-      this.app.currentPage.addShapes(this.shape)
+      const id = uniqueId()
+      this.shape = this.app
+        .createShape<T>({
+          id,
+          type: Shape.type,
+          point: originPoint.slice(0, 2),
+          points: this.points,
+          isComplete: false,
+        })
+        .getShape<T>(id)
     }
   }
 
   onPointerMove: TLStateEvents<S, K>['onPointerMove'] = () => {
     const { shape } = this
-    const { currentPoint, previousPoint } = this.app.inputs
+    const {
+      userState: { currentPoint, previousPoint },
+    } = this.app
     if (Vec.isEqual(previousPoint, currentPoint)) return
-    this.addNextPoint(Vec.sub(currentPoint, shape.props.point).concat(currentPoint[2]))
+    this.addNextPoint(Vec.sub(currentPoint, shape.model.point).concat(currentPoint[2]))
   }
 
   onPointerUp: TLStateEvents<S, K>['onPointerUp'] = () => {
@@ -84,7 +89,7 @@ export class CreatingState<
       isComplete: true,
       points: this.tool.simplify
         ? PointUtils.simplify2(this.points, this.tool.simplifyTolerance)
-        : this.shape.props.points,
+        : this.shape.model.points,
     })
     this.tool.previousShape = this.shape
     this.tool.transition('idle')

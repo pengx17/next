@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`When using the draw tool Transitions to creating and creates a shape on pointer down: created draw 1`] = `
+Object {
+  "id": "test_draw",
+  "isComplete": false,
+  "parentId": "page",
+  "point": Array [
+    100,
+    100,
+  ],
+  "points": Array [
+    Array [
+      0,
+      0,
+      0.5,
+    ],
+  ],
+  "type": "draw",
+}
+`;

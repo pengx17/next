@@ -16,17 +16,22 @@ export class TLHistoryManager<S extends TLShape = TLShape, K extends TLEventMap 
 
   private didChangeWhilePaused = false
 
+  disposables: (() => void)[] = []
+
   constructor(app: TLApp<S, K>) {
     this.app = app
-    reaction(() => toJS(this.app.document), this.persist)
   }
 
   // Manually push a patch based on the current document
-  private pushFrame() {
+  private pushFrame = () => {
     const snapshot = toJS(this.app.document)
     this.patches[this.frame] = fsp.compare(snapshot, this.prev)
     this.prev = snapshot
     this.app.events.notify('commit', null)
+  }
+
+  private dispose = () => {
+    this.disposables.forEach(disposable => disposable())
   }
 
   persist = (snapshot: TLDocumentModel<S>) => {
@@ -84,6 +89,7 @@ export class TLHistoryManager<S extends TLShape = TLShape, K extends TLEventMap 
 
   start = () => {
     if (this.state !== 'stopped') throw Error("Can't start a history manager that isn't stopped")
+    this.disposables.push(reaction(() => toJS(this.app.document), this.persist))
     this.prev = toJS(this.app.document)
     this.state = 'playing'
   }
@@ -95,6 +101,7 @@ export class TLHistoryManager<S extends TLShape = TLShape, K extends TLEventMap 
 
   stop = () => {
     if (this.state === 'stopped') return
+    this.dispose()
     this.patches = []
     this.frame = -1
     this.skipNextFrame = false

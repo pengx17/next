@@ -25,8 +25,8 @@ describe('When using the tool', () => {
       .pointerUp()
     expect(app.isIn('select.idle')).toBe(true)
     expect(app.shapes.size).toBe(1)
-    app.getShapesArray()[0].update({ id: 'test_line' })
-    expect(app.getShapesArray()[0]).toMatchSnapshot('created line')
+    const shape = app.getShapesArray()[0]
+    expect({ ...shape.model, id: 'test_line' }).toMatchSnapshot('created line')
   })
   it('Cancels creating a shape when escape is pressed', () => {
     const app = new TLTestApp()

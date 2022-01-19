@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`When using the tool Creates a shape and transitions to select.idle after pointer up: created line 1`] = `
+Object {
+  "handles": Array [
+    Object {
+      "point": Array [
+        0,
+        0,
+      ],
+    },
+    Object {
+      "point": Array [
+        1,
+        1,
+      ],
+    },
+  ],
+  "id": "test_line",
+  "parentId": "page",
+  "point": Array [
+    100,
+    100,
+    0.5,
+  ],
+  "type": "line",
+}
+`;
