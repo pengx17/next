@@ -21,7 +21,9 @@ export class PointingShapeBehindBoundsState<
   }
 
   onPointerMove: TLEvents<S>['pointer'] = () => {
-    const { currentPoint, originPoint } = this.app.inputs
+    const {
+      userState: { currentPoint, originPoint },
+    } = this.app
     if (Vec.dist(currentPoint, originPoint) > 5) {
       this.tool.transition('translating')
     }
@@ -30,7 +32,7 @@ export class PointingShapeBehindBoundsState<
   onPointerUp: TLEvents<S>['pointer'] = () => {
     const {
       selectedIds,
-      inputs: { shiftKey },
+      userState: { shiftKey },
     } = this.app
     if (shiftKey) {
       this.app.setSelectedShapes([...Array.from(selectedIds.values()), this.info.shape.id])

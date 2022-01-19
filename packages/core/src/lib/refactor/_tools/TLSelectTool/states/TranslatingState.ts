@@ -1,7 +1,6 @@
 import { Vec } from '@tldraw/vec'
 import { TLApp, TLSelectTool, TLShape, TLToolState } from '~lib/refactor'
 import { TLCursor, TLEventMap, TLEvents } from '~lib/refactor/_types'
-import { uniqueId } from '~utils'
 
 export class TranslatingState<
   S extends TLShape,
@@ -27,7 +26,7 @@ export class TranslatingState<
   private moveSelectedShapesToPointer() {
     const {
       selectedShapes,
-      inputs: { shiftKey, originPoint, currentPoint },
+      userState: { shiftKey, originPoint, currentPoint },
     } = this.app
     const { initialPoints } = this
     const delta = Vec.sub(currentPoint, originPoint)
@@ -76,14 +75,17 @@ export class TranslatingState<
     this.app.history.pause()
 
     // Set initial data
-    const { selectedShapesArray, inputs } = this.app
+    const {
+      selectedShapesArray,
+      userState: { altKey },
+    } = this.app
 
     this.initialShapePoints = Object.fromEntries(
       selectedShapesArray.map(({ id, model: { point } }) => [id, point.slice()])
     )
     this.initialPoints = this.initialShapePoints
 
-    if (inputs.altKey) {
+    if (altKey) {
       this.startCloning()
     } else {
       this.moveSelectedShapesToPointer()

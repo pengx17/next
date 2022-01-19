@@ -1,55 +1,55 @@
 import { action, makeObservable, observable } from 'mobx'
+import type { TLApp, TLShape, TLUserState } from '.'
 import type { TLEventMap } from './_types'
 
-export class TLInputs<K extends TLEventMap> {
-  constructor() {
+export class TLInputManager<S extends TLShape = TLShape, K extends TLEventMap = TLEventMap> {
+  app: TLApp<S, K>
+
+  constructor(app: TLApp<S, K>) {
+    this.app = app
     makeObservable(this)
   }
 
-  // note: fine for dev, but we probably don't need to make
-  // any of these properties observable
-  @observable shiftKey = false
-  @observable ctrlKey = false
-  @observable altKey = false
-  @observable spaceKey = false
-  @observable isPinching = false
-  @observable currentScreenPoint = [0, 0]
-  @observable currentPoint = [0, 0]
-  @observable previousScreenPoint = [0, 0]
-  @observable previousPoint = [0, 0]
-  @observable originScreenPoint = [0, 0]
-  @observable originPoint = [0, 0]
   pointerIds = new Set<number>()
 
   @observable state: 'pointing' | 'pinching' | 'idle' = 'idle'
 
-  @action private updateModifiers(
+  private getModifiersUpdate(
     event: K['gesture'] | K['pointer'] | K['keyboard'] | K['wheel'] | K['touch']
-  ) {
+  ): Partial<TLUserState> {
+    const { userState } = this.app
+    const changes: Partial<TLUserState> = {}
     if ('clientX' in event) {
-      this.previousScreenPoint = this.currentScreenPoint
-      this.currentScreenPoint = [event.clientX, event.clientY]
+      changes.previousScreenPoint = userState.currentScreenPoint
+      changes.currentScreenPoint = [event.clientX, event.clientY]
     }
     if ('shiftKey' in event) {
-      this.shiftKey = event.shiftKey
-      this.ctrlKey = event.metaKey || event.ctrlKey
-      this.altKey = event.altKey
+      changes.shiftKey = event.shiftKey
+      changes.ctrlKey = event.metaKey || event.ctrlKey
+      changes.altKey = event.altKey
     }
+    return changes
   }
 
   @action onWheel = (pagePoint: number[], event: K['wheel']) => {
+    const { userState } = this.app
     // if (this.state === 'pinching') return
-    this.updateModifiers(event)
-    this.previousPoint = this.currentPoint
-    this.currentPoint = pagePoint
+    this.app.updateUserState({
+      ...this.getModifiersUpdate(event),
+      previousPoint: userState.currentPoint,
+      currentPoint: pagePoint,
+    })
   }
 
   @action onPointerDown = (pagePoint: number[], event: K['pointer']) => {
+    const { userState } = this.app
     // if (this.pointerIds.size > 0) return
     this.pointerIds.add(event.pointerId)
-    this.updateModifiers(event)
-    this.originScreenPoint = this.currentScreenPoint
-    this.originPoint = pagePoint
+    this.app.updateUserState({
+      ...this.getModifiersUpdate(event),
+      originScreenPoint: userState.currentScreenPoint,
+      originPoint: pagePoint,
+    })
     this.state = 'pointing'
   }
 
@@ -58,35 +58,42 @@ export class TLInputs<K extends TLEventMap> {
     event: K['gesture'] | K['pointer'] | K['keyboard'] | K['wheel'] | K['touch']
   ) => {
     if (this.state === 'pinching') return
+    const { userState } = this.app
     // if ('pointerId' in event && !this.pointerIds.has(event.pointerId)) return
-    this.updateModifiers(event)
-    this.previousPoint = this.currentPoint
-    this.currentPoint = pagePoint
+    this.app.updateUserState({
+      ...this.getModifiersUpdate(event),
+      previousPoint: userState.currentPoint,
+      currentPoint: pagePoint,
+    })
   }
 
   @action onPointerUp = (pagePoint: number[], event: K['pointer']) => {
     // if (!this.pointerIds.has(event.pointerId)) return
     this.pointerIds.clear()
-    this.updateModifiers(event)
+    this.app.updateUserState(this.getModifiersUpdate(event))
     this.state = 'idle'
   }
 
   @action onKeyDown = (event: K['keyboard']) => {
-    this.updateModifiers(event)
     switch (event.key) {
       case ' ': {
-        this.spaceKey = true
+        this.app.updateUserState({ ...this.getModifiersUpdate(event), spaceKey: true })
         break
+      }
+      default: {
+        this.app.updateUserState(this.getModifiersUpdate(event))
       }
     }
   }
 
   @action onKeyUp = (event: K['keyboard']) => {
-    this.updateModifiers(event)
     switch (event.key) {
       case ' ': {
-        this.spaceKey = false
+        this.app.updateUserState({ ...this.getModifiersUpdate(event), spaceKey: false })
         break
+      }
+      default: {
+        this.app.updateUserState(this.getModifiersUpdate(event))
       }
     }
   }
@@ -95,7 +102,7 @@ export class TLInputs<K extends TLEventMap> {
     pagePoint: number[],
     event: K['gesture'] | K['pointer'] | K['keyboard'] | K['wheel'] | K['touch']
   ) => {
-    this.updateModifiers(event)
+    this.app.updateUserState(this.getModifiersUpdate(event))
     this.state = 'pinching'
   }
 
@@ -104,7 +111,7 @@ export class TLInputs<K extends TLEventMap> {
     event: K['gesture'] | K['pointer'] | K['keyboard'] | K['wheel'] | K['touch']
   ) => {
     if (this.state !== 'pinching') return
-    this.updateModifiers(event)
+    this.app.updateUserState(this.getModifiersUpdate(event))
   }
 
   @action onPinchEnd = (
@@ -112,7 +119,7 @@ export class TLInputs<K extends TLEventMap> {
     event: K['gesture'] | K['pointer'] | K['keyboard'] | K['wheel'] | K['touch']
   ) => {
     if (this.state !== 'pinching') return
-    this.updateModifiers(event)
+    this.app.updateUserState(this.getModifiersUpdate(event))
     this.state = 'idle'
   }
 }

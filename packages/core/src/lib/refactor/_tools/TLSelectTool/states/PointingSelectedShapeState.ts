@@ -25,14 +25,18 @@ export class PointingSelectedShapeState<
   }
 
   onPointerMove: TLEvents<S>['pointer'] = () => {
-    const { currentPoint, originPoint } = this.app.inputs
+    const {
+      userState: { currentPoint, originPoint },
+    } = this.app
     if (Vec.dist(currentPoint, originPoint) > 5) {
       this.tool.transition('translating')
     }
   }
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
-    const { shiftKey } = this.app.inputs
+    const {
+      userState: { shiftKey },
+    } = this.app
     if (!this.pointedSelectedShape) throw Error('Expected a pointed selected shape')
     if (shiftKey) {
       const { selectedIds } = this.app

@@ -2,7 +2,7 @@ import Vec from '@tldraw/vec'
 import { computed, makeObservable } from 'mobx'
 import { BoundsUtils } from '~utils'
 import type { TLApp, TLShape } from '.'
-import type { TLBounds, TLEventMap } from './_types'
+import type { TLEventMap } from './_types'
 
 export class TLDisplayManager<S extends TLShape = TLShape, K extends TLEventMap = TLEventMap> {
   app: TLApp<S, K>
@@ -16,7 +16,7 @@ export class TLDisplayManager<S extends TLShape = TLShape, K extends TLEventMap 
     const {
       document: { shapes },
       selectedShapes,
-      viewport: { currentView },
+      currentView,
     } = this.app
     return shapes
       .map(shape => this.app.getShape(shape.id))
@@ -32,10 +32,7 @@ export class TLDisplayManager<S extends TLShape = TLShape, K extends TLEventMap 
   }
 
   @computed get selectionDirectionHint(): number[] | undefined {
-    const {
-      selectionBounds,
-      viewport: { currentView },
-    } = this.app
+    const { selectionBounds, currentView } = this.app
     if (
       !selectionBounds ||
       BoundsUtils.boundsContain(currentView, selectionBounds) ||
@@ -81,7 +78,7 @@ export class TLDisplayManager<S extends TLShape = TLShape, K extends TLEventMap 
   @computed get showContextBar() {
     const {
       selectedShapesArray,
-      inputs: { ctrlKey },
+      userState: { ctrlKey },
     } = this.app
     return (
       !ctrlKey &&

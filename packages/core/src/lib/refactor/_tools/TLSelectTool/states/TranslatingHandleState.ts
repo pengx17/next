@@ -41,7 +41,7 @@ export class TranslatingHandleState<
 
   onPointerMove: TLEvents<S>['pointer'] = () => {
     const {
-      inputs: { shiftKey, previousPoint, originPoint, currentPoint },
+      userState: { shiftKey, previousPoint, originPoint, currentPoint },
     } = this.app
     if (Vec.isEqual(previousPoint, currentPoint)) return
     const delta = Vec.sub(currentPoint, originPoint)

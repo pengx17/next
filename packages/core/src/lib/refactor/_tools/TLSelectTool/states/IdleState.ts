@@ -47,7 +47,7 @@ export class IdleState<
   onPointerDown: TLEvents<S>['pointer'] = (info, event) => {
     const {
       selectedShapes,
-      inputs: { ctrlKey },
+      userState: { ctrlKey },
     } = this.app
 
     // Holding ctrlKey should ignore shapes
@@ -80,8 +80,11 @@ export class IdleState<
         if (selectedShapes.has(info.shape)) {
           this.tool.transition('pointingSelectedShape', info)
         } else {
-          const { selectionBounds, inputs } = this.app
-          if (selectionBounds && PointUtils.pointInBounds(inputs.currentPoint, selectionBounds)) {
+          const {
+            selectionBounds,
+            userState: { currentPoint },
+          } = this.app
+          if (selectionBounds && PointUtils.pointInBounds(currentPoint, selectionBounds)) {
             this.tool.transition('pointingShapeBehindBounds', info)
           } else {
             this.tool.transition('pointingShape', info)

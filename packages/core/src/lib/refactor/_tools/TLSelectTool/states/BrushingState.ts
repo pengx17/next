@@ -34,7 +34,7 @@ export class BrushingState<
 
   onPointerMove: TLEvents<S>['pointer'] = () => {
     const {
-      inputs: { shiftKey, ctrlKey, originPoint, currentPoint },
+      userState: { shiftKey, ctrlKey, originPoint, currentPoint },
     } = this.app
 
     const brushBounds = BoundsUtils.getBoundsFromPoints([currentPoint, originPoint], 0)

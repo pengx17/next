@@ -7,6 +7,6 @@ export * from './_TLToolState'
 export * from './_tools' // must come after tool / TLToolState
 
 export * from './_TLBush'
-export * from './_TLInputs'
-export * from './_TLViewport'
+export * from './_TLInputManager'
+export * from './_TLViewportManager'
 export * from './_TLApp'

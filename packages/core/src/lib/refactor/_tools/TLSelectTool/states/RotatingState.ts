@@ -43,7 +43,7 @@ export class RotatingState<
       history,
       selectedShapesArray,
       selectionBounds,
-      userState: { selectionRotation },
+      userState: { selectionRotation, currentPoint },
     } = this.app
 
     if (!selectionBounds) throw Error('Expected selected bounds.')
@@ -53,7 +53,7 @@ export class RotatingState<
     this.initialSelectionRotation = selectionRotation
     this.initialCommonBounds = { ...selectionBounds }
     this.initialCommonCenter = BoundsUtils.getBoundsCenter(selectionBounds)
-    this.initialAngle = Vec.angle(this.initialCommonCenter, this.app.inputs.currentPoint)
+    this.initialAngle = Vec.angle(this.initialCommonCenter, currentPoint)
     this.snapshot = Object.fromEntries(
       selectedShapesArray.map(shape => [
         shape.id,
@@ -81,7 +81,7 @@ export class RotatingState<
   onPointerMove: TLEvents<S>['pointer'] = () => {
     const {
       selectedShapes,
-      inputs: { shiftKey, currentPoint },
+      userState: { shiftKey, currentPoint },
     } = this.app
 
     const { snapshot, initialCommonCenter, initialAngle, initialSelectionRotation } = this

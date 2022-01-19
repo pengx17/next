@@ -1,28 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { action, computed, makeObservable, observable, reaction, toJS, transaction } from 'mobx'
-import type {
-  TLBounds,
-  TLCallback,
-  TLEventMap,
-  TLEvents,
-  TLShortcut,
-  TLStateEvents,
-  TLSubscription,
-  TLSubscriptionEventInfo,
-  TLSubscriptionEventName,
-} from './_types'
+import { TLBounds, TLCursor, TLEventMap, TLEvents, TLShortcut, TLStateEvents } from './_types'
 import { TLHistoryManager } from './_TLHistoryManager'
-import type { TLShape, TLShapeConstructor } from './_shapes/TLShape'
-import { TLCursors } from './_TLCursors'
-import { TLRootState } from './_TLState'
-import { TLInputs } from './_TLInputs'
-import { TLViewport } from './_TLViewport'
-import { TLSelectTool } from './_tools'
+import type { TLShape, TLShapeConstructor } from './_shapes'
 import type { TLToolConstructor } from './_TLTool'
+import { TLCursorManager } from './_TLCursorManager'
+import { TLRootState } from './_TLState'
+import { TLInputManager } from './_TLInputManager'
+import { TLViewportManager } from './_TLViewportManager'
+import { TLSelectTool } from './_tools'
 import { BoundsUtils, KeyUtils, uniqueId } from '~utils'
 import { TLResizeCorner } from '~types'
-import { TLDisplayManager } from './_TLDIsplayManager'
+import { TLDisplayManager } from './_TLDisplayManager'
 import { TLEventManager } from './_TLEventManager'
 
 /* -------------------------------------------------- */
@@ -37,11 +27,25 @@ export interface TLAssetModel {
 
 export interface TLUserState {
   camera: number[]
+  bounds: TLBounds
+  cursor: TLCursor
+  cursorRotation: number
+  selectionRotation: number
+  isToolLocked: boolean
   editingId?: string
   hoveredId?: string
   brush?: TLBounds
-  selectionRotation: number
-  isToolLocked: boolean
+  shiftKey: boolean
+  ctrlKey: boolean
+  altKey: boolean
+  spaceKey: boolean
+  isPinching: boolean
+  currentScreenPoint: number[]
+  currentPoint: number[]
+  previousScreenPoint: number[]
+  previousPoint: number[]
+  originScreenPoint: number[]
+  originPoint: number[]
 }
 
 export interface TLUserSettings {
@@ -76,6 +80,9 @@ export class TLApp<
     super()
     const { document, userState, settings, debug = false, shapes = [] } = params
     this.debug = debug
+    this.inputs = new TLInputManager(this)
+    this.viewport = new TLViewportManager(this)
+    this.cursors = new TLCursorManager(this)
     this.history = new TLHistoryManager(this)
     this.display = new TLDisplayManager(this)
     this.events = new TLEventManager(this)
@@ -177,7 +184,9 @@ export class TLApp<
   }
 
   static id = 'app'
+
   static states: TLToolConstructor<any, any>[] = [TLSelectTool]
+
   static initial = 'select'
 
   debug: boolean
@@ -189,8 +198,29 @@ export class TLApp<
 
   @observable userState: TLUserState = {
     camera: [0, 0, 1],
+    bounds: {
+      minX: 0,
+      minY: 0,
+      maxX: 1080,
+      maxY: 720,
+      width: 1080,
+      height: 720,
+    },
+    cursor: TLCursor.Default,
+    cursorRotation: 0,
     selectionRotation: 0,
     isToolLocked: false,
+    shiftKey: false,
+    ctrlKey: false,
+    altKey: false,
+    spaceKey: false,
+    isPinching: false,
+    currentScreenPoint: [0, 0],
+    currentPoint: [0, 0],
+    previousScreenPoint: [0, 0],
+    previousPoint: [0, 0],
+    originScreenPoint: [0, 0],
+    originPoint: [0, 0],
   }
 
   @observable userSettings: TLUserSettings = {
@@ -200,11 +230,11 @@ export class TLApp<
 
   @observable shapes = new Map<string, S>()
 
-  inputs = new TLInputs()
+  inputs: TLInputManager<S, K>
 
-  viewport = new TLViewport()
+  viewport: TLViewportManager<S, K>
 
-  cursors = new TLCursors()
+  cursors: TLCursorManager<S, K>
 
   /** A manager for history, i.e. undo and redo */
   history: TLHistoryManager<S, K>
@@ -263,6 +293,24 @@ export class TLApp<
   @action updateUserSettings(userSettings: Partial<TLUserSettings>) {
     Object.assign(this.userSettings, userSettings)
     return this
+  }
+
+  /** The part of the document currently in view */
+  @computed get currentView(): TLBounds {
+    const {
+      userState: { bounds, camera },
+    } = this
+    const [cx, cy, cz] = camera
+    const w = bounds.width / cz
+    const h = bounds.height / cz
+    return {
+      minX: -cx,
+      minY: -cy,
+      maxX: w - cx,
+      maxY: h - cy,
+      width: w,
+      height: h,
+    }
   }
 
   /* --------------- Shape Constructors --------------- */

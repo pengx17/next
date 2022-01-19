@@ -112,7 +112,7 @@ export class ResizingState<
 
   onPointerMove: TLEvents<S>['pointer'] = () => {
     const {
-      inputs: { altKey, shiftKey, ctrlKey, originPoint, currentPoint },
+      userState: { altKey, shiftKey, ctrlKey, originPoint, currentPoint },
     } = this.app
     const { handle, snapshots, initialCommonBounds } = this
     let delta = Vec.sub(currentPoint, originPoint)
@@ -245,15 +245,18 @@ export class ResizingState<
   private updateCursor(scaleX: number, scaleY: number) {
     const isFlippedX = scaleX < 0 && scaleY >= 0
     const isFlippedY = scaleY < 0 && scaleX >= 0
+    const {
+      userState: { cursor },
+    } = this.app
     switch (this.handle) {
       case TLResizeCorner.TopLeft:
       case TLResizeCorner.BottomRight: {
         if (isFlippedX || isFlippedY) {
-          if (this.app.cursors.cursor === TLCursor.NwseResize) {
+          if (cursor === TLCursor.NwseResize) {
             this.app.cursors.setCursor(TLCursor.NeswResize, this.app.selectionBounds?.rotation)
           }
         } else {
-          if (this.app.cursors.cursor === TLCursor.NeswResize) {
+          if (cursor === TLCursor.NeswResize) {
             this.app.cursors.setCursor(TLCursor.NwseResize, this.app.selectionBounds?.rotation)
           }
         }
@@ -262,11 +265,11 @@ export class ResizingState<
       case TLResizeCorner.TopRight:
       case TLResizeCorner.BottomLeft: {
         if (isFlippedX || isFlippedY) {
-          if (this.app.cursors.cursor === TLCursor.NeswResize) {
+          if (cursor === TLCursor.NeswResize) {
             this.app.cursors.setCursor(TLCursor.NwseResize, this.app.selectionBounds?.rotation)
           }
         } else {
-          if (this.app.cursors.cursor === TLCursor.NwseResize) {
+          if (cursor === TLCursor.NwseResize) {
             this.app.cursors.setCursor(TLCursor.NeswResize, this.app.selectionBounds?.rotation)
           }
         }
