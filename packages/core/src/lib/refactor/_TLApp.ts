@@ -237,17 +237,6 @@ export class TLApp<
 
   registerTools = this.registerStates
 
-  /* --------------- Shape Constructors --------------- */
-
-  /** A map of registered shape constructors */
-  private registeredShapes = new Map<string, TLShapeConstructor<S>>()
-
-  /** Register a shape constructor. */
-  @action registerShapes(shapeCtors: TLShapeConstructor<S>[]) {
-    shapeCtors.forEach(shapeCtor => this.registeredShapes.set(shapeCtor.type, shapeCtor))
-    return this
-  }
-
   /* -------------------- Document -------------------- */
 
   /** Load a document model. */
@@ -262,6 +251,8 @@ export class TLApp<
     return this
   }
 
+  /* ------------------- User State ------------------- */
+
   /** Apply a change to the user state. */
   @action updateUserState(userState: Partial<TLUserState>) {
     Object.assign(this.userState, userState)
@@ -274,95 +265,25 @@ export class TLApp<
     return this
   }
 
-  /* ----------------- Selected Shapes ---------------- */
+  /* --------------- Shape Constructors --------------- */
 
-  @observable selectedShapesArray: S[] = []
+  /** A map of registered shape constructors */
+  private registeredShapes = new Map<string, TLShapeConstructor<S>>()
 
-  @observable selectedShapes = new Set<S>()
-
-  @computed get selectionBounds(): TLBounds | undefined {
-    const { selectedShapesArray } = this
-    if (selectedShapesArray.length === 0) return undefined
-    if (selectedShapesArray.length === 1) {
-      return { ...selectedShapesArray[0].bounds, rotation: selectedShapesArray[0].model.rotation }
-    }
-    return BoundsUtils.getCommonBounds(selectedShapesArray.map(shape => shape.rotatedBounds))
-  }
-
-  @action setSelectedShapes(shapes: string[] | S[]) {
-    let shapesArray: S[]
-    let ids: string[]
-    if (typeof shapes[0] === 'string') {
-      ids = shapes as string[]
-      shapesArray = ids.map(id => this.getShape(id))
-    } else {
-      shapesArray = shapes as S[]
-      ids = shapesArray.map(shape => shape.id)
-    }
-    transaction(() => {
-      // Set selected ids
-      this.document.selectedIds = ids
-      // Set selected shapes array
-      this.selectedShapesArray = shapesArray
-      // Set selection rotation
-      this.userState.selectionRotation =
-        shapesArray.length === 1 ? shapesArray[0].model.rotation ?? 0 : 0
-      // Set selected shapes (set)
-      this.selectedShapes.clear()
-      shapesArray.forEach(shape => this.selectedShapes.add(shape))
-    })
+  /** Register a shape constructor. */
+  @action registerShapes(shapeCtors: TLShapeConstructor<S>[]) {
+    shapeCtors.forEach(shapeCtor => this.registeredShapes.set(shapeCtor.type, shapeCtor))
     return this
   }
 
-  /* ------------------ Editing Shape ----------------- */
-
-  @computed get editingShape(): S | undefined {
-    const {
-      userState: { editingId },
-    } = this
-    return editingId ? this.shapes.get(editingId) : undefined
-  }
-
-  @action setEditingShape = (shape?: string | S): this => {
-    this.userState.editingId = typeof shape === 'string' ? shape : shape?.id
-    return this
-  }
-
-  clearEditingShape = (): this => {
-    return this.setEditingShape()
-  }
-
-  /* ------------------ Hovered Shape ----------------- */
-
-  @computed get HoveredShape(): S | undefined {
-    const {
-      userState: { hoveredId },
-    } = this
-    return hoveredId ? this.shapes.get(hoveredId) : undefined
-  }
-
-  @action setHoveredShape = (shape?: string | S): this => {
-    this.userState.hoveredId = typeof shape === 'string' ? shape : shape?.id
-    return this
-  }
-
-  clearHoveredShape = (): this => {
-    return this.setHoveredShape()
+  getShapeConstructor = (shape: S | S['model']): TLShapeConstructor<S> => {
+    const model = 'getBounds' in shape ? (shape as S).model : (shape as S['model'])
+    const ShapeCtor = this.registeredShapes.get(model.type)
+    if (!ShapeCtor) throw new Error(`Shape type "${model.type}" is not registered.`)
+    return ShapeCtor
   }
 
   /* --------------------- Shapes --------------------- */
-
-  /** Create shapes based on partial models, requiring only the shape's type. */
-  createShapes = (partials: (Partial<S['model']> & { type: S['model']['type'] })[]) => {
-    return this.addShapes(
-      partials.map(partial => {
-        const shapeCtor = this.registeredShapes.get(partial.type)
-        if (!shapeCtor) throw new Error(`No shape registered for type ${partial.type}`)
-        const id = partial.id ?? uniqueId()
-        return { ...shapeCtor.defaultModel, ...partial, id }
-      })
-    )
-  }
 
   private parseModelsFromShapeArg = (shapesArg: S[] | S['model'][]): S['model'][] => {
     return 'getBounds' in shapesArg[0]
@@ -378,11 +299,16 @@ export class TLApp<
     }
   }
 
-  getShapeConstructor = (shape: S | S['model']): TLShapeConstructor<S> => {
-    const model = 'getBounds' in shape ? (shape as S).model : (shape as S['model'])
-    const ShapeCtor = this.registeredShapes.get(model.type)
-    if (!ShapeCtor) throw new Error(`Shape type "${model.type}" is not registered.`)
-    return ShapeCtor
+  /** Create shapes based on partial models, requiring only the shape's type. */
+  createShapes = (partials: (Partial<S['model']> & { type: S['model']['type'] })[]) => {
+    return this.addShapes(
+      partials.map(partial => {
+        const shapeCtor = this.registeredShapes.get(partial.type)
+        if (!shapeCtor) throw new Error(`No shape registered for type ${partial.type}`)
+        const id = partial.id ?? uniqueId()
+        return { ...shapeCtor.defaultModel, ...partial, id }
+      })
+    )
   }
 
   /** Add shapes to the document model. */
@@ -429,19 +355,110 @@ export class TLApp<
     return shape
   }
 
-  /** Clone the app into a new TLApp instance. */
-  clone = (): TLApp<S, K> => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return new this.constructor({
-      id: this.id,
-      document: toJS(this.document),
-      shapes: Array.from(this.registeredShapes.values()),
-    })
+  /* ----------------- Selected Shapes ---------------- */
+
+  /** An array of selected shape Ids. */
+  @computed get selectedIds() {
+    return this.document.selectedIds
   }
 
-  get selectedIds() {
-    return this.document.selectedIds
+  /** An array of selected shapes. */
+  @observable selectedShapesArray: S[] = []
+
+  /** A set of selected shapes. */
+  @observable selectedShapes = new Set<S>()
+
+  /** The bounding box of the currently selected shapes, if any. */
+  @computed get selectionBounds(): TLBounds | undefined {
+    const { selectedShapesArray } = this
+    if (selectedShapesArray.length === 0) return undefined
+    if (selectedShapesArray.length === 1) {
+      return { ...selectedShapesArray[0].bounds, rotation: selectedShapesArray[0].model.rotation }
+    }
+    return BoundsUtils.getCommonBounds(selectedShapesArray.map(shape => shape.rotatedBounds))
+  }
+
+  /** Set the user's selected shapes. */
+  @action setSelectedShapes(shapes: string[] | S[]) {
+    let shapesArray: S[]
+    let ids: string[]
+    if (typeof shapes[0] === 'string') {
+      ids = shapes as string[]
+      shapesArray = ids.map(id => this.getShape(id))
+    } else {
+      shapesArray = shapes as S[]
+      ids = shapesArray.map(shape => shape.id)
+    }
+    transaction(() => {
+      // Set selected ids
+      this.document.selectedIds = ids
+      // Set selected shapes array
+      this.selectedShapesArray = shapesArray
+      // Set selection rotation
+      this.userState.selectionRotation =
+        shapesArray.length === 1 ? shapesArray[0].model.rotation ?? 0 : 0
+      // Set selected shapes (set)
+      this.selectedShapes.clear()
+      shapesArray.forEach(shape => this.selectedShapes.add(shape))
+    })
+    return this
+  }
+
+  /** Select no shapes. */
+  clearSelectedShapes = (): this => {
+    return this.setSelectedShapes([])
+  }
+
+  /* ------------------ Hovered Shape ----------------- */
+
+  /** The user's current hovered shape id. */
+  @computed get hoveredId() {
+    return this.userState.hoveredId
+  }
+
+  /** The user's current hovered shape. */
+  @computed get HoveredShape(): S | undefined {
+    const {
+      userState: { hoveredId },
+    } = this
+    return hoveredId ? this.shapes.get(hoveredId) : undefined
+  }
+
+  /** Set the user's hovered shape. */
+  @action setHoveredShape = (shape?: string | S): this => {
+    this.userState.hoveredId = typeof shape === 'string' ? shape : shape?.id
+    return this
+  }
+
+  /** Clear the user's hovered shape. */
+  clearHoveredShape = (): this => {
+    return this.setHoveredShape()
+  }
+
+  /* ------------------ Editing Shape ----------------- */
+
+  /** The user's current editing shape id. */
+  @computed get editingId() {
+    return this.userState.editingId
+  }
+
+  /** The currently editing shape, if any. */
+  @computed get editingShape(): S | undefined {
+    const {
+      userState: { editingId },
+    } = this
+    return editingId ? this.shapes.get(editingId) : undefined
+  }
+
+  /** Set the user's editing shape. */
+  @action setEditingShape = (shape?: string | S): this => {
+    this.userState.editingId = typeof shape === 'string' ? shape : shape?.id
+    return this
+  }
+
+  /** Clear the user's editing shape. */
+  clearEditingShape = (): this => {
+    return this.setEditingShape()
   }
 
   /* ----------------- Event Handlers ----------------- */
@@ -751,5 +768,16 @@ export class TLApp<
     const { isToolLocked } = this.userState
     this.updateUserState({ isToolLocked: !isToolLocked })
     return this
+  }
+
+  /** Clone a new instance of the app. */
+  clone = (): TLApp<S, K> => {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return new this.constructor({
+      id: this.id,
+      document: toJS(this.document),
+      shapes: Array.from(this.registeredShapes.values()),
+    })
   }
 }
