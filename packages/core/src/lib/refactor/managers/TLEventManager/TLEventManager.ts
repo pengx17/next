@@ -1,11 +1,11 @@
-import type { TLApp, TLShape } from '.'
+import type { TLApp, TLShape } from '../../'
 import type {
   TLCallback,
   TLEventMap,
   TLSubscription,
   TLSubscriptionEventInfo,
   TLSubscriptionEventName,
-} from './_types'
+} from '../../_types'
 
 export class TLEventManager<S extends TLShape, K extends TLEventMap, R extends TLApp<S, K>> {
   app: R

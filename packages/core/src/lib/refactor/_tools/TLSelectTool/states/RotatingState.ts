@@ -70,7 +70,7 @@ export class RotatingState<
   }
 
   onExit = () => {
-    this.app.history.unpause()
+    this.app.history.resume()
     this.snapshot = {}
   }
 
@@ -141,7 +141,7 @@ export class RotatingState<
   }
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
-    this.app.history.unpause()
+    this.app.history.resume()
     // this.app.persist()
     this.tool.transition('idle')
   }

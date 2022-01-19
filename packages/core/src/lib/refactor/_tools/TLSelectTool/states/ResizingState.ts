@@ -103,7 +103,7 @@ export class ResizingState<
     this.snapshots = {}
     this.initialCommonBounds = {} as TLBounds
     this.selectionRotation = 0
-    this.app.history.unpause()
+    this.app.history.resume()
   }
 
   onWheel: TLEvents<S>['wheel'] = (info, e) => {
@@ -225,7 +225,7 @@ export class ResizingState<
   }
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
-    this.app.history.unpause()
+    this.app.history.resume()
     // this.app.persist()
     this.tool.transition('idle')
   }

@@ -2,22 +2,27 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { action, computed, makeObservable, observable, reaction, toJS, transaction } from 'mobx'
 import { TLBounds, TLCursor, TLEventMap, TLEvents, TLShortcut, TLStateEvents } from './_types'
-import { TLHistoryManager } from './_TLHistoryManager'
 import type { TLShape, TLShapeConstructor } from './_shapes'
 import type { TLToolConstructor } from './_TLTool'
-import { TLCursorManager } from './_TLCursorManager'
+import {
+  TLHistoryManager,
+  TLEventManager,
+  TLDisplayManager,
+  TLInputManager,
+  TLCursorManager,
+} from './managers'
 import { TLRootState } from './_TLState'
-import { TLInputManager } from './_TLInputManager'
 import { TLViewportManager } from './_TLViewportManager'
 import { TLSelectTool } from './_tools'
 import { BoundsUtils, KeyUtils, uniqueId } from '~utils'
 import { TLResizeCorner } from '~types'
-import { TLDisplayManager } from './_TLDisplayManager'
-import { TLEventManager } from './_TLEventManager'
+import * as fsp from 'fast-json-patch'
 
 /* -------------------------------------------------- */
 /*                        TLApp                       */
 /* -------------------------------------------------- */
+
+export type TLPatch = fsp.Operation[]
 
 export interface TLAssetModel {
   id: string
@@ -28,8 +33,6 @@ export interface TLAssetModel {
 export interface TLUserState {
   camera: number[]
   bounds: TLBounds
-  cursor: TLCursor
-  cursorRotation: number
   selectionRotation: number
   isToolLocked: boolean
   editingId?: string
@@ -46,6 +49,18 @@ export interface TLUserState {
   previousPoint: number[]
   originScreenPoint: number[]
   originPoint: number[]
+}
+
+export interface TLDisplayState<S extends TLShape = TLShape> {
+  cursor: TLCursor
+  cursorRotation: number
+  shapesInViewport: S[]
+  selectionDirectionHint?: number[]
+  showSelection: boolean
+  showSelectionDetail: boolean
+  showContextBar: boolean
+  showRotateHandles: boolean
+  showResizeHandles: boolean
 }
 
 export interface TLUserSettings {
@@ -79,6 +94,7 @@ export class TLApp<
   constructor(params = {} as Partial<TLAppConstructorParams<S>>) {
     super()
     const { document, userState, settings, debug = false, shapes = [] } = params
+    makeObservable(this)
     this.debug = debug
     this.inputs = new TLInputManager(this)
     this.viewport = new TLViewportManager(this)
@@ -86,11 +102,6 @@ export class TLApp<
     this.history = new TLHistoryManager(this)
     this.display = new TLDisplayManager(this)
     this.events = new TLEventManager(this)
-    this.shapes.clear()
-    if (shapes) this.registerShapes(shapes)
-    if (userState) this.updateUserState(userState)
-    if (settings) this.updateUserSettings(settings)
-    if (document) this.loadDocument(document)
     const ownShortcuts: TLShortcut<S, K>[] = [
       {
         keys: 'mod+shift+g',
@@ -179,8 +190,12 @@ export class TLApp<
         this.currentState?._events.onEnter({ fromId: 'initial' })
       }
     }
-    makeObservable(this)
-    reaction(() => toJS(this.document), this.history.persist)
+    this.shapes.clear()
+    if (shapes) this.registerShapes(shapes)
+    if (userState) this.updateUserState(userState)
+    if (settings) this.updateUserSettings(settings)
+    if (document) this.loadDocument(document)
+    this.history.start()
   }
 
   static id = 'app'
@@ -206,8 +221,6 @@ export class TLApp<
       width: 1080,
       height: 720,
     },
-    cursor: TLCursor.Default,
-    cursorRotation: 0,
     selectionRotation: 0,
     isToolLocked: false,
     shiftKey: false,
@@ -223,6 +236,18 @@ export class TLApp<
     originPoint: [0, 0],
   }
 
+  @observable displayState: TLDisplayState<S> = {
+    cursor: TLCursor.Default,
+    cursorRotation: 0,
+    shapesInViewport: [],
+    selectionDirectionHint: undefined,
+    showSelection: false,
+    showSelectionDetail: false,
+    showContextBar: false,
+    showRotateHandles: false,
+    showResizeHandles: false,
+  }
+
   @observable userSettings: TLUserSettings = {
     mode: 'light',
     showGrid: false,
@@ -230,10 +255,13 @@ export class TLApp<
 
   @observable shapes = new Map<string, S>()
 
+  /** A manager for user inputs, e.g. keys and pointers */
   inputs: TLInputManager<S, K>
 
+  /** A manager for the viewport and actions like pan and zoom */
   viewport: TLViewportManager<S, K>
 
+  /** A manager for the user's cursor */
   cursors: TLCursorManager<S, K>
 
   /** A manager for history, i.e. undo and redo */
@@ -242,20 +270,8 @@ export class TLApp<
   /** A manager for the display state, e.g. showing selection bounds */
   display: TLDisplayManager<S, K>
 
-  /** A manager for the display state, e.g. showing selection bounds */
+  /** A manager for the events and subscriptions */
   events: TLEventManager<S, K, this>
-
-  /** Undo to the previous frame. */
-  @action undo = () => this.history.undo()
-
-  /** Redo to the next frame. */
-  @action redo = () => this.history.redo()
-
-  /** Pause the history. Any further changes will be coalesced into the current frame. */
-  pause = () => this.history.pause()
-
-  /** Unpause the history. The next change will produce a new frame. */
-  unpause = () => this.history.unpause()
 
   /* ------------------- Tool States ------------------ */
 
@@ -277,15 +293,26 @@ export class TLApp<
       this.addShapes(model.shapes)
       this.setSelectedShapes(model.selectedIds)
     })
-    this.history.reset()
+    if (this.history.state === 'playing') this.history.reset()
     return this
   }
 
-  /* ------------------- User State ------------------- */
+  /** Apply a JSON patch to the current document */
+  @action patchDocument(patch: TLPatch) {
+    fsp.applyPatch(this.document, patch)
+  }
+
+  /* -------------------- States -------------------- */
 
   /** Apply a change to the user state. */
   @action updateUserState(userState: Partial<TLUserState>) {
     Object.assign(this.userState, userState)
+    return this
+  }
+
+  /** Apply a change to the user state. */
+  @action updateDisplayState(displayState: Partial<TLDisplayState>) {
+    Object.assign(this.displayState, displayState)
     return this
   }
 
@@ -817,6 +844,18 @@ export class TLApp<
     this.updateUserState({ isToolLocked: !isToolLocked })
     return this
   }
+
+  /** Undo to the previous frame. */
+  undo = () => this.history.undo()
+
+  /** Redo to the next frame. */
+  redo = () => this.history.redo()
+
+  /** Pause the history. Any further changes will be coalesced into the current frame. */
+  pause = () => this.history.pause()
+
+  /** Unpause the history. The next change will produce a new frame. */
+  resume = () => this.history.resume()
 
   /** Clone a new instance of the app. */
   clone = (): TLApp<S, K> => {

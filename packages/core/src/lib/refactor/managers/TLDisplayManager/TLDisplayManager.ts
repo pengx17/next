@@ -1,8 +1,8 @@
 import Vec from '@tldraw/vec'
-import { computed, makeObservable } from 'mobx'
+import { autorun, computed, makeObservable } from 'mobx'
 import { BoundsUtils } from '~utils'
-import type { TLApp, TLShape } from '.'
-import type { TLEventMap } from './_types'
+import type { TLApp, TLShape } from '../..'
+import type { TLEventMap } from '../../_types'
 
 export class TLDisplayManager<S extends TLShape = TLShape, K extends TLEventMap = TLEventMap> {
   app: TLApp<S, K>
@@ -10,26 +10,48 @@ export class TLDisplayManager<S extends TLShape = TLShape, K extends TLEventMap 
   constructor(app: TLApp<S, K>) {
     this.app = app
     makeObservable(this)
+
+    autorun(() => {
+      const {
+        document: { shapes },
+        selectedShapes,
+        currentView,
+      } = this.app
+
+      this.app.updateDisplayState({
+        shapesInViewport: shapes
+          .map(shape => this.app.getShape(shape.id))
+          .filter(shape => {
+            return (
+              shape.model.parentId === undefined &&
+              (!shape.canUnmount ||
+                selectedShapes.has(shape) ||
+                BoundsUtils.boundsContain(currentView, shape.rotatedBounds) ||
+                BoundsUtils.boundsCollide(currentView, shape.rotatedBounds))
+            )
+          }),
+      })
+    })
   }
 
-  @computed get shapesInViewport(): S[] {
-    const {
-      document: { shapes },
-      selectedShapes,
-      currentView,
-    } = this.app
-    return shapes
-      .map(shape => this.app.getShape(shape.id))
-      .filter(shape => {
-        return (
-          shape.model.parentId === undefined &&
-          (!shape.canUnmount ||
-            selectedShapes.has(shape) ||
-            BoundsUtils.boundsContain(currentView, shape.rotatedBounds) ||
-            BoundsUtils.boundsCollide(currentView, shape.rotatedBounds))
-        )
-      })
-  }
+  // @computed get shapesInViewport(): S[] {
+  //   const {
+  //     document: { shapes },
+  //     selectedShapes,
+  //     currentView,
+  //   } = this.app
+  //   return shapes
+  //     .map(shape => this.app.getShape(shape.id))
+  //     .filter(shape => {
+  //       return (
+  //         shape.model.parentId === undefined &&
+  //         (!shape.canUnmount ||
+  //           selectedShapes.has(shape) ||
+  //           BoundsUtils.boundsContain(currentView, shape.rotatedBounds) ||
+  //           BoundsUtils.boundsCollide(currentView, shape.rotatedBounds))
+  //       )
+  //     })
+  // }
 
   @computed get selectionDirectionHint(): number[] | undefined {
     const { selectionBounds, currentView } = this.app

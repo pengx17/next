@@ -29,15 +29,12 @@ export abstract class TLRootState<S extends TLShape, K extends TLEventMap>
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const id = this.constructor['id'] as string
-
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const initial = this.constructor['initial'] as string | undefined
-
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const states = this.constructor['states'] as TLStateClass<S>[]
-
     this._id = id
     this._initial = initial
     this._states = states

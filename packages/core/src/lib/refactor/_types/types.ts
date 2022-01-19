@@ -114,6 +114,10 @@ export type TLSubscriptionEvent =
       info: null
     }
   | {
+      event: 'commit'
+      info: null
+    }
+  | {
       event: 'persist'
       info: null
     }

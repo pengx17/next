@@ -208,84 +208,42 @@ describe('TLApp.deleteShapes', () => {
   })
 })
 
-describe('TLApp history', () => {
-  it('Does change, undo', () => {
+describe('app.setBrush', () => {
+  it('Sets brush when passed a bounding box', () => {
     const app = testApp.clone()
-    app.debug = true
-    app.getShape('box1').update({ point: [1, 1] })
-    expect(app.getShape('box1').model.point).toMatchObject([1, 1])
-    app.undo()
-    expect(app.getShape('box1').model.point).toMatchObject([0, 0])
+    app.updateUserState({
+      brush: {
+        minX: 0,
+        maxX: 100,
+        minY: 0,
+        maxY: 100,
+        width: 100,
+        height: 100,
+      },
+    })
+    expect(app.userState.brush).toMatchObject({
+      minX: 0,
+      maxX: 100,
+      minY: 0,
+      maxY: 100,
+      width: 100,
+      height: 100,
+    })
   })
 
-  it('Does change, undo, redo', () => {
+  it('Clears brush when passed undefined', () => {
     const app = testApp.clone()
-    app.debug = true
-    app.getShape('box1').update({ point: [1, 1] })
-    app.undo()
-    expect(app.getShape('box1').model.point).toMatchObject([0, 0])
-    app.redo()
-    expect(app.getShape('box1').model.point).toMatchObject([1, 1])
-  })
-
-  it('Does change, undo, undo', () => {
-    const app = testApp.clone()
-    app.debug = true
-    app.getShape('box1').update({ point: [1, 1] })
-    app.undo()
-    app.undo()
-    expect(app.getShape('box1').model.point).toMatchObject([0, 0])
-  })
-
-  it('Does change, change, undo', () => {
-    const app = testApp.clone()
-    app.debug = true
-    app.getShape('box1').update({ point: [1, 1] })
-    app.getShape('box1').update({ point: [2, 2] })
-    app.undo()
-    expect(app.getShape('box1').model.point).toMatchObject([1, 1])
-  })
-
-  it('Does change, change, undo, undo', () => {
-    const app = testApp.clone()
-    app.debug = true
-    app.getShape('box1').update({ point: [1, 1] })
-    app.getShape('box1').update({ point: [2, 2] })
-    app.undo()
-    app.undo()
-    expect(app.getShape('box1').model.point).toMatchObject([0, 0])
-  })
-
-  it('Does change, change, undo, change, undo', () => {
-    const app = testApp.clone()
-    app.debug = true
-    app.getShape('box1').update({ point: [1, 1] })
-    app.getShape('box1').update({ point: [2, 2] })
-    app.undo()
-    app.getShape('box1').update({ point: [3, 3] })
-    app.undo()
-    expect(app.getShape('box1').model.point).toMatchObject([1, 1])
-  })
-
-  it('Does change, undo, redo', () => {
-    const app = testApp.clone()
-    app.debug = true
-    app.getShape('box1').update({ point: [1, 1] })
-    app.getShape('box1').update({ point: [2, 2] })
-    app.undo()
-    app.redo()
-    expect(app.getShape('box1').model.point).toMatchObject([2, 2])
-  })
-
-  it('Does change, change, undo, undo, redo, redo', () => {
-    const app = testApp.clone()
-    app.debug = true
-    app.getShape('box1').update({ point: [1, 1] })
-    app.getShape('box1').update({ point: [2, 2] })
-    app.undo()
-    app.undo()
-    app.redo()
-    app.redo()
-    expect(app.getShape('box1').model.point).toMatchObject([2, 2])
+    app.updateUserState({
+      brush: {
+        minX: 0,
+        maxX: 100,
+        minY: 0,
+        maxY: 100,
+        width: 100,
+        height: 100,
+      },
+    })
+    app.updateUserState({ brush: undefined })
+    expect(app.userState.brush).toBeUndefined()
   })
 })

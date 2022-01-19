@@ -94,7 +94,7 @@ export class TranslatingState<
 
   onExit = () => {
     // Resume the history when we exit
-    this.app.history.unpause()
+    this.app.history.resume()
 
     // Reset initial data
     this.didClone = false
@@ -114,7 +114,7 @@ export class TranslatingState<
   }
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
-    this.app.history.unpause()
+    this.app.history.resume()
     // this.app.persist()
     this.tool.transition('idle')
   }

@@ -32,7 +32,7 @@ export class TranslatingHandleState<
   }
 
   onExit = () => {
-    this.app.unpause()
+    this.app.resume()
   }
 
   onWheel: TLEvents<S>['wheel'] = (info, e) => {
@@ -57,7 +57,7 @@ export class TranslatingHandleState<
   }
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
-    this.app.history.unpause()
+    this.app.history.resume()
     // this.app.history.persist()
     this.tool.transition('idle')
   }

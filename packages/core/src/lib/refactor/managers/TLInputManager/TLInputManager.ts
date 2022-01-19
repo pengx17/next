@@ -1,18 +1,16 @@
-import { action, makeObservable, observable } from 'mobx'
-import type { TLApp, TLShape, TLUserState } from '.'
-import type { TLEventMap } from './_types'
+import type { TLApp, TLShape, TLUserState } from '../..'
+import type { TLEventMap } from '../../_types'
 
 export class TLInputManager<S extends TLShape = TLShape, K extends TLEventMap = TLEventMap> {
   app: TLApp<S, K>
 
   constructor(app: TLApp<S, K>) {
     this.app = app
-    makeObservable(this)
   }
 
   pointerIds = new Set<number>()
 
-  @observable state: 'pointing' | 'pinching' | 'idle' = 'idle'
+  private state: 'pointing' | 'pinching' | 'idle' = 'idle'
 
   private getModifiersUpdate(
     event: K['gesture'] | K['pointer'] | K['keyboard'] | K['wheel'] | K['touch']
@@ -31,7 +29,7 @@ export class TLInputManager<S extends TLShape = TLShape, K extends TLEventMap = 
     return changes
   }
 
-  @action onWheel = (pagePoint: number[], event: K['wheel']) => {
+  onWheel = (pagePoint: number[], event: K['wheel']) => {
     const { userState } = this.app
     // if (this.state === 'pinching') return
     this.app.updateUserState({
@@ -41,7 +39,7 @@ export class TLInputManager<S extends TLShape = TLShape, K extends TLEventMap = 
     })
   }
 
-  @action onPointerDown = (pagePoint: number[], event: K['pointer']) => {
+  onPointerDown = (pagePoint: number[], event: K['pointer']) => {
     const { userState } = this.app
     // if (this.pointerIds.size > 0) return
     this.pointerIds.add(event.pointerId)
@@ -53,7 +51,7 @@ export class TLInputManager<S extends TLShape = TLShape, K extends TLEventMap = 
     this.state = 'pointing'
   }
 
-  @action onPointerMove = (
+  onPointerMove = (
     pagePoint: number[],
     event: K['gesture'] | K['pointer'] | K['keyboard'] | K['wheel'] | K['touch']
   ) => {
@@ -67,14 +65,14 @@ export class TLInputManager<S extends TLShape = TLShape, K extends TLEventMap = 
     })
   }
 
-  @action onPointerUp = (pagePoint: number[], event: K['pointer']) => {
+  onPointerUp = (pagePoint: number[], event: K['pointer']) => {
     // if (!this.pointerIds.has(event.pointerId)) return
     this.pointerIds.clear()
     this.app.updateUserState(this.getModifiersUpdate(event))
     this.state = 'idle'
   }
 
-  @action onKeyDown = (event: K['keyboard']) => {
+  onKeyDown = (event: K['keyboard']) => {
     switch (event.key) {
       case ' ': {
         this.app.updateUserState({ ...this.getModifiersUpdate(event), spaceKey: true })
@@ -86,7 +84,7 @@ export class TLInputManager<S extends TLShape = TLShape, K extends TLEventMap = 
     }
   }
 
-  @action onKeyUp = (event: K['keyboard']) => {
+  onKeyUp = (event: K['keyboard']) => {
     switch (event.key) {
       case ' ': {
         this.app.updateUserState({ ...this.getModifiersUpdate(event), spaceKey: false })
@@ -98,7 +96,7 @@ export class TLInputManager<S extends TLShape = TLShape, K extends TLEventMap = 
     }
   }
 
-  @action onPinchStart = (
+  onPinchStart = (
     pagePoint: number[],
     event: K['gesture'] | K['pointer'] | K['keyboard'] | K['wheel'] | K['touch']
   ) => {
@@ -106,7 +104,7 @@ export class TLInputManager<S extends TLShape = TLShape, K extends TLEventMap = 
     this.state = 'pinching'
   }
 
-  @action onPinch = (
+  onPinch = (
     pagePoint: number[],
     event: K['gesture'] | K['pointer'] | K['keyboard'] | K['wheel'] | K['touch']
   ) => {
@@ -114,7 +112,7 @@ export class TLInputManager<S extends TLShape = TLShape, K extends TLEventMap = 
     this.app.updateUserState(this.getModifiersUpdate(event))
   }
 
-  @action onPinchEnd = (
+  onPinchEnd = (
     pagePoint: number[],
     event: K['gesture'] | K['pointer'] | K['keyboard'] | K['wheel'] | K['touch']
   ) => {
