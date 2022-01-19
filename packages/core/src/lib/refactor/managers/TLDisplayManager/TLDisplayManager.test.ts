@@ -3,9 +3,9 @@
 
 import Vec from '@tldraw/vec'
 import { TLBoxShape, TLBoxShapeModel } from '~lib/refactor'
-import { BoxShape } from '~lib/refactor/_shapes/TLBoxShape/TLBoxShape.test'
-import { TLTestApp } from '~lib/refactor/_test'
-import { TLResizeCorner, TLRotateCorner, TLTargetType } from '~lib/refactor/_types'
+import { BoxShape } from '~lib/refactor/shapes/TLBoxShape/TLBoxShape.test'
+import { TLTestApp } from '~lib/refactor/test'
+import { TLResizeCorner, TLRotateCorner, TLTargetType } from '~lib/refactor/types'
 
 const testApp = new TLTestApp()
 

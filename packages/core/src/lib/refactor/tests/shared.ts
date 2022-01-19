@@ -1,5 +1,5 @@
-import { TLApp } from '../_TLApp'
-import { TLShape, TLShapeModel } from '../_shapes/TLShape'
+import { TLApp } from '../TLApp'
+import { TLShape, TLShapeModel } from '../shapes/TLShape'
 
 export interface BoxModel extends TLShapeModel {
   type: 'box'

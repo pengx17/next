@@ -1,7 +1,7 @@
 import { reaction, toJS } from 'mobx'
-import type { TLApp, TLDocumentModel } from '../../_TLApp'
-import type { TLShape } from '../../_shapes/TLShape'
-import type { TLEventMap } from '../../_types'
+import type { TLApp, TLDocumentModel } from '../../TLApp'
+import type { TLShape } from '../../shapes/TLShape'
+import type { TLEventMap } from '../../types'
 import * as fsp from 'fast-json-patch'
 
 type Patch = fsp.Operation[]

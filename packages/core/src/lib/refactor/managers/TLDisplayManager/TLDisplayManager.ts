@@ -2,7 +2,7 @@ import Vec from '@tldraw/vec'
 import { autorun, reaction } from 'mobx'
 import { BoundsUtils } from '~utils'
 import type { TLApp, TLShape } from '../..'
-import type { TLEventMap } from '../../_types'
+import type { TLEventMap } from '../../types'
 
 export class TLDisplayManager<S extends TLShape = TLShape, K extends TLEventMap = TLEventMap> {
   app: TLApp<S, K>

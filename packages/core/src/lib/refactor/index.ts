@@ -1,10 +1,10 @@
 // The order of these imports matters!
-export * from './_shapes'
+export * from './shapes'
 
-export * from './_TLState'
-export * from './_TLTool'
-export * from './_TLToolState'
-export * from './_tools' // must come after tool / TLToolState
+export * from './TLState'
+export * from './TLTool'
+export * from './TLToolState'
+export * from './tools' // must come after tool / TLToolState
 
-export * from './_TLBush'
-export * from './_TLApp'
+export * from './TLBush'
+export * from './TLApp'

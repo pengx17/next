@@ -1,5 +1,5 @@
 import type { TLApp, TLShape } from '../..'
-import { TLCursor, TLEventMap } from '../../_types'
+import { TLCursor, TLEventMap } from '../../types'
 
 export class TLCursorManager<S extends TLShape = TLShape, K extends TLEventMap = TLEventMap> {
   app: TLApp<S, K>

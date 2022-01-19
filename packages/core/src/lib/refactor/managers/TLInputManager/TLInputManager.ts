@@ -1,5 +1,5 @@
 import type { TLApp, TLShape, TLUserState } from '../..'
-import type { TLEventMap } from '../../_types'
+import type { TLEventMap } from '../../types'
 
 export class TLInputManager<S extends TLShape = TLShape, K extends TLEventMap = TLEventMap> {
   app: TLApp<S, K>

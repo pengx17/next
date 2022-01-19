@@ -1,5 +1,5 @@
 import type { TLApp, TLShape } from '../..'
-import type { TLEventMap } from '../../_types'
+import type { TLEventMap } from '../../types'
 
 export class TLDocumentManager<S extends TLShape = TLShape, K extends TLEventMap = TLEventMap> {
   app: TLApp<S, K>

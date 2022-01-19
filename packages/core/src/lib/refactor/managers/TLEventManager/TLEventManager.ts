@@ -5,7 +5,7 @@ import type {
   TLSubscription,
   TLSubscriptionEventInfo,
   TLSubscriptionEventName,
-} from '../../_types'
+} from '../../types'
 
 export class TLEventManager<S extends TLShape, K extends TLEventMap, R extends TLApp<S, K>> {
   app: R
