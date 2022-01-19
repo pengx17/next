@@ -239,7 +239,7 @@ export class ResizingState<
     const isFlippedX = scaleX < 0 && scaleY >= 0
     const isFlippedY = scaleY < 0 && scaleX >= 0
     const {
-      userState: { cursor },
+      displayState: { cursor },
     } = this.app
     switch (this.handle) {
       case TLResizeCorner.TopLeft:

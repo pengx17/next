@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { TLEventMap, TLStateEvents } from '../../types'
-import type { TLApp } from '../TLApp'
-import type { TLShape } from '../TLShape'
+import type { TLEventMap, TLShortcut, TLStateEvents } from '~types'
+import type { TLApp, TLShape } from '~lib'
 import { TLState } from '../TLState'
 
 export interface TLToolConstructor<
@@ -11,6 +10,8 @@ export interface TLToolConstructor<
 > {
   new (parent: R, app: R): TLTool<S, K, R>
   id: string
+  shortcut?: string[]
+  shortcuts?: TLShortcut<any, any, any>[]
 }
 
 export abstract class TLTool<

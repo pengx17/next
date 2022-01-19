@@ -13,13 +13,15 @@ import { KeyUtils } from '~utils'
 import type { TLShape } from '..'
 
 export interface TLStateConstructor<
-  S extends TLShape,
-  K extends TLEventMap,
+  S extends TLShape = TLShape,
+  K extends TLEventMap = TLEventMap,
   R extends TLRootState<S, K> = TLRootState<S, K>,
   P extends R | TLState<S, K, R, any> = any
 > {
   new (parent: P, root: R): TLState<S, K, R>
   id: string
+  shortcut?: string[]
+  shortcuts?: TLShortcut<any, any, any>[]
 }
 
 export abstract class TLRootState<S extends TLShape, K extends TLEventMap>
@@ -81,15 +83,15 @@ export abstract class TLRootState<S extends TLShape, K extends TLEventMap>
 
   children = new Map<string, TLState<S, K, any, any>>([])
 
-  registerStates = (stateClasses: TLStateConstructor<S, K, any>[]) => {
-    stateClasses.forEach(StateClass => this.children.set(StateClass.id, new StateClass(this, this)))
+  registerStates = (stateCtors: TLStateConstructor<S, K, any>[]) => {
+    stateCtors.forEach(StateCtor => this.children.set(StateCtor.id, new StateCtor(this, this)))
     return this
   }
 
-  deregisterStates = (states: TLStateConstructor<S, K, any>[]) => {
-    states.forEach(StateClass => {
-      this.children.get(StateClass.id)?.dispose()
-      this.children.delete(StateClass.id)
+  deregisterStates = (stateCtors: TLStateConstructor<S, K, any>[]) => {
+    stateCtors.forEach(StateCtor => {
+      this.children.get(StateCtor.id)?.dispose()
+      this.children.delete(StateCtor.id)
     })
     return this
   }
@@ -426,9 +428,9 @@ export abstract class TLState<
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const shortcut = this.constructor['shortcut'] as string
-    if (shortcut) {
-      KeyUtils.registerShortcut(shortcut, () => {
+    const shortcut = this.constructor['shortcut'] as string[]
+    if (shortcut && shortcut[0]) {
+      KeyUtils.registerShortcut(shortcut[0], () => {
         this.parent.transition(this.id)
       })
     }
@@ -478,17 +480,17 @@ export abstract class TLState<
 
   children = new Map<string, TLState<S, K, R, any>>([])
 
-  registerStates = (stateClasses: TLStateConstructor<S, K, R, any>[]) => {
-    stateClasses.forEach(StateClass =>
-      this.children.set(StateClass.id, new StateClass(this, this._root))
+  registerStates = (stateCtors: TLStateConstructor<S, K, R, any>[]) => {
+    stateCtors.forEach(StateCtor =>
+      this.children.set(StateCtor.id, new StateCtor(this, this._root))
     )
     return this
   }
 
   deregisterStates = (states: TLStateConstructor<S, K, R, any>[]) => {
-    states.forEach(StateClass => {
-      this.children.get(StateClass.id)?.dispose()
-      this.children.delete(StateClass.id)
+    states.forEach(StateCtor => {
+      this.children.get(StateCtor.id)?.dispose()
+      this.children.delete(StateCtor.id)
     })
     return this
   }

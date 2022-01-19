@@ -96,7 +96,7 @@ export class TLApp<
   S extends TLShape = TLShape,
   K extends TLEventMap = TLEventMap
 > extends TLRootState<S, K> {
-  constructor(params = {} as Partial<TLAppConstructorParams<S>>) {
+  constructor(params = {} as Partial<TLAppConstructorParams<S, K>>) {
     super()
     const { document, userState, settings, debug = false, shapes = [], tools = [] } = params
     this.debug = debug
@@ -204,7 +204,7 @@ export class TLApp<
 
   static id = 'app'
 
-  static states: TLToolConstructor<any, any>[] = [TLSelectTool]
+  static states: TLToolConstructor[] = [TLSelectTool]
 
   static initial = 'select'
 

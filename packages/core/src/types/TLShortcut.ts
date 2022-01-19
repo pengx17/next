@@ -9,5 +9,5 @@ export type TLShortcut<
   T extends R | TLState<S, K, R, any> = any
 > = {
   keys: string | string[]
-  fn: (api: R, state: T, event: KeyboardEvent) => void
+  fn: (app: R, state: T, event: KeyboardEvent) => void
 }

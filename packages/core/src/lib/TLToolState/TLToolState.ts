@@ -1,20 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { TLEventMap } from '~types'
-import type { TLShape } from '../TLShape'
+import type { TLShape, TLApp, TLTool } from '~lib'
 import { TLState } from '../TLState'
-import type { TLApp } from '../TLApp'
-import type { TLTool } from '../TLTool'
-
-export interface TLToolStateClass<
-  S extends TLShape = TLShape,
-  K extends TLEventMap = TLEventMap,
-  R extends TLApp<S, K> = TLApp<S, K>,
-  P extends TLTool<S, K, R> = TLTool<S, K, R>
-> {
-  new (tool: P, app: R): TLToolState<S, K, R, P>
-  id: string
-  defaultModel: S['model']
-}
 
 export abstract class TLToolState<
   S extends TLShape,
