@@ -1,11 +1,12 @@
 import * as React from 'react'
-import type { TLViewport, TLBounds } from '@tldraw/core'
+import type { TLBounds } from '@tldraw/core'
+import { useRendererContext } from './useRendererContext'
 
 export function useResizeObserver<T extends Element>(
   ref: React.RefObject<T>,
-  viewport: TLViewport,
   onBoundsChange?: (bounds: TLBounds) => void
 ) {
+  const { callbacks } = useRendererContext()
   const rIsMounted = React.useRef(false)
 
   // When the element resizes, update the bounds (stored in inputs)
@@ -24,7 +25,7 @@ export function useResizeObserver<T extends Element>(
           height: rect.height,
         }
 
-        viewport.updateBounds(bounds)
+        callbacks.onResize?.(bounds)
         onBoundsChange?.(bounds)
       }
     } else {

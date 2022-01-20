@@ -1,18 +1,14 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import type { TLBounds } from '@tldraw/core'
 import * as React from 'react'
-import { useRendererContext } from '~hooks'
 
-export function usePreventNavigation(rCanvas: React.RefObject<HTMLDivElement>): void {
-  const context = useRendererContext()
-  const {
-    viewport: { bounds },
-  } = context
+const preventGestureNavigation = (event: TouchEvent) => event.preventDefault()
 
+export function usePreventNavigation(
+  rCanvas: React.RefObject<HTMLDivElement>,
+  bounds: TLBounds
+): void {
   React.useEffect(() => {
-    const preventGestureNavigation = (event: TouchEvent) => {
-      event.preventDefault()
-    }
-
     const preventNavigation = (event: TouchEvent) => {
       // Center point of the touch area
       const touchXPosition = event.touches[0].pageX

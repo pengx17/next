@@ -35,7 +35,7 @@ export interface TLUserState<S extends TLShape = TLShape> {
   bounds: TLBounds
   shapes: Map<string, S>
   selectedIds: string[]
-  erasingShapeIds: string[]
+  erasingIds: string[]
   editingId?: string
   hoveredId?: string
   brush?: TLBounds
@@ -223,11 +223,11 @@ export class TLApp<
 
   @observable userSettings = TLApp.defaultUserSettings as TLUserSettings
 
-  /** A manager for user inputs, e.g. keys and pointers */
-  private inputs: TLInputManager<S, K>
-
   /** A manager for the user's current document */
   private user: TLUserStateManager<S, K>
+
+  /** A manager for user inputs, e.g. keys and pointers */
+  inputs: TLInputManager<S, K>
 
   /** A manager for the events and subscriptions */
   events: TLEventManager<S, K, this>
@@ -343,6 +343,14 @@ export class TLApp<
       document: { shapes },
     } = this
     return shapes.map(shape => this.getShape(shape.id))
+  }
+
+  /** An array of the currently erasing shapes. Set automatically based on document.selectedIds */
+  @computed get erasingShapesArray(): S[] {
+    const {
+      userState: { erasingIds },
+    } = this
+    return erasingIds.map(id => this.getShape(id))
   }
 
   @computed get shapesInViewport() {
@@ -490,7 +498,7 @@ export class TLApp<
   }
 
   /** The user's current hovered shape. */
-  @computed get HoveredShape(): S | undefined {
+  @computed get hoveredShape(): S | undefined {
     const {
       userState: { hoveredId },
     } = this
@@ -906,7 +914,7 @@ export class TLApp<
   static defaultUserState: TLUserState = {
     camera: [0, 0, 1],
     selectedIds: [],
-    erasingShapeIds: [],
+    erasingIds: [],
     shapes: new Map(),
     bounds: {
       minX: 0,

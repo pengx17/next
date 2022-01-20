@@ -13,27 +13,27 @@ export const AppCanvas = observer(function InnerApp<S extends TLReactShape>(
 
   return (
     <Renderer
-      viewport={app.viewport}
       inputs={app.inputs}
       callbacks={app._events as any}
-      brush={app.brush}
+      brush={app.userState.brush}
       editingShape={app.editingShape}
       hoveredShape={app.hoveredShape}
-      selectionDirectionHint={app.selectionDirectionHint}
+      selectionDirectionHint={app.userState.selectionDirectionHint}
       selectionBounds={app.selectionBounds}
       selectedShapes={app.selectedShapesArray}
       erasingShapes={app.erasingShapesArray}
       shapes={app.shapesInViewport}
-      assets={app.assets}
-      showGrid={app.settings.showGrid}
-      showSelection={app.showSelection}
-      showSelectionRotation={app.showSelectionRotation}
-      showResizeHandles={app.showResizeHandles}
-      showRotateHandles={app.showRotateHandles}
-      showSelectionDetail={app.showSelectionDetail}
-      showContextBar={app.showContextBar}
-      cursor={app.cursors.cursor}
-      cursorRotation={app.cursors.rotation}
+      // assets={app.assets}
+      camera={app.userState.camera}
+      showGrid={app.userSettings.showGrid}
+      showSelection={app.userState.showSelection}
+      showSelectionRotation={app.userState.showSelectionRotation}
+      showResizeHandles={app.userState.showResizeHandles}
+      showRotateHandles={app.userState.showRotateHandles}
+      showSelectionDetail={app.userState.showSelectionDetail}
+      showContextBar={app.userState.showContextBar}
+      cursor={app.userState.cursor}
+      cursorRotation={app.userState.cursorRotation}
       selectionRotation={app.selectionRotation}
       onEditingEnd={app.clearEditingShape}
       {...props}

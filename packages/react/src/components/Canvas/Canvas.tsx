@@ -22,7 +22,7 @@ import {
   useZoom,
 } from '~hooks'
 import { TLAsset, TLBinding, TLBounds, TLCursor, TLTheme } from '@tldraw/core'
-import { EMPTY_OBJECT, NOOP } from '~constants'
+import { DEFAULT_CAMERA, EMPTY_OBJECT, NOOP } from '~constants'
 import type { TLReactShape } from '~lib'
 import { DirectionIndicator } from '~components/ui/DirectionIndicator'
 import { useKeyboardEvents } from '~hooks/useKeyboardEvents'
@@ -32,6 +32,7 @@ export interface TLCanvasProps<S extends TLReactShape> {
   className: string
   bindings: TLBinding[]
   brush: TLBounds
+  camera: number[]
   shapes: S[]
   assets: Record<string, TLAsset>
   theme: TLTheme
@@ -84,15 +85,15 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
   showGrid = true,
   gridSize = 8,
   onEditingEnd = NOOP,
+  camera = DEFAULT_CAMERA,
   theme = EMPTY_OBJECT,
   children,
 }: Partial<TLCanvasProps<S>>): JSX.Element {
   const rContainer = React.useRef<HTMLDivElement>(null)
-  const { viewport, components, meta } = useRendererContext()
-  const { zoom } = viewport.camera
+  const { components, meta } = useRendererContext()
   useStylesheet(theme, id)
   usePreventNavigation(rContainer)
-  useResizeObserver(rContainer, viewport)
+  useResizeObserver(rContainer)
   useGestureEvents(rContainer)
   useCursor(rContainer, cursor, cursorRotation)
   useZoom(rContainer)
@@ -100,7 +101,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
   const events = useCanvasEvents()
   const onlySelectedShape = selectedShapes?.length === 1 && selectedShapes[0]
   const onlySelectedShapeWithHandles =
-    onlySelectedShape && 'handles' in onlySelectedShape.props ? selectedShapes?.[0] : undefined
+    onlySelectedShape && 'handles' in onlySelectedShape.model ? selectedShapes?.[0] : undefined
   const selectedShapesSet = React.useMemo(() => new Set(selectedShapes || []), [selectedShapes])
   const erasingShapesSet = React.useMemo(() => new Set(erasingShapes || []), [erasingShapes])
   return (
@@ -111,7 +112,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
           {components.SelectionBackground && selectedShapes && selectionBounds && showSelection && (
             <Container bounds={selectionBounds} zIndex={2}>
               <components.SelectionBackground
-                zoom={zoom}
+                zoom={camera[2]}
                 shapes={selectedShapes}
                 bounds={selectionBounds}
                 showResizeHandles={showResizeHandles}
@@ -124,7 +125,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
               <Shape
                 key={'shape_' + shape.id}
                 shape={shape}
-                asset={assets && shape.props.assetId ? assets[shape.props.assetId] : undefined}
+                asset={assets && shape.model.assetId ? assets[shape.model.assetId] : undefined}
                 isEditing={shape === editingShape}
                 isHovered={shape === hoveredShape}
                 isBinding={shape === bindingShape}
@@ -154,7 +155,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
               {showSelection && components.SelectionForeground && (
                 <Container bounds={selectionBounds} zIndex={10002}>
                   <components.SelectionForeground
-                    zoom={zoom}
+                    zoom={camera[2]}
                     shapes={selectedShapes}
                     bounds={selectionBounds}
                     showResizeHandles={showResizeHandles}
@@ -165,7 +166,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
               {showHandles && onlySelectedShapeWithHandles && components.Handle && (
                 <Container bounds={selectionBounds} zIndex={10003}>
                   <SVGContainer>
-                    {onlySelectedShapeWithHandles.props.handles!.map((handle, i) =>
+                    {onlySelectedShapeWithHandles.model.handles!.map((handle, i) =>
                       React.createElement(components.Handle!, {
                         key: `${handle.id}_handle_${i}`,
                         shape: onlySelectedShapeWithHandles,
@@ -192,7 +193,7 @@ export const Canvas = observer(function Renderer<S extends TLReactShape>({
                   shapes={selectedShapes}
                   hidden={!showContextBar}
                   bounds={selectedShapes.length === 1 ? selectedShapes[0].bounds : selectionBounds}
-                  rotation={selectedShapes.length === 1 ? selectedShapes[0].props.rotation : 0}
+                  rotation={selectedShapes.length === 1 ? selectedShapes[0].model.rotation : 0}
                 />
               )}
             </>

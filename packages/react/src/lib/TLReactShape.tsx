@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TLAsset, TLShape, TLShapeModel } from '@tldraw/core'
+import type { TLReactApp } from './TLReactApp'
 
 export interface TLCommonShapeModel<M = unknown> {
   meta: M
@@ -27,14 +28,11 @@ export interface TLComponentProps<M = unknown> extends TLCommonShapeModel<M> {
 }
 
 export interface TLReactShapeConstructor<S extends TLReactShape = TLReactShape> {
-  new (props: S['props'] & { type: any }): S
-  id: string
+  new (app: TLReactApp<S>, id: string): S
+  type: string
 }
 
-export abstract class TLReactShape<P extends TLShapeModel = TLShapeModel, M = any> extends TLShape<
-  P,
-  M
-> {
-  abstract ReactComponent: (props: TLComponentProps<M>) => JSX.Element | null
-  abstract ReactIndicator: (props: TLIndicatorProps<M>) => JSX.Element | null
+export abstract class TLReactShape<P extends TLShapeModel = TLShapeModel> extends TLShape<P> {
+  abstract ReactComponent: (props: TLComponentProps) => JSX.Element | null
+  abstract ReactIndicator: (props: TLIndicatorProps) => JSX.Element | null
 }

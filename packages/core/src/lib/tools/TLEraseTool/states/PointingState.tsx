@@ -18,7 +18,7 @@ export class PointingState<
     } = this.app
 
     this.app.updateUserState({
-      erasingShapeIds: shapesInViewport
+      erasingIds: shapesInViewport
         .filter(shape => shape.hitTestPoint(currentPoint))
         .map(shape => shape.id),
     })
@@ -35,8 +35,8 @@ export class PointingState<
   }
 
   onPointerUp: TLStateEvents<S, K>['onPointerUp'] = () => {
-    const shapeIdsToDelete = [...this.app.userState.erasingShapeIds]
-    this.app.updateUserState({ erasingShapeIds: [] })
+    const shapeIdsToDelete = [...this.app.userState.erasingIds]
+    this.app.updateUserState({ erasingIds: [] })
     this.app.deleteShapes(shapeIdsToDelete.map(id => this.app.getShape(id)))
     this.tool.transition('idle')
   }

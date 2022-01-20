@@ -2,13 +2,7 @@
 import * as React from 'react'
 import type { TLReactApp, TLReactShape, TLReactShapeConstructor } from '~lib'
 import { AppProvider } from '~components'
-import type {
-  AnyObject,
-  TLDocumentModel,
-  TLCallback,
-  TLTheme,
-  TLToolConstructor,
-} from '@tldraw/core'
+import type { AnyObject, TLDocumentModel, TLTheme, TLToolConstructor } from '@tldraw/core'
 import type { TLReactComponents } from '~types/component-props'
 import type { TLReactCallbacks, TLReactEventMap } from '~types'
 import { AppCanvas } from './AppCanvas'

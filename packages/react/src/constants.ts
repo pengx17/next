@@ -12,7 +12,7 @@ export const NOOP = () => void null
 const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 export const IMAGE_EXTENSIONS = ['.png', '.svg', '.jpg', '.jpeg', '.gif']
 export const VIDEO_EXTENSIONS = isSafari ? [] : ['.mp4', '.webm']
-
+export const DEFAULT_CAMERA = [0, 0, 1]
 export const EMPTY_OBJECT: any = {}
 export const EMPTY_ARRAY: any[] = []
 

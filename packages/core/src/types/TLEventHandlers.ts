@@ -20,4 +20,5 @@ export interface TLEventHandlers<
   onPinchStart: TLEvents<S, K, E>['pinch']
   onPinch: TLEvents<S, K, E>['pinch']
   onPinchEnd: TLEvents<S, K, E>['pinch']
+  onResize: TLEvents<S, K, E>['resize']
 }

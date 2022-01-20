@@ -8,7 +8,6 @@ export interface TLRendererProps<S extends TLReactShape>
     Partial<TLCanvasProps<S>> {}
 
 export function Renderer<S extends TLReactShape>({
-  viewport,
   inputs,
   callbacks,
   components,
@@ -17,7 +16,6 @@ export function Renderer<S extends TLReactShape>({
   return (
     <RendererContext
       id={rest.id}
-      viewport={viewport}
       inputs={inputs}
       callbacks={callbacks}
       components={components}

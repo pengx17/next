@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react-lite'
-import type { TLEventHandlers, TLInputs, TLViewport } from '@tldraw/core'
+import type { TLEventHandlers, TLInputManager } from '@tldraw/core'
 import {
   SelectionBackground as _SelectionBackground,
   SelectionForeground as _SelectionForeground,
@@ -23,8 +23,7 @@ type RendererCallbacks<S extends TLReactShape = TLReactShape> = Partial<
 
 export interface TLRendererContextProps<S extends TLReactShape = TLReactShape> {
   id?: string
-  viewport: TLViewport
-  inputs: TLInputs<TLReactEventMap>
+  inputs: TLInputManager<S, TLReactEventMap>
   callbacks?: RendererCallbacks<S>
   components?: Partial<TLReactComponents<S>>
   meta?: any
@@ -33,8 +32,7 @@ export interface TLRendererContextProps<S extends TLReactShape = TLReactShape> {
 
 export interface TLRendererContext<S extends TLReactShape = TLReactShape> {
   id: string
-  viewport: TLViewport
-  inputs: TLInputs<TLReactEventMap>
+  inputs: TLInputManager<S, TLReactEventMap>
   callbacks: RendererCallbacks<S>
   components: Partial<TLReactComponents<S>>
   meta: any
@@ -42,7 +40,6 @@ export interface TLRendererContext<S extends TLReactShape = TLReactShape> {
 
 export const RendererContext = observer(function App<S extends TLReactShape>({
   id = 'noid',
-  viewport,
   inputs,
   callbacks = EMPTY_OBJECT,
   meta = EMPTY_OBJECT,
@@ -63,7 +60,6 @@ export const RendererContext = observer(function App<S extends TLReactShape>({
 
     return {
       id,
-      viewport,
       inputs,
       callbacks,
       meta,
@@ -95,7 +91,6 @@ export const RendererContext = observer(function App<S extends TLReactShape>({
     return autorun(() => {
       setCurrentContext({
         id,
-        viewport,
         inputs,
         callbacks,
         meta,

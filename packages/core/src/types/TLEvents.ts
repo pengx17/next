@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { TLEventInfo } from './types'
+import type { TLBounds, TLEventInfo } from './types'
 import type { TLEventMap } from './TLEventMap'
 import type { TLShape } from '../lib/TLShape'
 
@@ -15,4 +15,5 @@ export interface TLEvents<
   ) => void
   pointer: (info: E, event: K['pointer'] | K['wheel']) => void
   keyboard: (info: E, event: K['keyboard']) => void
+  resize: (bounds: TLBounds) => void
 }

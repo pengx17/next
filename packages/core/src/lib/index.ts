@@ -8,4 +8,5 @@ export * from './TLToolState'
 export * from './tools' // must come after tool / TLToolState
 
 export * from './TLBush'
+export * from './TLApp/managers/TLInputManager'
 export * from './TLApp'

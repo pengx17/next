@@ -33,7 +33,7 @@ export class ErasingState<
       .filter(shape => shape.hitTestLineSegment(previousPoint, currentPoint))
       .forEach(shape => this.hitShapes.add(shape))
     this.app.updateUserState({
-      erasingShapeIds: Array.from(this.hitShapes.values()).map(shape => shape.id),
+      erasingIds: Array.from(this.hitShapes.values()).map(shape => shape.id),
     })
   }
 
@@ -49,7 +49,7 @@ export class ErasingState<
   onKeyDown: TLStateEvents<S>['onKeyDown'] = (info, e) => {
     switch (e.key) {
       case 'Escape': {
-        this.app.updateUserState({ erasingShapeIds: [] })
+        this.app.updateUserState({ erasingIds: [] })
         this.tool.transition('idle')
         break
       }
