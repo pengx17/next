@@ -229,6 +229,26 @@ describe('TLApp.deleteShapes', () => {
     })
     expect(app.shapes.size).toBe(0)
   })
+
+  it('Removes all shapes', () => {
+    const app = testApp.clone()
+    app.deleteShapes([...app.document.shapes])
+    expect(app.document).toMatchObject({
+      shapes: [],
+      selectedIds: [],
+    })
+    expect(app.shapes.size).toBe(0)
+  })
+
+  it('Removes the selected shape when deleting a shape', () => {
+    const app = testApp.clone()
+    app.selectShapes(['box1']).deleteShapes([app.getShape('box1')])
+    expect(app.document).toMatchObject({
+      shapes: [],
+      selectedIds: [],
+    })
+    expect(app.shapes.size).toBe(0)
+  })
 })
 
 describe('userState.brush', () => {

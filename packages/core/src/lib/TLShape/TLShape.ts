@@ -109,6 +109,10 @@ export class TLShape<S extends TLShapeModel = TLShapeModel> {
     return app.document.shapes.find(shapeModel => shapeModel.id === id)! as S
   }
 
+  @computed get isSelected(): boolean {
+    return this.app.selectedShapes.has(this)
+  }
+
   @computed get zIndex(): number {
     const { id, app } = this
     return app.document.shapes.findIndex(shapeModel => shapeModel.id === id)

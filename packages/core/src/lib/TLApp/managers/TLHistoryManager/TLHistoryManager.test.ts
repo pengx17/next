@@ -5,7 +5,7 @@ import { TLTestApp } from '~test'
 describe('When updating the history', () => {
   it('Does change, undo', () => {
     const app = new TLTestApp()
-    expect(app.history.state).toBe('playing')
+    expect(app.history.state).toBe('running')
     expect(app.history.frame).toBe(-1)
     app.getShape('box1').update({ point: [1, 1] })
     expect(app.history.frame).toBe(0)
@@ -172,7 +172,7 @@ describe('When pausing the history', () => {
     app.getShape('box1').update({ point: [2, 2] })
     expect(app.history.state).toBe('paused')
     app.undo()
-    expect(app.history.state).toBe('playing')
+    expect(app.history.state).toBe('running')
     expect(app.getShape('box1').model.point).toMatchObject([1, 1])
     app.redo()
     expect(app.getShape('box1').model.point).toMatchObject([2, 2])
@@ -186,7 +186,7 @@ describe('When pausing the history', () => {
     app.pause()
     expect(app.history.state).toBe('paused')
     app.redo()
-    expect(app.history.state).toBe('playing')
+    expect(app.history.state).toBe('running')
     expect(app.getShape('box1').model.point).toMatchObject([2, 2])
     app.undo()
     expect(app.getShape('box1').model.point).toMatchObject([1, 1])

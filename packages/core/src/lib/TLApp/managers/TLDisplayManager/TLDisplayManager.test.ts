@@ -33,7 +33,7 @@ describe('TLDisplayManager.setShapesInViewport', () => {
 
 describe('TLDisplayManager.setDirectionHint', () => {
   it('Is undefined when the selection is on screen', () => {
-    const app = testApp.clone().setSelectedShapes(['box1'])
+    const app = testApp.clone().selectShapes(['box1'])
     expect(app.displayState.selectionDirectionHint).toBeUndefined()
     app.setCamera([-150, 0, 1])
     expect(app.displayState.selectionDirectionHint).toBeDefined()
@@ -41,7 +41,7 @@ describe('TLDisplayManager.setDirectionHint', () => {
   })
 
   it('Is positioned correctly when the bounds are non-zero', () => {
-    const app = testApp.clone().setSelectedShapes(['box1'])
+    const app = testApp.clone().selectShapes(['box1'])
     app.viewport.updateBounds({
       minX: 100,
       minY: 100,
@@ -57,7 +57,7 @@ describe('TLDisplayManager.setDirectionHint', () => {
 
 describe('TLDisplayManager..showSelection', () => {
   it('Shows selection only if the select tool is active and there are selected shapes', () => {
-    const app = testApp.clone().setSelectedShapes(['box1'])
+    const app = testApp.clone().selectShapes(['box1'])
     expect(app.displayState.showSelection).toBe(true)
   })
   it.todo('Hides selection if the only selected shape has hideSelection=true')
@@ -77,11 +77,11 @@ describe('app.showSelectionRotation', () => {
 
 describe('app.showContextBar', () => {
   it('Hides context bar when there are no shapes selected', () => {
-    new TLTestApp().setSelectedShapes([]).expectDisplayStateToBe({ showContextBar: false })
+    new TLTestApp().selectShapes([]).expectDisplayStateToBe({ showContextBar: false })
   })
 
   it('Shows context bar if any of the selected shapes has hideContextBar=false', () => {
-    new TLTestApp().setSelectedShapes(['box1']).expectDisplayStateToBe({ showContextBar: true })
+    new TLTestApp().selectShapes(['box1']).expectDisplayStateToBe({ showContextBar: true })
   })
 
   it('Shows context bar if some selected shapes have hideContextBar=true', () => {
@@ -99,7 +99,7 @@ describe('app.showContextBar', () => {
           size: [100, 100],
         },
       ])
-      .setSelectedShapes(['box1', 'nocontextbarbox1'])
+      .selectShapes(['box1', 'nocontextbarbox1'])
       .expectDisplayStateToBe({ showContextBar: true })
   })
 
@@ -119,14 +119,14 @@ describe('app.showContextBar', () => {
           size: [100, 100],
         },
       ])
-      .setSelectedShapes(['nocontextbarbox1'])
+      .selectShapes(['nocontextbarbox1'])
       .expectDisplayStateToBe({ showContextBar: false })
   })
 
   it('Hides context bar when the state is not select.idle/hoveringSelectionHandle', () => {
     const app = new TLTestApp()
     app
-      .setSelectedShapes(['box1'])
+      .selectShapes(['box1'])
       .expectToBeIn('select.idle')
       .expectDisplayStateToBe({ showContextBar: true })
       .pointerDown([0, 0], 'box1')
@@ -155,7 +155,7 @@ describe('app.showContextBar', () => {
 
 describe('TLDisplayManager.showResizeHandles', () => {
   it('Hides resize handles when there are no shapes selected', () => {
-    new TLTestApp().setSelectedShapes([]).expectDisplayStateToBe({ showResizeHandles: false })
+    new TLTestApp().selectShapes([]).expectDisplayStateToBe({ showResizeHandles: false })
   })
 
   it('Shows resize handles if any of the selected shapes has hideResizeHandles=false', () => {
@@ -164,7 +164,7 @@ describe('TLDisplayManager.showResizeHandles', () => {
       hideResizeHandles = true
     }
     new TLTestApp()
-      .setSelectedShapes(['box1'])
+      .selectShapes(['box1'])
       .expectDisplayStateToBe({ showResizeHandles: true })
       .registerShapes([TLNoHandlesBoxShape])
       .createShapes([
@@ -175,7 +175,7 @@ describe('TLDisplayManager.showResizeHandles', () => {
           size: [100, 100],
         },
       ])
-      .setSelectedShapes(['box1', 'noresizehandlesbox1'])
+      .selectShapes(['box1', 'noresizehandlesbox1'])
       .expectDisplayStateToBe({ showResizeHandles: true })
   })
 
@@ -194,13 +194,13 @@ describe('TLDisplayManager.showResizeHandles', () => {
           size: [100, 100],
         },
       ])
-      .setSelectedShapes(['noresizehandlesbox1'])
+      .selectShapes(['noresizehandlesbox1'])
       .expectDisplayStateToBe({ showResizeHandles: false })
   })
 
   it('Hides resize handles when the state is not select.idle/hoveringSelectionHandle/pointingResizeHandle/pointingRotateHandle', () => {
     new TLTestApp()
-      .setSelectedShapes(['box1'])
+      .selectShapes(['box1'])
       .expectToBeIn('select.idle')
       .expectDisplayStateToBe({ showResizeHandles: true })
       .pointerDown([0, 0], 'box1')
@@ -238,7 +238,7 @@ describe('TLDisplayManager.showResizeHandles', () => {
 
 describe('app.showRotateHandles', () => {
   it('Hides rotate handle when there are no shapes selected', () => {
-    new TLTestApp().setSelectedShapes([]).expectDisplayStateToBe({ showRotateHandles: false })
+    new TLTestApp().selectShapes([]).expectDisplayStateToBe({ showRotateHandles: false })
   })
 
   it('Shows rotate handle if any of the selected shapes has hideRotateHandle=false', () => {
@@ -247,7 +247,7 @@ describe('app.showRotateHandles', () => {
       hideRotateHandle = true
     }
     new TLTestApp()
-      .setSelectedShapes(['box1'])
+      .selectShapes(['box1'])
       .expectDisplayStateToBe({ showRotateHandles: true })
       .registerShapes([TLNoRotateHandleBoxShape])
       .createShapes([
@@ -258,7 +258,7 @@ describe('app.showRotateHandles', () => {
           size: [100, 100],
         },
       ])
-      .setSelectedShapes(['box1', 'norotatehandlesbox1'])
+      .selectShapes(['box1', 'norotatehandlesbox1'])
       .expectDisplayStateToBe({ showRotateHandles: true })
   })
 
@@ -277,13 +277,13 @@ describe('app.showRotateHandles', () => {
           size: [100, 100],
         },
       ])
-      .setSelectedShapes(['norotatehandlesbox1'])
+      .selectShapes(['norotatehandlesbox1'])
       .expectDisplayStateToBe({ showRotateHandles: false })
   })
 
   it('Hides rotate handles when the state is not hoveringSelectionHandle/pointingResizeHandle/pointingRotateHandle', () => {
     new TLTestApp()
-      .setSelectedShapes(['box1'])
+      .selectShapes(['box1'])
       .expectToBeIn('select.idle')
       .expectDisplayStateToBe({ showRotateHandles: true })
       .pointerDown([0, 0], 'box1')

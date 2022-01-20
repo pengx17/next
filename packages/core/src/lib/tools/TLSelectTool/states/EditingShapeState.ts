@@ -48,7 +48,7 @@ export class EditingShapeState<
       case 'Escape': {
         transaction(() => {
           e.stopPropagation()
-          this.app.setSelectedShapes([this.editingShape])
+          this.app.selectShapes([this.editingShape])
           this.tool.transition('idle')
         })
         break

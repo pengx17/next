@@ -10,21 +10,19 @@ export class BrushingState<
 > extends TLToolState<S, K, R, P> {
   static id = 'brushing'
 
-  private initialSelectedIds: string[] = []
-
   private initialSelectedShapes: S[] = []
 
   private tree: TLBush<S> = new TLBush()
 
   onEnter = () => {
-    const { selectedShapes, selectedIds, document } = this.app
-    this.initialSelectedIds = Array.from(selectedIds.values())
+    const { selectedShapes, document } = this.app
     this.initialSelectedShapes = Array.from(selectedShapes.values())
     this.tree.load(document.shapes.map(s => this.app.getShape(s.id)))
+    this.updateBrushSelection()
   }
 
   onExit = () => {
-    this.initialSelectedIds = []
+    this.initialSelectedShapes = []
     this.tree.clear()
   }
 
@@ -33,6 +31,34 @@ export class BrushingState<
   }
 
   onPointerMove: TLEvents<S>['pointer'] = () => {
+    this.updateBrushSelection()
+  }
+
+  onPointerUp: TLEvents<S>['pointer'] = () => {
+    this.app.updateUserState({ brush: undefined })
+    this.tool.transition('idle')
+  }
+
+  onKeyDown: TLEvents<S>['keyboard'] = (info, e) => {
+    switch (e.key) {
+      case 'Shift': {
+        this.updateBrushSelection()
+        break
+      }
+      case 'Ctrl': {
+        this.updateBrushSelection()
+        break
+      }
+      case 'Escape': {
+        this.app.updateUserState({ brush: undefined })
+        this.app.selectShapes(this.initialSelectedShapes)
+        this.tool.transition('idle')
+        break
+      }
+    }
+  }
+
+  private updateBrushSelection() {
     const {
       userState: { shiftKey, ctrlKey, originPoint, currentPoint },
     } = this.app
@@ -52,32 +78,16 @@ export class BrushingState<
     if (shiftKey) {
       if (hits.every(hit => this.initialSelectedShapes.includes(hit))) {
         // Deselect hit shapes
-        this.app.setSelectedShapes(this.initialSelectedShapes.filter(hit => !hits.includes(hit)))
+        this.app.selectShapes(this.initialSelectedShapes.filter(hit => !hits.includes(hit)))
       } else {
         // Select hit shapes + initial selected shapes
-        this.app.setSelectedShapes(
+        this.app.selectShapes(
           Array.from(new Set([...this.initialSelectedShapes, ...hits]).values())
         )
       }
     } else {
       // Select hit shapes
-      this.app.setSelectedShapes(hits)
-    }
-  }
-
-  onPointerUp: TLEvents<S>['pointer'] = () => {
-    this.app.updateUserState({ brush: undefined })
-    this.tool.transition('idle')
-  }
-
-  handleModifierKey: TLEvents<S>['keyboard'] = (info, e) => {
-    switch (e.key) {
-      case 'Escape': {
-        this.app.updateUserState({ brush: undefined })
-        this.app.setSelectedShapes(this.initialSelectedIds)
-        this.tool.transition('idle')
-        break
-      }
+      this.app.selectShapes(hits)
     }
   }
 }

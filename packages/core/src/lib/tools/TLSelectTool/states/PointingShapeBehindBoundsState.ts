@@ -35,9 +35,9 @@ export class PointingShapeBehindBoundsState<
       userState: { shiftKey },
     } = this.app
     if (shiftKey) {
-      this.app.setSelectedShapes([...Array.from(selectedIds.values()), this.info.shape.id])
+      this.app.selectShapes([...Array.from(selectedIds.values()), this.info.shape.id])
     } else {
-      this.app.setSelectedShapes([this.info.shape.id])
+      this.app.selectShapes([this.info.shape.id])
     }
     this.tool.transition('idle')
   }

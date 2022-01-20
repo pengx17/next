@@ -41,7 +41,7 @@ export class CreatingState<
       const { bounds } = shape
       shape.update({ point: Vec.sub(originPoint, [bounds.width / 2, bounds.height / 2]) })
       this.app.transition('select')
-      this.app.setSelectedShapes([shape])
+      this.app.selectShapes([shape])
       this.app.currentState.transition('editingShape', {
         type: TLTargetType.Shape,
         shape: this.creatingShape,

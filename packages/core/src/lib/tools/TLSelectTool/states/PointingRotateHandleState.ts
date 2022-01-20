@@ -44,7 +44,7 @@ export class PointingRotateHandleState<
   private updateCursor() {
     const {
       cursors,
-      userState: { selectionRotation },
+      displayState: { selectionRotation },
     } = this.app
     cursors.setCursor(CURSORS[this.handle], selectionRotation)
   }

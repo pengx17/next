@@ -42,9 +42,9 @@ export class PointingSelectedShapeState<
       const { selectedIds } = this.app
       const next = Array.from(selectedIds.values())
       next.splice(next.indexOf(this.pointedSelectedShape.id), 1)
-      this.app.setSelectedShapes(next)
+      this.app.selectShapes(next)
     } else {
-      this.app.setSelectedShapes([this.pointedSelectedShape.id])
+      this.app.selectShapes([this.pointedSelectedShape.id])
     }
     this.tool.transition('idle')
   }

@@ -10,11 +10,12 @@ import {
   TLDisplayManager,
   TLInputManager,
   TLCursorManager,
+  TLSelectionManager,
 } from './managers'
 import { TLRootState } from '../TLState'
 import { TLViewportManager } from './managers'
 import { TLSelectTool } from '../tools'
-import { BoundsUtils, KeyUtils, uniqueId } from '~utils'
+import { BoundsUtils, getFirstFromSet, KeyUtils, uniqueId } from '~utils'
 import { TLResizeCorner } from '~types'
 import * as fsp from 'fast-json-patch'
 
@@ -33,7 +34,6 @@ export interface TLAssetModel {
 export interface TLUserState {
   camera: number[]
   bounds: TLBounds
-  selectionRotation: number
   isToolLocked: boolean
   erasingShapeIds: string[]
   editingId?: string
@@ -56,6 +56,7 @@ export interface TLDisplayState<S extends TLShape = TLShape> {
   cursor: TLCursor
   cursorRotation: number
   shapesInViewport: S[]
+  selectionRotation: number
   selectionDirectionHint?: number[]
   showSelection: boolean
   showSelectionDetail: boolean
@@ -185,6 +186,7 @@ export class TLApp<
     this.history = new TLHistoryManager(this)
     this.display = new TLDisplayManager(this)
     this.events = new TLEventManager(this)
+    this.selection = new TLSelectionManager(this)
     this.shapes.clear()
     if (shapes) this.registerShapes(shapes)
     if (this.states) this.registerStates(this.states)
@@ -226,7 +228,6 @@ export class TLApp<
       width: 1080,
       height: 720,
     },
-    selectionRotation: 0,
     isToolLocked: false,
     shiftKey: false,
     ctrlKey: false,
@@ -246,6 +247,7 @@ export class TLApp<
     cursorRotation: 0,
     shapesInViewport: [],
     selectionDirectionHint: undefined,
+    selectionRotation: 0,
     showSelection: false,
     showSelectionDetail: false,
     showSelectionRotation: false,
@@ -279,6 +281,9 @@ export class TLApp<
   /** A manager for the events and subscriptions */
   events: TLEventManager<S, K, this>
 
+  /** A manager for the user's current selection */
+  selection: TLSelectionManager<S, K>
+
   /* ------------------- Tool States ------------------ */
 
   @computed get selectedTool() {
@@ -293,6 +298,7 @@ export class TLApp<
 
   /** Load a document model. */
   @action loadDocument(model: TLDocumentModel<S>) {
+    if (this.selection.state !== 'stopped') this.selection.stop()
     if (this.display.state !== 'stopped') this.display.stop()
     transaction(() => {
       try {
@@ -300,13 +306,14 @@ export class TLApp<
         this.document.shapes = []
         this.shapes.clear()
         this.addShapes(model.shapes)
-        this.setSelectedShapes(model.selectedIds)
+        this.selectShapes(model.selectedIds)
       } catch (e) {
         console.error(e)
       }
     })
-    if (this.history.state === 'playing') this.history.reset()
+    if (this.history.state === 'running') this.history.reset()
     if (this.display.state === 'stopped') this.display.start()
+    if (this.selection.state === 'stopped') this.selection.start()
     return this
   }
 
@@ -410,10 +417,13 @@ export class TLApp<
 
   /** Delete shapes from the document model. */
   @action deleteShapes(shapeModels: S[] | S['model'][]) {
-    const { shapes, document } = this
-    this.parseModelsFromShapeArg(shapeModels).forEach(model => {
-      shapes.delete(model.id)
-      document.shapes.splice(document.shapes.indexOf(model), 1)
+    const { shapes, selectedShapes, document } = this
+    transaction(() => {
+      this.parseModelsFromShapeArg(shapeModels).forEach(model => {
+        selectedShapes.delete(this.getShape(model.id))
+        shapes.delete(model.id)
+        document.shapes.splice(document.shapes.indexOf(model), 1)
+      })
     })
     return this
   }
@@ -443,15 +453,24 @@ export class TLApp<
   /* ----------------- Selected Shapes ---------------- */
 
   /** An array of selected shape Ids. */
-  @computed get selectedIds() {
+  get selectedIds() {
     return this.document.selectedIds
   }
 
-  /** An array of selected shapes. */
-  @observable selectedShapesArray: S[] = []
-
   /** A set of selected shapes. */
   @observable selectedShapes = new Set<S>()
+
+  /** An array of selected shapes. */
+  @computed get selectedShapesArray(): S[] {
+    const { selectedIds } = this.document
+    return selectedIds.map(id => this.getShape(id))
+  }
+
+  /** The rotation of the current selection */
+  @computed get selectionRotation() {
+    const { selectedShapes } = this
+    return selectedShapes.size === 1 ? getFirstFromSet(selectedShapes).model.rotation ?? 0 : 0
+  }
 
   /** The bounding box of the currently selected shapes, if any. */
   @computed get selectionBounds(): TLBounds | undefined {
@@ -464,34 +483,39 @@ export class TLApp<
   }
 
   /** Set the user's selected shapes. */
-  @action setSelectedShapes(shapes: string[] | S[]) {
-    let shapesArray: S[]
-    let ids: string[]
-    if (typeof shapes[0] === 'string') {
-      ids = shapes as string[]
-      shapesArray = ids.map(id => this.getShape(id))
-    } else {
-      shapesArray = shapes as S[]
-      ids = shapesArray.map(shape => shape.id)
-    }
-    transaction(() => {
-      // Set selected ids
-      this.document.selectedIds = ids
-      // Set selected shapes array
-      this.selectedShapesArray = shapesArray
-      // Set selection rotation
-      this.userState.selectionRotation =
-        shapesArray.length === 1 ? shapesArray[0].model.rotation ?? 0 : 0
-      // Set selected shapes (set)
-      this.selectedShapes.clear()
-      shapesArray.forEach(shape => this.selectedShapes.add(shape))
-    })
-    return this
-  }
+  // @action setSelectedShapes(shapes: string[] | S[]) {
+  //   let shapesArray: S[]
+  //   let ids: string[]
+  //   if (typeof shapes[0] === 'string') {
+  //     ids = shapes as string[]
+  //     shapesArray = ids.map(id => this.getShape(id))
+  //   } else {
+  //     shapesArray = shapes as S[]
+  //     ids = shapesArray.map(shape => shape.id)
+  //   }
+  //   transaction(() => {
+  //     this.selectedShapes.clear()
+  //     shapesArray.forEach(shape => this.selectedShapes.add(shape))
+  //   })
+  //   return this
+  // }
 
-  /** Select no shapes. */
-  clearSelectedShapes = (): this => {
-    return this.setSelectedShapes([])
+  @action private setSelectedShapes(fn: (selection: Set<S>) => void) {
+    // let shapesArray: S[]
+    // let ids: string[]
+    // if (typeof shapes[0] === 'string') {
+    //   ids = shapes as string[]
+    //   shapesArray = ids.map(id => this.getShape(id))
+    // } else {
+    //   shapesArray = shapes as S[]
+    //   ids = shapesArray.map(shape => shape.id)
+    // }
+    // transaction(() => {
+    //   this.selectedShapes.clear()
+    //   shapesArray.forEach(shape => this.selectedShapes.add(shape))
+    // })
+    fn(this.selectedShapes)
+    return this
   }
 
   /* ------------------ Hovered Shape ----------------- */
@@ -683,9 +707,19 @@ export class TLApp<
    *
    * @param shapes The shapes or shape ids to select.
    */
-  selectShapes = (...shapes: S[] | string[]): this => {
-    this.setSelectedShapes(shapes)
-    return this
+  selectShapes = (shapes: S[] | string[]): this => {
+    return this.setSelectedShapes(set => {
+      set.clear()
+      if (typeof shapes[0] === 'string') {
+        shapes.forEach(id => set.add(this.getShape(id as string)))
+      } else {
+        shapes.forEach(shape => set.add(shape as S))
+      }
+    })
+  }
+
+  select = (...shapes: S[] | string[]): this => {
+    return this.selectShapes(shapes)
   }
 
   /**
@@ -693,23 +727,33 @@ export class TLApp<
    *
    * @param ids The shapes or shape ids to deselect.
    */
-  deselectShapes = (...shapes: S[] | string[]): this => {
-    const ids =
-      typeof shapes[0] === 'string' ? (shapes as string[]) : (shapes as S[]).map(shape => shape.id)
-    this.setSelectedShapes(this.selectedShapesArray.filter(shape => !ids.includes(shape.id)))
-    return this
+  deselectShapes = (shapes: S[] | string[]): this => {
+    return this.setSelectedShapes(set => {
+      if (typeof shapes[0] === 'string') {
+        shapes.forEach(id => set.delete(this.getShape(id as string)))
+      } else {
+        shapes.forEach(shape => set.delete(shape as S))
+      }
+    })
+  }
+
+  deselect = (...shapes: S[] | string[]): this => {
+    return this.deselectShapes(shapes)
   }
 
   /** Select all shapes on the current page. */
   selectAll = (): this => {
-    this.setSelectedShapes(Array.from(this.shapes.keys()))
-    return this
+    return this.setSelectedShapes(set => {
+      set.clear()
+      this.getShapesArray().forEach(shape => set.add(shape))
+    })
   }
 
   /** Deselect all shapes on the current page. */
   deselectAll = (): this => {
-    this.setSelectedShapes([])
-    return this
+    return this.setSelectedShapes(set => {
+      set.clear()
+    })
   }
 
   /** Bring shapes forward in the shape stack. */

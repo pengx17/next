@@ -158,7 +158,7 @@ export class IdleState<
       }
       case 'Escape': {
         if (selectedShapes.size > 0) {
-          this.app.setSelectedShapes([])
+          this.app.selectShapes([])
         }
         break
       }

@@ -1,5 +1,5 @@
 import Vec from '@tldraw/vec'
-import { autorun, reaction } from 'mobx'
+import { reaction } from 'mobx'
 import { BoundsUtils } from '~utils'
 import type { TLApp, TLShape } from '../../..'
 import type { TLEventMap } from '../../../../types'
@@ -7,7 +7,9 @@ import type { TLEventMap } from '../../../../types'
 export class TLDisplayManager<S extends TLShape = TLShape, K extends TLEventMap = TLEventMap> {
   app: TLApp<S, K>
 
-  state: 'stopped' | 'started' = 'stopped'
+  state: 'stopped' | 'running' = 'stopped'
+
+  disposables: (() => void)[] = []
 
   constructor(app: TLApp<S, K>) {
     this.app = app
@@ -52,6 +54,11 @@ export class TLDisplayManager<S extends TLShape = TLShape, K extends TLEventMap 
       )
     }
     return selectionDirectionHint
+  }
+
+  getSelectionRotation = () => {
+    const { selectedShapesArray } = this.app
+    return selectedShapesArray.length === 1 ? selectedShapesArray[0].model.rotation ?? 0 : 0
   }
 
   getShowSelection = () => {
@@ -122,34 +129,53 @@ export class TLDisplayManager<S extends TLShape = TLShape, K extends TLEventMap 
     )
   }
 
-  disposables: (() => void)[] = []
-
   start = () => {
-    this.state = 'started'
+    this.state = 'running'
     this.disposables.push(
-      reaction(this.getShapesInViewport, result =>
-        this.app.updateDisplayState({ shapesInViewport: result })
+      reaction(
+        this.getShapesInViewport,
+        result => this.app.updateDisplayState({ shapesInViewport: result }),
+        { fireImmediately: true }
       ),
-      reaction(this.getSelectionDirectionHint, result =>
-        this.app.updateDisplayState({ selectionDirectionHint: result })
+      reaction(
+        this.getSelectionDirectionHint,
+        result => this.app.updateDisplayState({ selectionDirectionHint: result }),
+        { fireImmediately: true }
       ),
-      reaction(this.getShowSelection, result =>
-        this.app.updateDisplayState({ showSelection: result })
+      reaction(
+        this.getShowSelection,
+        result => this.app.updateDisplayState({ showSelection: result }),
+        { fireImmediately: true }
       ),
-      reaction(this.getShowSelectionRotation, result =>
-        this.app.updateDisplayState({ showSelectionRotation: result })
+      reaction(
+        this.getSelectionRotation,
+        result => this.app.updateDisplayState({ selectionRotation: result }),
+        { fireImmediately: true }
       ),
-      reaction(this.getShowSelectionDetail, result =>
-        this.app.updateDisplayState({ showSelectionDetail: result })
+      reaction(
+        this.getShowSelectionRotation,
+        result => this.app.updateDisplayState({ showSelectionRotation: result }),
+        { fireImmediately: true }
       ),
-      reaction(this.getShowContextBar, result =>
-        this.app.updateDisplayState({ showContextBar: result })
+      reaction(
+        this.getShowSelectionDetail,
+        result => this.app.updateDisplayState({ showSelectionDetail: result }),
+        { fireImmediately: true }
       ),
-      reaction(this.getShowRotateHandles, result =>
-        this.app.updateDisplayState({ showRotateHandles: result })
+      reaction(
+        this.getShowContextBar,
+        result => this.app.updateDisplayState({ showContextBar: result }),
+        { fireImmediately: true }
       ),
-      reaction(this.getShowResizeHandles, result =>
-        this.app.updateDisplayState({ showResizeHandles: result })
+      reaction(
+        this.getShowRotateHandles,
+        result => this.app.updateDisplayState({ showRotateHandles: result }),
+        { fireImmediately: true }
+      ),
+      reaction(
+        this.getShowResizeHandles,
+        result => this.app.updateDisplayState({ showResizeHandles: result }),
+        { fireImmediately: true }
       )
     )
   }

@@ -18,7 +18,7 @@ export class PointingState<
     } = this.app
     if (Vec.dist(currentPoint, originPoint) > 5) {
       this.tool.transition('creating')
-      this.app.setSelectedShapes(Array.from(this.app.shapes.values()))
+      this.app.selectShapes(Array.from(this.app.shapes.values()))
     }
   }
 

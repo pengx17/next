@@ -6,7 +6,7 @@ describe('When using the tool', () => {
   })
   it('Transitions to creating and creates a dot shape on pointer down', () => {
     const app = new TLTestApp()
-    app.deleteShapes(app.document.shapes.map(shape => app.getShape(shape.id))).selectTool('dot')
+    app.deleteShapes([...app.document.shapes]).selectTool('dot')
     expect(app.shapes.size).toBe(0)
     app.pointerDown([100, 100])
     expect(app.shapes.size).toBe(1)

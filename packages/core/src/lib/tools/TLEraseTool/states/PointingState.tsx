@@ -30,7 +30,7 @@ export class PointingState<
     } = this.app
     if (Vec.dist(currentPoint, originPoint) > 5) {
       this.tool.transition('erasing')
-      this.app.setSelectedShapes([])
+      this.app.selectShapes([])
     }
   }
 

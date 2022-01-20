@@ -30,7 +30,7 @@ export class CreatingState<
       .getShape<T>(id)
     this.initialShape = toJS(shape.model)
     this.creatingShape = shape
-    this.app.setSelectedShapes([shape])
+    this.app.selectShapes([shape])
   }
 
   onPointerMove: TLStateEvents<S, K>['onPointerMove'] = () => {
@@ -53,7 +53,7 @@ export class CreatingState<
   onPointerUp: TLStateEvents<S, K>['onPointerUp'] = () => {
     this.tool.transition('idle')
     if (this.creatingShape) {
-      this.app.setSelectedShapes([this.creatingShape])
+      this.app.selectShapes([this.creatingShape])
     }
     if (!this.app.userState.isToolLocked) {
       this.app.transition('select')

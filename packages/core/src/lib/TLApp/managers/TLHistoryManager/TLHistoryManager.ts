@@ -12,7 +12,7 @@ export class TLHistoryManager<S extends TLShape = TLShape, K extends TLEventMap 
   frame = -1
   skipNextFrame = false
   prev = {} as TLDocumentModel<S>
-  state: 'stopped' | 'paused' | 'playing' = 'stopped'
+  state: 'stopped' | 'paused' | 'running' = 'stopped'
 
   private didChangeWhilePaused = false
 
@@ -52,7 +52,7 @@ export class TLHistoryManager<S extends TLShape = TLShape, K extends TLEventMap 
         }
         break
       }
-      case 'playing': {
+      case 'running': {
         // Push a new frame
         this.frame++
         // Splice the patches, removing any pending redos
@@ -91,7 +91,7 @@ export class TLHistoryManager<S extends TLShape = TLShape, K extends TLEventMap 
     if (this.state !== 'stopped') throw Error("Can't start a history manager that isn't stopped")
     this.disposables.push(reaction(() => toJS(this.app.document), this.persist))
     this.prev = toJS(this.app.document)
-    this.state = 'playing'
+    this.state = 'running'
   }
 
   reset = () => {
@@ -111,15 +111,15 @@ export class TLHistoryManager<S extends TLShape = TLShape, K extends TLEventMap 
 
   pause = () => {
     if (this.state === 'paused') return
-    if (this.state !== 'playing') throw Error("Can't pause a history manager that isn't playing")
+    if (this.state !== 'running') throw Error("Can't pause a history manager that isn't running")
     this.state = 'paused'
     this.didChangeWhilePaused = false
   }
 
   resume = () => {
-    if (this.state === 'playing') return
+    if (this.state === 'running') return
     if (this.state !== 'paused') throw Error("Can't resume a history manager that isn't paused")
-    this.state = 'playing'
+    this.state = 'running'
     // If we changed while paused, create a new frame before continuing.
     if (this.didChangeWhilePaused) {
       this.frame++

@@ -53,7 +53,7 @@ export class CreatingState<
       this.initialBounds.maxY = this.initialBounds.minY + this.initialBounds.height
     }
     this.creatingShape = shape
-    this.app.setSelectedShapes([shape])
+    this.app.selectShapes([shape])
   }
 
   onPointerMove: TLStateEvents<S, K>['onPointerMove'] = info => {
@@ -82,7 +82,7 @@ export class CreatingState<
   onPointerUp: TLStateEvents<S, K>['onPointerUp'] = () => {
     this.tool.transition('idle')
     if (this.creatingShape) {
-      this.app.setSelectedShapes([this.creatingShape as unknown as S])
+      this.app.selectShapes([this.creatingShape as unknown as S])
     }
     if (!this.app.userState.isToolLocked) {
       this.app.transition('select')
