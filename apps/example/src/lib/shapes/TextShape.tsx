@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
 import { HTMLContainer, TLComponentProps, TLTextMeasure } from '@tldraw/react'
-import { TextUtils, TLBounds, TLResizeStartInfo, TLTextShape, TLTextShapeProps } from '@tldraw/core'
+import { TextUtils, TLBounds, TLResizeStartInfo, TLTextShape, TLTextShapeModel } from '@tldraw/core'
 import { observer } from 'mobx-react-lite'
 import { CustomStyleProps, withClampedStyles } from './style-props'
-import { NumberInput } from '~components/inputs/NumberInput'
 
-export interface TextShapeProps extends TLTextShapeProps, CustomStyleProps {
+export interface TextShapeModel extends TLTextShapeModel, CustomStyleProps {
   borderRadius: number
   fontFamily: string
   fontSize: number
@@ -16,10 +15,10 @@ export interface TextShapeProps extends TLTextShapeProps, CustomStyleProps {
   type: 'text'
 }
 
-export class TextShape extends TLTextShape<TextShapeProps> {
+export class TextShape extends TLTextShape<TextShapeModel> {
   static id = 'text'
 
-  static defaultModel: TextShapeProps = {
+  static defaultModel: TextShapeModel = {
     id: 'box',
     parentId: 'page',
     type: 'text',
@@ -41,7 +40,7 @@ export class TextShape extends TLTextShape<TextShapeProps> {
 
   ReactComponent = observer(({ events, isErasing, isEditing, onEditingEnd }: TLComponentProps) => {
     const {
-      props: { opacity, fontFamily, fontSize, fontWeight, lineHeight, text, stroke, padding },
+      model: { opacity, fontFamily, fontSize, fontWeight, lineHeight, text, stroke, padding },
     } = this
     const rInput = React.useRef<HTMLTextAreaElement>(null)
 
@@ -51,7 +50,7 @@ export class TextShape extends TLTextShape<TextShapeProps> {
 
     // When the text changes, update the text—and,
     const handleChange = React.useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const { isSizeLocked } = this.props
+      const { isSizeLocked } = this.model
       const text = TextUtils.normalizeText(e.currentTarget.value)
       if (isSizeLocked) {
         this.update({ text, size: this.getAutoSizedBoundingBox({ text }) })
@@ -140,7 +139,7 @@ export class TextShape extends TLTextShape<TextShapeProps> {
     }, [isEditing, onEditingEnd])
 
     React.useLayoutEffect(() => {
-      const { fontFamily, fontSize, fontWeight, lineHeight, padding } = this.props
+      const { fontFamily, fontSize, fontWeight, lineHeight, padding } = this.model
       const { width, height } = this.measure.measureText(
         text,
         { fontFamily, fontSize, fontWeight, lineHeight },
@@ -199,7 +198,7 @@ export class TextShape extends TLTextShape<TextShapeProps> {
 
   ReactIndicator = observer(() => {
     const {
-      props: { borderRadius },
+      model: { borderRadius },
       bounds,
     } = this
     return (
@@ -213,8 +212,8 @@ export class TextShape extends TLTextShape<TextShapeProps> {
     )
   })
 
-  validateProps = (props: Partial<TextShapeProps>) => {
-    if (props.isSizeLocked || this.props.isSizeLocked) {
+  validateProps = (props: Partial<TextShapeModel>) => {
+    if (props.isSizeLocked || this.model.isSizeLocked) {
       props.size = this.getAutoSizedBoundingBox(props)
     }
     return withClampedStyles(props)
@@ -224,14 +223,14 @@ export class TextShape extends TLTextShape<TextShapeProps> {
 
   private measure = new TLTextMeasure()
 
-  getAutoSizedBoundingBox(props = {} as Partial<TextShapeProps>) {
+  getAutoSizedBoundingBox(props = {} as Partial<TextShapeModel>) {
     const {
-      text = this.props.text,
-      fontFamily = this.props.fontFamily,
-      fontSize = this.props.fontSize,
-      fontWeight = this.props.fontWeight,
-      lineHeight = this.props.lineHeight,
-      padding = this.props.padding,
+      text = this.model.text,
+      fontFamily = this.model.fontFamily,
+      fontSize = this.model.fontSize,
+      fontWeight = this.model.fontWeight,
+      lineHeight = this.model.lineHeight,
+      padding = this.model.padding,
     } = props
     const { width, height } = this.measure.measureText(
       text,
@@ -242,8 +241,8 @@ export class TextShape extends TLTextShape<TextShapeProps> {
   }
 
   getBounds = (): TLBounds => {
-    const [x, y] = this.props.point
-    const [width, height] = this.props.size
+    const [x, y] = this.model.point
+    const [width, height] = this.model.size
     return {
       minX: x,
       minY: y,
@@ -256,7 +255,7 @@ export class TextShape extends TLTextShape<TextShapeProps> {
 
   onResizeStart = ({ isSingle }: TLResizeStartInfo) => {
     if (!isSingle) return this
-    this.scale = [...(this.props.scale ?? [1, 1])]
+    this.scale = [...(this.model.scale ?? [1, 1])]
     return this.update({
       isSizeLocked: false,
     })

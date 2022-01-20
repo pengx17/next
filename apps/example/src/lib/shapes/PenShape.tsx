@@ -1,25 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
 import { getStroke } from 'perfect-freehand'
-import { SvgPathUtils, TLDrawShape, TLDrawShapeProps } from '@tldraw/core'
+import { SvgPathUtils, TLDrawShape, TLDrawShapeModel } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { computed, makeObservable } from 'mobx'
 import { CustomStyleProps, withClampedStyles } from './style-props'
 
-export interface PenShapeProps extends TLDrawShapeProps, CustomStyleProps {
+export interface PenShapeModel extends TLDrawShapeModel, CustomStyleProps {
   type: 'draw'
 }
 
-export class PenShape extends TLDrawShape<PenShapeProps> {
-  constructor(props = {} as Partial<PenShapeProps>) {
+export class PenShape extends TLDrawShape<PenShapeModel> {
+  constructor(props = {} as Partial<PenShapeModel>) {
     super(props)
     makeObservable(this)
   }
 
   static id = 'draw'
 
-  static defaultModel: PenShapeProps = {
+  static defaultModel: PenShapeModel = {
     id: 'draw',
     parentId: 'page',
     type: 'draw',
@@ -34,7 +34,7 @@ export class PenShape extends TLDrawShape<PenShapeProps> {
 
   @computed get pointsPath() {
     const {
-      props: { points, isComplete, strokeWidth },
+      model: { points, isComplete, strokeWidth },
     } = this
     if (points.length < 2) {
       return `M -4, 0
@@ -48,7 +48,7 @@ export class PenShape extends TLDrawShape<PenShapeProps> {
   ReactComponent = observer(({ events, isErasing }: TLComponentProps) => {
     const {
       pointsPath,
-      props: { stroke, strokeWidth, opacity },
+      model: { stroke, strokeWidth, opacity },
     } = this
     return (
       <SVGContainer {...events} opacity={isErasing ? 0.2 : opacity}>
@@ -68,7 +68,7 @@ export class PenShape extends TLDrawShape<PenShapeProps> {
     return <path d={pointsPath} />
   })
 
-  validateProps = (props: Partial<PenShapeProps>) => {
+  validateProps = (props: Partial<PenShapeModel>) => {
     props = withClampedStyles(props)
     if (props.strokeWidth !== undefined) props.strokeWidth = Math.max(props.strokeWidth, 1)
     return props

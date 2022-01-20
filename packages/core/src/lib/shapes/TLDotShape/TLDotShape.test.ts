@@ -1,14 +1,14 @@
 import { TLDotShapeModel, TLDotShape } from './TLDotShape'
 import { TLApp } from '~lib'
 
-export interface DotShapeProps extends TLDotShapeModel {
+export interface DotShapeModel extends TLDotShapeModel {
   stroke: string
 }
 
-export class DotShape extends TLDotShape<DotShapeProps> {
+export class DotShape extends TLDotShape<DotShapeModel> {
   static type = 'dot'
 
-  static defaultModel: DotShapeProps = {
+  static defaultModel: DotShapeModel = {
     id: 'dot',
     type: 'dot',
     radius: 3,

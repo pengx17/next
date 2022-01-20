@@ -6,7 +6,7 @@ import type { TLReactShape } from '~lib'
 import { useShapeEvents } from '~hooks/useShapeEvents'
 import type { TLAsset } from '@tldraw/core'
 
-interface ShapeProps {
+interface ShapeModel {
   shape: TLReactShape
   asset?: TLAsset
   zIndex: number
@@ -29,10 +29,10 @@ export const Shape = observer(function Shape({
   onEditingEnd,
   asset,
   meta,
-}: ShapeProps) {
+}: ShapeModel) {
   const {
     bounds,
-    props: { rotation, scale },
+    model: { rotation, scale },
     ReactComponent,
   } = shape
   const events = useShapeEvents(shape)

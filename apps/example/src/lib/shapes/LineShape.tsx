@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import { TLHandle, TLLineShapeProps, TLLineShape } from '@tldraw/core'
+import { TLHandle, TLLineShapeModel, TLLineShape } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { CustomStyleProps, withClampedStyles } from './style-props'
 
-interface LineShapeProps extends CustomStyleProps, TLLineShapeProps {
+interface LineShapeModel extends CustomStyleProps, TLLineShapeModel {
   type: 'line'
   handles: TLHandle[]
 }
 
-export class LineShape extends TLLineShape<LineShapeProps> {
+export class LineShape extends TLLineShape<LineShapeModel> {
   static id = 'line'
 
-  static defaultModel: LineShapeProps = {
+  static defaultModel: LineShapeModel = {
     id: 'line',
     parentId: 'page',
     type: 'line',
@@ -33,7 +33,7 @@ export class LineShape extends TLLineShape<LineShapeProps> {
   ReactComponent = observer(({ events, isErasing, isSelected }: TLComponentProps) => {
     const {
       points,
-      props: { stroke, fill, strokeWidth, opacity },
+      model: { stroke, fill, strokeWidth, opacity },
     } = this
     const path = points.join()
     return (
@@ -58,7 +58,7 @@ export class LineShape extends TLLineShape<LineShapeProps> {
     return <polygon points={path} />
   })
 
-  validateProps = (props: Partial<LineShapeProps>) => {
+  validateProps = (props: Partial<LineShapeModel>) => {
     return withClampedStyles(props)
   }
 }

@@ -1,23 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import { TLPolylineShape, TLPolylineShapeProps } from '@tldraw/core'
+import { TLPolylineShape, TLPolylineShapeModel } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { CustomStyleProps, withClampedStyles } from './style-props'
 
-interface PolylineShapeProps extends CustomStyleProps, TLPolylineShapeProps {
+interface PolylineShapeModel extends CustomStyleProps, TLPolylineShapeModel {
   type: 'polyline'
 }
 
-export class PolylineShape extends TLPolylineShape<PolylineShapeProps> {
+export class PolylineShape extends TLPolylineShape<PolylineShapeModel> {
   hideSelection = true
 
   static id = 'polyline'
 
-  static defaultModel: PolylineShapeProps = {
+  static defaultModel: PolylineShapeModel = {
     id: 'box',
-    parentId: 'page',
     type: 'polyline',
+    parentId: 'page',
     point: [0, 0],
     handles: [],
     stroke: '#000000',
@@ -29,7 +29,7 @@ export class PolylineShape extends TLPolylineShape<PolylineShapeProps> {
   ReactComponent = observer(({ events, isErasing }: TLComponentProps) => {
     const {
       points,
-      props: { stroke, strokeWidth, opacity },
+      model: { stroke, strokeWidth, opacity },
     } = this
     const path = points.join()
     return (
@@ -54,7 +54,7 @@ export class PolylineShape extends TLPolylineShape<PolylineShapeProps> {
     return <polyline points={path} />
   })
 
-  validateProps = (props: Partial<PolylineShapeProps>) => {
+  validateProps = (props: Partial<PolylineShapeModel>) => {
     return withClampedStyles(props)
   }
 }

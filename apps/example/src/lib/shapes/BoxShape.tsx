@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
-import { TLBoxShape, TLBoxShapeProps } from '@tldraw/core'
+import { TLBoxShape, TLBoxShapeModel } from '@tldraw/core'
 import { observer } from 'mobx-react-lite'
 import { CustomStyleProps, withClampedStyles } from './style-props'
 
-export interface BoxShapeProps extends TLBoxShapeProps, CustomStyleProps {
+export interface BoxShapeModel extends TLBoxShapeModel, CustomStyleProps {
   borderRadius: number
   type: 'box'
 }
 
-export class BoxShape extends TLBoxShape<BoxShapeProps> {
+export class BoxShape extends TLBoxShape<BoxShapeModel> {
   static id = 'box'
 
-  static defaultModel: BoxShapeProps = {
+  static defaultModel: BoxShapeModel = {
     id: 'box',
     parentId: 'page',
     type: 'box',
@@ -28,7 +28,7 @@ export class BoxShape extends TLBoxShape<BoxShapeProps> {
 
   ReactComponent = observer(({ events, isErasing, isSelected }: TLComponentProps) => {
     const {
-      props: {
+      model: {
         size: [w, h],
         stroke,
         fill,
@@ -66,7 +66,7 @@ export class BoxShape extends TLBoxShape<BoxShapeProps> {
 
   ReactIndicator = observer(() => {
     const {
-      props: {
+      model: {
         size: [w, h],
         borderRadius,
       },
@@ -74,7 +74,7 @@ export class BoxShape extends TLBoxShape<BoxShapeProps> {
     return <rect width={w} height={h} rx={borderRadius} ry={borderRadius} fill="transparent" />
   })
 
-  validateProps = (props: Partial<BoxShapeProps>) => {
+  validateProps = (props: Partial<BoxShapeModel>) => {
     if (props.size !== undefined) {
       props.size[0] = Math.max(props.size[0], 1)
       props.size[1] = Math.max(props.size[1], 1)

@@ -1,19 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import { TLEllipseShapeProps, TLEllipseShape } from '@tldraw/core'
+import { TLEllipseShapeModel, TLEllipseShape } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { CustomStyleProps, withClampedStyles } from './style-props'
 
-export interface EllipseShapeProps extends TLEllipseShapeProps, CustomStyleProps {
+export interface EllipseShapeModel extends TLEllipseShapeModel, CustomStyleProps {
   type: 'ellipse'
   size: number[]
 }
 
-export class EllipseShape extends TLEllipseShape<EllipseShapeProps> {
+export class EllipseShape extends TLEllipseShape<EllipseShapeModel> {
   static id = 'ellipse'
 
-  static defaultModel: EllipseShapeProps = {
+  static defaultModel: EllipseShapeModel = {
     id: 'ellipse',
     parentId: 'page',
     type: 'ellipse',
@@ -32,7 +32,7 @@ export class EllipseShape extends TLEllipseShape<EllipseShapeProps> {
       fill,
       strokeWidth,
       opacity,
-    } = this.props
+    } = this.model
     return (
       <SVGContainer {...events} opacity={isErasing ? 0.2 : opacity}>
         <ellipse
@@ -58,13 +58,13 @@ export class EllipseShape extends TLEllipseShape<EllipseShapeProps> {
   ReactIndicator = observer(() => {
     const {
       size: [w, h],
-    } = this.props
+    } = this.model
     return (
       <ellipse cx={w / 2} cy={h / 2} rx={w / 2} ry={h / 2} strokeWidth={2} fill="transparent" />
     )
   })
 
-  validateProps = (props: Partial<EllipseShapeProps>) => {
+  validateProps = (props: Partial<EllipseShapeModel>) => {
     if (props.size !== undefined) {
       props.size[0] = Math.max(props.size[0], 1)
       props.size[1] = Math.max(props.size[1], 1)

@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import { TLPolygonShape, TLPolygonShapeProps } from '@tldraw/core'
+import { TLPolygonShape, TLPolygonShapeModel } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { CustomStyleProps, withClampedStyles } from './style-props'
 
-interface PolygonShapeProps extends TLPolygonShapeProps, CustomStyleProps {
+interface PolygonShapeModel extends TLPolygonShapeModel, CustomStyleProps {
   type: 'polygon'
 }
 
-export class PolygonShape extends TLPolygonShape<PolygonShapeProps> {
+export class PolygonShape extends TLPolygonShape<PolygonShapeModel> {
   static id = 'polygon'
 
-  static defaultModel: PolygonShapeProps = {
+  static defaultModel: PolygonShapeModel = {
     id: 'polygon',
     parentId: 'page',
     type: 'polygon',
@@ -20,7 +20,6 @@ export class PolygonShape extends TLPolygonShape<PolygonShapeProps> {
     size: [100, 100],
     sides: 5,
     ratio: 1,
-    isFlippedY: false,
     stroke: '#000000',
     fill: '#ffffff',
     strokeWidth: 2,
@@ -30,7 +29,7 @@ export class PolygonShape extends TLPolygonShape<PolygonShapeProps> {
   ReactComponent = observer(({ events, isErasing, isSelected }: TLComponentProps) => {
     const {
       offset: [x, y],
-      props: { stroke, fill, strokeWidth, opacity },
+      model: { stroke, fill, strokeWidth, opacity },
     } = this
     const path = this.getVertices(strokeWidth / 2).join()
     return (
@@ -52,7 +51,7 @@ export class PolygonShape extends TLPolygonShape<PolygonShapeProps> {
   ReactIndicator = observer(() => {
     const {
       offset: [x, y],
-      props: { strokeWidth },
+      model: { strokeWidth },
     } = this
     return (
       <polygon
@@ -62,7 +61,7 @@ export class PolygonShape extends TLPolygonShape<PolygonShapeProps> {
     )
   })
 
-  validateProps = (props: Partial<PolygonShapeProps>) => {
+  validateProps = (props: Partial<PolygonShapeModel>) => {
     if (props.sides !== undefined) props.sides = Math.max(props.sides, 3)
     return withClampedStyles(props)
   }

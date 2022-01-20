@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import type { TLBoxShapeProps } from '@tldraw/core'
+import type { TLBoxShapeModel } from '@tldraw/core'
 import { HTMLContainer, TLComponentProps, TLReactBoxShape } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { CustomStyleProps, withClampedStyles } from './style-props'
 import { TextInput } from '~components/inputs/TextInput'
 
-export interface CodeSandboxShapeProps extends TLBoxShapeProps, CustomStyleProps {
+export interface CodeSandboxShapeModel extends TLBoxShapeModel, CustomStyleProps {
   type: 'code'
   embedId: string
 }
 
-export class CodeSandboxShape extends TLReactBoxShape<CodeSandboxShapeProps> {
+export class CodeSandboxShape extends TLReactBoxShape<CodeSandboxShapeModel> {
   static id = 'code'
 
-  static defaultModel: CodeSandboxShapeProps = {
+  static defaultModel: CodeSandboxShapeModel = {
     id: 'code',
     type: 'code',
     parentId: 'page',
@@ -32,7 +32,7 @@ export class CodeSandboxShape extends TLReactBoxShape<CodeSandboxShapeProps> {
   canFlip = false
 
   ReactContextBar = observer(() => {
-    const { embedId } = this.props
+    const { embedId } = this.model
     const rInput = React.useRef<HTMLInputElement>(null)
     const handleChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       const url = e.currentTarget.value
@@ -54,7 +54,7 @@ export class CodeSandboxShape extends TLReactBoxShape<CodeSandboxShapeProps> {
   })
 
   ReactComponent = observer(({ events, isEditing, isErasing }: TLComponentProps) => {
-    const { opacity, embedId } = this.props
+    const { opacity, embedId } = this.model
     return (
       <HTMLContainer
         style={{
@@ -108,11 +108,11 @@ export class CodeSandboxShape extends TLReactBoxShape<CodeSandboxShapeProps> {
   ReactIndicator = observer(() => {
     const {
       size: [w, h],
-    } = this.props
+    } = this.model
     return <rect width={w} height={h} fill="transparent" />
   })
 
-  validateProps = (props: Partial<CodeSandboxShapeProps>) => {
+  validateProps = (props: Partial<CodeSandboxShapeModel>) => {
     if (props.size !== undefined) {
       props.size[0] = Math.max(props.size[0], 1)
       props.size[1] = Math.max(props.size[1], 1)

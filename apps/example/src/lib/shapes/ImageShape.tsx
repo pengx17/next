@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
 import { HTMLContainer, TLComponentProps } from '@tldraw/react'
-import { TLImageShape, TLImageShapeProps } from '@tldraw/core'
+import { TLImageShape, TLImageShapeModel } from '@tldraw/core'
 import { observer } from 'mobx-react-lite'
 import type { CustomStyleProps } from './style-props'
 
-export interface ImageShapeProps extends TLImageShapeProps, CustomStyleProps {
+export interface ImageShapeModel extends TLImageShapeModel, CustomStyleProps {
   type: 'image'
   assetId: string
   opacity: number
 }
 
-export class ImageShape extends TLImageShape<ImageShapeProps> {
+export class ImageShape extends TLImageShape<ImageShapeModel> {
   static id = 'image'
 
-  static defaultModel: ImageShapeProps = {
+  static defaultModel: ImageShapeModel = {
     id: 'image1',
     parentId: 'page',
     type: 'image',
@@ -32,7 +32,7 @@ export class ImageShape extends TLImageShape<ImageShapeProps> {
 
   ReactComponent = observer(({ events, isErasing, asset }: TLComponentProps) => {
     const {
-      props: {
+      model: {
         opacity,
         objectFit,
         clipping,
@@ -69,7 +69,7 @@ export class ImageShape extends TLImageShape<ImageShapeProps> {
 
   ReactIndicator = observer(() => {
     const {
-      props: {
+      model: {
         size: [w, h],
       },
     } = this

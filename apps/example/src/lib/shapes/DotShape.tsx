@@ -1,17 +1,17 @@
 import * as React from 'react'
-import { TLDotShape, TLDotShapeProps } from '@tldraw/core'
+import { TLDotShape, TLDotShapeModel } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { CustomStyleProps, withClampedStyles } from './style-props'
 
-export interface DotShapeProps extends TLDotShapeProps, CustomStyleProps {
+export interface DotShapeModel extends TLDotShapeModel, CustomStyleProps {
   type: 'dot'
 }
 
-export class DotShape extends TLDotShape<DotShapeProps> {
+export class DotShape extends TLDotShape<DotShapeModel> {
   static id = 'dot'
 
-  static defaultModel: DotShapeProps = {
+  static defaultModel: DotShapeModel = {
     id: 'dot',
     parentId: 'page',
     type: 'dot',
@@ -24,7 +24,7 @@ export class DotShape extends TLDotShape<DotShapeProps> {
   }
 
   ReactComponent = observer(({ events, isErasing }: TLComponentProps) => {
-    const { radius, stroke, fill, strokeWidth, opacity } = this.props
+    const { radius, stroke, fill, strokeWidth, opacity } = this.model
     return (
       <SVGContainer {...events} opacity={isErasing ? 0.2 : opacity}>
         <circle className="tl-hitarea-fill" cx={radius} cy={radius} r={radius} />
@@ -42,11 +42,11 @@ export class DotShape extends TLDotShape<DotShapeProps> {
   })
 
   ReactIndicator = observer(() => {
-    const { radius } = this.props
+    const { radius } = this.model
     return <circle cx={radius} cy={radius} r={radius} pointerEvents="all" />
   })
 
-  validateProps = (props: Partial<DotShapeProps>) => {
+  validateProps = (props: Partial<DotShapeModel>) => {
     if (props.radius !== undefined) props.radius = Math.max(props.radius, 1)
     return withClampedStyles(props)
   }

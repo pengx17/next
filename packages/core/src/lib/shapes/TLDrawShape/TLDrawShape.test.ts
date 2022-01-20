@@ -1,14 +1,14 @@
 import { TLDrawShapeModel, TLDrawShape } from './TLDrawShape'
 import { TLApp } from '~lib'
 
-export interface DrawShapeProps extends TLDrawShapeModel {
+export interface DrawShapeModel extends TLDrawShapeModel {
   stroke: string
 }
 
-export class DrawShape extends TLDrawShape<DrawShapeProps> {
+export class DrawShape extends TLDrawShape<DrawShapeModel> {
   static type = 'draw'
 
-  static defaultModel: DrawShapeProps = {
+  static defaultModel: DrawShapeModel = {
     id: 'draw',
     type: 'draw',
     point: [0, 0],

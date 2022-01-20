@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { TLAsset, TLShape, TLShapeProps } from '@tldraw/core'
+import { TLAsset, TLShape, TLShapeModel } from '@tldraw/core'
 
-export interface TLCommonShapeProps<M = unknown> {
+export interface TLCommonShapeModel<M = unknown> {
   meta: M
   isEditing: boolean
   isBinding: boolean
@@ -11,9 +11,9 @@ export interface TLCommonShapeProps<M = unknown> {
   asset?: TLAsset
 }
 
-export type TLIndicatorProps<M = unknown> = TLCommonShapeProps<M>
+export type TLIndicatorProps<M = unknown> = TLCommonShapeModel<M>
 
-export interface TLComponentProps<M = unknown> extends TLCommonShapeProps<M> {
+export interface TLComponentProps<M = unknown> extends TLCommonShapeModel<M> {
   events: {
     onPointerMove: React.PointerEventHandler
     onPointerDown: React.PointerEventHandler
@@ -31,7 +31,7 @@ export interface TLReactShapeConstructor<S extends TLReactShape = TLReactShape> 
   id: string
 }
 
-export abstract class TLReactShape<P extends TLShapeProps = TLShapeProps, M = any> extends TLShape<
+export abstract class TLReactShape<P extends TLShapeModel = TLShapeModel, M = any> extends TLShape<
   P,
   M
 > {

@@ -24,7 +24,7 @@ export const Indicator = observer(function Shape({
   const {
     bounds,
 
-    props: { scale, rotation = 0 },
+    model: { scale, rotation = 0 },
     ReactIndicator,
   } = shape
 

@@ -1,24 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import { SvgPathUtils, TLDrawShape, TLDrawShapeProps } from '@tldraw/core'
+import { SvgPathUtils, TLApp, TLDrawShape, TLDrawShapeModel } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { computed, makeObservable } from 'mobx'
 import { CustomStyleProps, withClampedStyles } from './style-props'
 
-export interface PencilShapeProps extends TLDrawShapeProps, CustomStyleProps {
+export interface PencilShapeModel extends TLDrawShapeModel, CustomStyleProps {
   type: 'pencil'
 }
 
-export class PencilShape extends TLDrawShape<PencilShapeProps> {
-  constructor(props = {} as Partial<PencilShapeProps>) {
-    super(props)
+export class PencilShape extends TLDrawShape<PencilShapeModel> {
+  constructor(public app: TLApp, public id: string) {
+    super(app, id)
     makeObservable(this)
   }
 
   static id = 'pencil'
 
-  static defaultModel: PencilShapeProps = {
+  static defaultModel: PencilShapeModel = {
     id: 'pencil',
     parentId: 'page',
     type: 'pencil',
@@ -32,14 +32,14 @@ export class PencilShape extends TLDrawShape<PencilShapeProps> {
   }
 
   @computed get pointsPath() {
-    const { points } = this.props
+    const { points } = this.model
     return SvgPathUtils.getCurvedPathForPoints(points)
   }
 
   ReactComponent = observer(({ events, isErasing }: TLComponentProps) => {
     const {
       pointsPath,
-      props: { stroke, fill, strokeWidth, opacity },
+      model: { stroke, fill, strokeWidth, opacity },
     } = this
     return (
       <SVGContainer {...events} opacity={isErasing ? 0.2 : opacity}>
@@ -59,7 +59,7 @@ export class PencilShape extends TLDrawShape<PencilShapeProps> {
     return <path d={pointsPath} fill="none" />
   })
 
-  validateProps = (props: Partial<PencilShapeProps>) => {
+  validateProps = (props: Partial<PencilShapeModel>) => {
     return withClampedStyles(props)
   }
 }

@@ -7,48 +7,48 @@ import {
   TLPolygonShape,
   TLPolylineShape,
   TLStarShape,
-  TLBoxShapeProps,
-  TLDotShapeProps,
-  TLDrawShapeProps,
-  TLEllipseShapeProps,
-  TLLineShapeProps,
-  TLPolygonShapeProps,
-  TLPolylineShapeProps,
-  TLStarShapeProps,
+  TLBoxShapeModel,
+  TLDotShapeModel,
+  TLDrawShapeModel,
+  TLEllipseShapeModel,
+  TLLineShapeModel,
+  TLPolygonShapeModel,
+  TLPolylineShapeModel,
+  TLStarShapeModel,
 } from '@tldraw/core'
 
 import type { TLComponentProps, TLIndicatorProps } from './TLReactShape'
 
-export abstract class TLReactBoxShape<P extends TLBoxShapeProps, M = any> extends TLBoxShape<P> {
+export abstract class TLReactBoxShape<P extends TLBoxShapeModel, M = any> extends TLBoxShape<P> {
   abstract ReactComponent: (props: TLComponentProps<M>) => JSX.Element | null
   abstract ReactIndicator: (props: TLIndicatorProps<M>) => JSX.Element | null
 }
 
-export abstract class TLReactDotShape<P extends TLDotShapeProps, M = any> extends TLDotShape<P> {
+export abstract class TLReactDotShape<P extends TLDotShapeModel, M = any> extends TLDotShape<P> {
   abstract ReactComponent: (props: TLComponentProps<M>) => JSX.Element | null
   abstract ReactIndicator: (props: TLIndicatorProps<M>) => JSX.Element | null
 }
 
-export abstract class TLReactDrawShape<P extends TLDrawShapeProps, M = any> extends TLDrawShape<P> {
+export abstract class TLReactDrawShape<P extends TLDrawShapeModel, M = any> extends TLDrawShape<P> {
   abstract ReactComponent: (props: TLComponentProps<M>) => JSX.Element | null
   abstract ReactIndicator: (props: TLIndicatorProps<M>) => JSX.Element | null
 }
 
 export abstract class TLReactEllipseShape<
-  P extends TLEllipseShapeProps,
+  P extends TLEllipseShapeModel,
   M = any
 > extends TLEllipseShape<P> {
   abstract ReactComponent: (props: TLComponentProps<M>) => JSX.Element | null
   abstract ReactIndicator: (props: TLIndicatorProps<M>) => JSX.Element | null
 }
 
-export abstract class TLReactLineShape<P extends TLLineShapeProps, M = any> extends TLLineShape<P> {
+export abstract class TLReactLineShape<P extends TLLineShapeModel, M = any> extends TLLineShape<P> {
   abstract ReactComponent: (props: TLComponentProps<M>) => JSX.Element | null
   abstract ReactIndicator: (props: TLIndicatorProps<M>) => JSX.Element | null
 }
 
 export abstract class TLReactPolygonShape<
-  P extends TLPolygonShapeProps,
+  P extends TLPolygonShapeModel,
   M = any
 > extends TLPolygonShape<P> {
   abstract ReactComponent: (props: TLComponentProps<M>) => JSX.Element | null
@@ -56,14 +56,14 @@ export abstract class TLReactPolygonShape<
 }
 
 export abstract class TLReactPolylineShape<
-  P extends TLPolylineShapeProps,
+  P extends TLPolylineShapeModel,
   M = any
 > extends TLPolylineShape<P> {
   abstract ReactComponent: (props: TLComponentProps<M>) => JSX.Element | null
   abstract ReactIndicator: (props: TLIndicatorProps<M>) => JSX.Element | null
 }
 
-export abstract class TLReactStarShape<P extends TLStarShapeProps, M = any> extends TLStarShape<P> {
+export abstract class TLReactStarShape<P extends TLStarShapeModel, M = any> extends TLStarShape<P> {
   abstract ReactComponent: (props: TLComponentProps<M>) => JSX.Element | null
   abstract ReactIndicator: (props: TLIndicatorProps<M>) => JSX.Element | null
 }

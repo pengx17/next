@@ -1,24 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import { SvgPathUtils, TLDrawShape, TLDrawShapeProps } from '@tldraw/core'
+import { SvgPathUtils, TLApp, TLDrawShape, TLDrawShapeModel } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { computed, makeObservable } from 'mobx'
 import { CustomStyleProps, withClampedStyles } from './style-props'
 
-export interface HighlighterShapeProps extends TLDrawShapeProps, CustomStyleProps {
+export interface HighlighterShapeModel extends TLDrawShapeModel, CustomStyleProps {
   type: 'highlighter'
 }
 
-export class HighlighterShape extends TLDrawShape<HighlighterShapeProps> {
-  constructor(props = {} as Partial<HighlighterShapeProps>) {
-    super(props)
+export class HighlighterShape extends TLDrawShape<HighlighterShapeModel> {
+  constructor(public app: TLApp, public id: string) {
+    super(app, id)
     makeObservable(this)
   }
 
   static id = 'highlighter'
 
-  static defaultModel: HighlighterShapeProps = {
+  static defaultModel: HighlighterShapeModel = {
     id: 'highlighter',
     parentId: 'page',
     type: 'highlighter',
@@ -32,14 +32,14 @@ export class HighlighterShape extends TLDrawShape<HighlighterShapeProps> {
   }
 
   @computed get pointsPath() {
-    const { points } = this.props
+    const { points } = this.model
     return SvgPathUtils.getCurvedPathForPoints(points)
   }
 
   ReactComponent = observer(({ events, isErasing }: TLComponentProps) => {
     const {
       pointsPath,
-      props: { stroke, strokeWidth, opacity },
+      model: { stroke, strokeWidth, opacity },
     } = this
 
     return (
@@ -63,7 +63,7 @@ export class HighlighterShape extends TLDrawShape<HighlighterShapeProps> {
     return <path d={pointsPath} fill="none" />
   })
 
-  validateProps = (props: Partial<HighlighterShapeProps>) => {
+  validateProps = (props: Partial<HighlighterShapeModel>) => {
     props = withClampedStyles(props)
     if (props.strokeWidth !== undefined) props.strokeWidth = Math.max(props.strokeWidth, 1)
     return props

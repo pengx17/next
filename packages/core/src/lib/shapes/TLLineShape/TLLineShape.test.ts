@@ -1,14 +1,14 @@
 import { TLLineShapeModel, TLLineShape } from './TLLineShape'
 import { TLApp } from '~lib'
 
-export interface LineShapeProps extends TLLineShapeModel {
+export interface LineShapeModel extends TLLineShapeModel {
   stroke: string
 }
 
-export class LineShape extends TLLineShape<LineShapeProps> {
+export class LineShape extends TLLineShape<LineShapeModel> {
   static type = 'line'
 
-  static defaultModel: LineShapeProps = {
+  static defaultModel: LineShapeModel = {
     id: 'line',
     type: 'line',
     point: [0, 0],

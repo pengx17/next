@@ -150,7 +150,7 @@ export class ResizingState<
     this.app.selectedShapes.forEach(shape => {
       const {
         isAspectRatioLocked,
-        model: initialShapeProps,
+        model: initialShapeModel,
         bounds: initialShapeBounds,
         transformOrigin,
         innerTransformOrigin,
@@ -167,7 +167,7 @@ export class ResizingState<
         return
       }
       let scale = [scaleX, scaleY]
-      let rotation = initialShapeProps.rotation ?? 0
+      let rotation = initialShapeModel.rotation ?? 0
       let center = BoundsUtils.getBoundsCenter(relativeBounds)
       // If the shape can't flip, make sure that scale is [+,+]
       if (!shape.canFlip) {
@@ -175,7 +175,7 @@ export class ResizingState<
       }
       // If the shape can't scale, keep the shape's initial scale
       if (!shape.canScale) {
-        scale = initialShapeProps.scale ?? [1, 1]
+        scale = initialShapeModel.scale ?? [1, 1]
       }
       // If we're flipped and the shape is rotated, flip the rotation
       if ((rotation && scaleX < 0 && scaleY >= 0) || (scaleY < 0 && scaleX >= 0)) {
@@ -204,7 +204,7 @@ export class ResizingState<
         // Position the bounds at the center
         relativeBounds = BoundsUtils.centerBounds(relativeBounds, center)
       }
-      shape.onResize(initialShapeProps, {
+      shape.onResize(initialShapeModel, {
         center,
         rotation,
         scale,

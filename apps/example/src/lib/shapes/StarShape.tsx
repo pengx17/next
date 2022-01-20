@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import { TLStarShape, TLStarShapeProps } from '@tldraw/core'
+import { TLStarShape, TLStarShapeModel } from '@tldraw/core'
 import { SVGContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { CustomStyleProps, withClampedStyles } from './style-props'
 
-interface StarShapeProps extends CustomStyleProps, TLStarShapeProps {
+interface StarShapeModel extends CustomStyleProps, TLStarShapeModel {
   type: 'star'
 }
 
-export class StarShape extends TLStarShape<StarShapeProps> {
+export class StarShape extends TLStarShape<StarShapeModel> {
   static id = 'star'
 
-  static defaultModel: StarShapeProps = {
+  static defaultModel: StarShapeModel = {
     id: 'star',
     parentId: 'page',
     type: 'star',
@@ -20,7 +20,6 @@ export class StarShape extends TLStarShape<StarShapeProps> {
     size: [100, 100],
     sides: 5,
     ratio: 1,
-    isFlippedY: false,
     stroke: '#000000',
     fill: '#ffffff',
     strokeWidth: 2,
@@ -30,7 +29,7 @@ export class StarShape extends TLStarShape<StarShapeProps> {
   ReactComponent = observer(({ events, isErasing, isSelected }: TLComponentProps) => {
     const {
       offset: [x, y],
-      props: { stroke, fill, strokeWidth, opacity },
+      model: { stroke, fill, strokeWidth, opacity },
     } = this
 
     const path = this.getVertices(strokeWidth / 2).join()
@@ -58,7 +57,7 @@ export class StarShape extends TLStarShape<StarShapeProps> {
   ReactIndicator = observer(() => {
     const {
       offset: [x, y],
-      props: { strokeWidth },
+      model: { strokeWidth },
     } = this
     return (
       <polygon
@@ -68,7 +67,7 @@ export class StarShape extends TLStarShape<StarShapeProps> {
     )
   })
 
-  validateProps = (props: Partial<StarShapeProps>) => {
+  validateProps = (props: Partial<StarShapeModel>) => {
     if (props.sides !== undefined) props.sides = Math.max(props.sides, 3)
     return withClampedStyles(props)
   }

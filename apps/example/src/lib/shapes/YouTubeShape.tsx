@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
-import { TLBoxShape, TLBoxShapeProps } from '@tldraw/core'
+import { TLBoxShape, TLBoxShapeModel } from '@tldraw/core'
 import { HTMLContainer, TLComponentProps } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { CustomStyleProps, withClampedStyles } from './style-props'
 import { TextInput } from '~components/inputs/TextInput'
 
-export interface YouTubeShapeProps extends TLBoxShapeProps, CustomStyleProps {
+export interface YouTubeShapeModel extends TLBoxShapeModel, CustomStyleProps {
   type: 'youtube'
   embedId: string
 }
 
-export class YouTubeShape extends TLBoxShape<YouTubeShapeProps> {
+export class YouTubeShape extends TLBoxShape<YouTubeShapeModel> {
   static id = 'youtube'
 
-  static defaultModel: YouTubeShapeProps = {
+  static defaultModel: YouTubeShapeModel = {
     id: 'youtube',
     type: 'youtube',
     parentId: 'page',
@@ -34,7 +34,7 @@ export class YouTubeShape extends TLBoxShape<YouTubeShapeProps> {
   canFlip = false
 
   ReactContextBar = observer(() => {
-    const { embedId } = this.props
+    const { embedId } = this.model
     const rInput = React.useRef<HTMLInputElement>(null)
     const handleChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       const url = e.currentTarget.value
@@ -59,7 +59,7 @@ export class YouTubeShape extends TLBoxShape<YouTubeShapeProps> {
 
   ReactComponent = observer(({ events, isEditing, isErasing }: TLComponentProps) => {
     const {
-      props: { opacity, embedId },
+      model: { opacity, embedId },
     } = this
     return (
       <HTMLContainer
@@ -147,14 +147,14 @@ export class YouTubeShape extends TLBoxShape<YouTubeShapeProps> {
 
   ReactIndicator = observer(() => {
     const {
-      props: {
+      model: {
         size: [w, h],
       },
     } = this
     return <rect width={w} height={h} fill="transparent" />
   })
 
-  validateProps = (props: Partial<YouTubeShapeProps>) => {
+  validateProps = (props: Partial<YouTubeShapeModel>) => {
     if (props.size !== undefined) {
       props.size[0] = Math.max(props.size[0], 1)
       props.size[1] = Math.max(props.size[0] * this.aspectRatio, 1)
