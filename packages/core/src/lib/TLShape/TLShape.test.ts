@@ -33,7 +33,6 @@ describe('TLShape.clone', () => {
           size: [100, 100],
         },
       ],
-      selectedIds: [],
     })
   })
 
@@ -68,7 +67,6 @@ describe('TLShape.clone', () => {
           size: [100, 100],
         },
       ],
-      selectedIds: [],
     })
   })
 })
@@ -93,7 +91,6 @@ describe('TLShape.update', () => {
           size: [100, 100],
         },
       ],
-      selectedIds: [],
     })
   })
 })
@@ -104,7 +101,6 @@ describe('TLShape.delete', () => {
     app.deleteShapes([...app.document.shapes])
     expect(app.document).toMatchObject({
       shapes: [],
-      selectedIds: [],
     })
     expect(app.shapes.size).toBe(0)
   })

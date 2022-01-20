@@ -8,7 +8,7 @@ export abstract class TLTextTool<
   K extends TLEventMap = TLEventMap,
   R extends TLApp<S, K> = TLApp<S, K>
 > extends TLTool<S, K, R> {
-  static id = 'box'
+  static id = 'text'
 
   static states = [IdleState, CreatingState]
 

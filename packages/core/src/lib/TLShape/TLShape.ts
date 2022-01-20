@@ -113,6 +113,17 @@ export class TLShape<S extends TLShapeModel = TLShapeModel> {
     return this.app.selectedShapes.has(this)
   }
 
+  @computed get isInViewport(): boolean {
+    const { rotatedBounds } = this
+    return (
+      this.model.parentId === undefined &&
+      (!this.canUnmount ||
+        this.isSelected ||
+        BoundsUtils.boundsContain(this.app.currentView, rotatedBounds) ||
+        BoundsUtils.boundsCollide(this.app.currentView, rotatedBounds))
+    )
+  }
+
   @computed get zIndex(): number {
     const { id, app } = this
     return app.document.shapes.findIndex(shapeModel => shapeModel.id === id)

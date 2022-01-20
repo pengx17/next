@@ -16,7 +16,7 @@ export class TLTextShape<P extends TLTextShapeModel = TLTextShapeModel> extends 
 
   canFlip = false
 
-  static id = 'text'
+  static type = 'text'
 
   static defaultModel: TLTextShapeModel = {
     id: 'text',

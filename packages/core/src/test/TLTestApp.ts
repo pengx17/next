@@ -20,40 +20,49 @@ import {
   TLLineTool,
   TLSelectTool,
   TLAppConstructorParams,
+  TLTextShape,
+  TLTextTool,
 } from '~lib'
+import { action, makeObservable } from 'mobx'
 
 export class SelectTool extends TLSelectTool {
-  static id = 'select'
+  static type = 'select'
   static shortcut = ['v']
 }
 
 export class BoxTool extends TLBoxTool<TLBoxShape, any> {
-  static id = 'box'
+  static type = 'box'
   static shortcut = ['r']
   Shape = TLBoxShape
 }
 
 export class DotTool extends TLDotTool<TLDotShape, any> {
-  static id = 'dot'
+  static type = 'dot'
   static shortcut = ['d']
   Shape = TLDotShape
 }
 
 export class DrawTool extends TLDrawTool<TLDrawShape, any> {
-  static id = 'draw'
+  static type = 'draw'
   static shortcut = ['d']
   Shape = TLDrawShape
 }
 
 export class EraseTool extends TLEraseTool<any, any> {
-  static id = 'erase'
+  static type = 'erase'
   static shortcut = ['e']
 }
 
 export class LineTool extends TLLineTool<TLLineShape, any> {
-  static id = 'line'
+  static type = 'line'
   static shortcut = ['l']
   Shape = TLLineShape
+}
+
+export class TextTool extends TLTextTool<TLTextShape, any> {
+  static type = 'text'
+  static shortcut = ['t']
+  Shape = TLTextShape
 }
 
 interface KeyboardOptions {
@@ -85,7 +94,6 @@ export class TLTestApp extends TLApp<S> {
   constructor(params = {} as Partial<TLAppConstructorParams<S>>) {
     super({
       document: {
-        selectedIds: [],
         shapes: [
           {
             id: 'box1',
@@ -116,8 +124,9 @@ export class TLTestApp extends TLApp<S> {
         TLPolylineShape,
         TLPolygonShape,
         TLStarShape,
+        TLTextShape,
       ],
-      tools: [BoxTool, EraseTool, LineTool, DotTool, DrawTool],
+      tools: [BoxTool, EraseTool, LineTool, DotTool, DrawTool, TextTool],
       ...params,
     })
 
@@ -129,6 +138,8 @@ export class TLTestApp extends TLApp<S> {
       width: 1080,
       height: 720,
     })
+
+    makeObservable(this)
   }
 
   prevScreenPoint = [0, 0]
@@ -348,6 +359,13 @@ export class TLTestApp extends TLApp<S> {
         partial[key as keyof TLDisplayState]
       )
     }
+    return this
+  }
+
+  @action reset = () => {
+    this.loadDocument({
+      shapes: [],
+    })
     return this
   }
 }

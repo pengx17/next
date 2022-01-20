@@ -4,6 +4,8 @@ import { testApp } from '~test'
 
 describe('TLCursorManager', () => {
   it.todo('Sets cursor')
+
   it.todo('Sets cursor rotation')
+
   it.todo('Resets cursor')
 })

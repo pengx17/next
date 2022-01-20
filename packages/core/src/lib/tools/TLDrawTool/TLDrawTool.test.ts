@@ -5,6 +5,7 @@ describe('When using the draw tool', () => {
     const app = new TLTestApp().selectTool('draw')
     expect(app.isIn('draw.idle')).toBe(true)
   })
+
   it('Transitions to creating and creates a shape on pointer down', () => {
     const app = new TLTestApp()
     app
@@ -18,6 +19,7 @@ describe('When using the draw tool', () => {
     const shape = app.getShapesArray()[0]
     expect({ ...shape.model, id: 'test_draw' }).toMatchSnapshot('created draw')
   })
+
   it('Extends the shapes points while moving in the creating state', () => {
     const app = new TLTestApp()
     app
@@ -30,6 +32,7 @@ describe('When using the draw tool', () => {
     expect(app.shapes.size).toBe(1)
     expect(shape.model.points.length).toBe(3)
   })
+
   it('Creates multiple shapes', () => {
     const app = new TLTestApp()
     app
@@ -43,6 +46,7 @@ describe('When using the draw tool', () => {
     app.pointerDown([200, 200]).pointerMove([210, 210]).pointerMove([220, 220]).pointerUp()
     expect(app.shapes.size).toBe(2)
   })
+
   it("Extends the previous shape's points if pressing shift moving in the creating state", () => {
     const app = new TLTestApp()
     app
@@ -58,6 +62,7 @@ describe('When using the draw tool', () => {
     const shape = app.getShapesArray()[0]
     expect(shape.model.point).toMatchObject([100, 100])
   })
+
   it('Cancels creating a shape when escape is pressed', () => {
     const app = new TLTestApp()
     app
@@ -70,6 +75,7 @@ describe('When using the draw tool', () => {
     expect(app.isIn('draw.idle')).toBe(true)
     expect(app.shapes.size).toBe(0)
   })
+
   it('Transitions from idle to select.idle on Escape', () => {
     const app = new TLTestApp().selectTool('draw')
     expect(app.isIn('draw.idle')).toBe(true)
@@ -124,6 +130,7 @@ describe('When extending the draw shape', () => {
     ])
     expect(shape.model.points[shape.model.points.length - 1]).toMatchObject([0, 110, 0.5])
   })
+
   it('Extends down and left without changing the point', () => {
     const app = new TLTestApp()
     app
@@ -137,6 +144,7 @@ describe('When extending the draw shape', () => {
     const shape = app.getShapesArray()[0]
     expect(shape.model.point).toMatchObject([100, 100])
   })
+
   it('Repositions when dragging past initial x and y', () => {
     const app = new TLTestApp()
     app
@@ -151,6 +159,7 @@ describe('When extending the draw shape', () => {
     const shape = app.getShapesArray()[0]
     expect(shape.model.point).toMatchObject([50, 100])
   })
+
   it('Extends up or left and shifts points', () => {
     const app = new TLTestApp()
     app
@@ -163,6 +172,7 @@ describe('When extending the draw shape', () => {
     const shape = app.getShapesArray()[0]
     expect(shape.model.point).toMatchObject([-50, 0])
   })
+
   it('Repositions when dragging past initial x and y after shifting points', () => {
     const app = new TLTestApp()
     app

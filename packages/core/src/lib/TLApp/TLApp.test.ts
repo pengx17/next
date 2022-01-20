@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { TLTestApp } from '~test'
-import { TLApp, TLShape, TLShapeModel } from '~lib'
+import { TLApp, TLBoxShape, TLShape, TLShapeModel } from '~lib'
 
 export interface BoxModel extends TLShapeModel {
   type: 'box'
@@ -21,9 +21,17 @@ export const testApp = new TLApp({
         point: [0, 0],
       },
     ],
-    selectedIds: [],
   },
   shapes: [Box],
+})
+
+describe('TLTestApp', () => {
+  it('resets', () => {
+    const app = new TLTestApp().reset()
+    expect(app.document).toMatchObject({
+      shapes: [],
+    })
+  })
 })
 
 describe('When creating the app', () => {
@@ -31,7 +39,6 @@ describe('When creating the app', () => {
     const app = new TLApp()
     expect(app.document).toMatchObject({
       shapes: [],
-      selectedIds: [],
     })
     expect(app.userState).toMatchObject({
       camera: [0, 0, 1],
@@ -50,7 +57,6 @@ describe('When creating the app', () => {
             point: [0, 0],
           },
         ],
-        selectedIds: [],
       },
       shapes: [Box],
     })
@@ -62,7 +68,6 @@ describe('When creating the app', () => {
           point: [0, 0],
         },
       ],
-      selectedIds: [],
     })
     expect(app.shapes.size).toBe(1)
     expect(app.shapes.get('box1')).toBeInstanceOf(Box)
@@ -86,7 +91,6 @@ describe('When cloning the app', () => {
             point: [0, 0],
           },
         ],
-        selectedIds: [],
       },
       shapes: [Box],
     })
@@ -104,6 +108,13 @@ describe('When cloning the app', () => {
 /* -------------------------------------------------- */
 /*                      TLApp API                     */
 /* -------------------------------------------------- */
+
+describe('TLApp.selectShapes', () => {
+  it('Selects a shape', () => {
+    const app = new TLTestApp()
+    app.selectShapes(['box1']).expectSelectedIdsToBe(['box1'])
+  })
+})
 
 describe('TLApp.getShape', () => {
   it('Gets a shape by its ID', () => {
@@ -137,115 +148,167 @@ describe('TLApp.getShapeModel', () => {
 
 describe('TLApp.addShapes', () => {
   it('Adds new shapes to the model.', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp().reset()
+    expect(app.document.shapes.length).toBe(0)
     app.addShapes([
       {
         id: 'box2',
         type: 'box',
         point: [0, 0],
+        size: [100, 100],
       },
     ])
     expect(app.document).toMatchObject({
       shapes: [
         {
-          id: 'box1',
+          id: 'box2',
           type: 'box',
           point: [0, 0],
+          size: [100, 100],
         },
+      ],
+    })
+    expect(app.document.shapes.length).toBe(1)
+    app.addShapes([
+      {
+        id: 'box3',
+        type: 'box',
+        point: [0, 0],
+        size: [100, 100],
+      },
+    ])
+    expect(app.document.shapes.length).toBe(2)
+    expect(app.document).toMatchObject({
+      shapes: [
         {
           id: 'box2',
           type: 'box',
           point: [0, 0],
+          size: [100, 100],
+        },
+        {
+          id: 'box3',
+          type: 'box',
+          point: [0, 0],
+          size: [100, 100],
         },
       ],
-      selectedIds: [],
     })
   })
 
   it('Adds new TLShapes instances', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp().reset()
     app.addShapes([
       {
-        id: 'box2',
+        id: 'box1',
         type: 'box',
         point: [0, 0],
+        size: [100, 100],
       },
     ])
-    expect(app.shapes.size).toBe(2)
-    expect(app.shapes.get('box2')).toBeInstanceOf(Box)
-    expect(app.shapes.get('box2')!.model).toMatchObject({
-      id: 'box2',
+    expect(app.shapes.size).toBe(1)
+    expect(app.shapes.get('box1')).toBeInstanceOf(TLBoxShape)
+    expect(app.shapes.get('box1')!.model).toMatchObject({
+      id: 'box1',
       type: 'box',
       point: [0, 0],
+      size: [100, 100],
     })
   })
 
   it('Throws error if a TLShapeConstructor is not found for a shape', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp().reset()
+    const err = jest.fn()
+    jest.spyOn(console, 'error').mockImplementation(err)
     expect(() =>
       app.addShapes([
         {
           id: 'box2',
-          // @ts-expect-error
           type: 'missingType',
           point: [0, 0],
         },
       ])
-    ).toThrowError(`Shape type "missingType" is not registered.`)
+    ).toThrowError()
+    expect(err).toHaveBeenCalled()
   })
 })
 
 describe('TLApp.updateShapes', () => {
   it('Updates the shapes in the model', () => {
-    const app = testApp.clone()
-    app.updateShapes([
-      {
-        id: 'box1',
-        type: 'box',
-        point: [1, 1],
-      },
-    ])
+    const app = new TLTestApp()
+      .reset()
+      .addShapes([
+        {
+          id: 'box1',
+          type: 'box',
+          point: [0, 0],
+          size: [100, 100],
+        },
+      ])
+      .updateShapes([
+        {
+          id: 'box1',
+          point: [1, 1],
+        },
+      ])
     expect(app.document).toMatchObject({
       shapes: [
         {
           id: 'box1',
           type: 'box',
           point: [1, 1],
+          size: [100, 100],
         },
       ],
-      selectedIds: [],
     })
   })
 })
 
 describe('TLApp.deleteShapes', () => {
   it('Removes the shapes', () => {
-    const app = testApp.clone()
-    const boxModel = app.getShapeModel('box1')
-    app.deleteShapes([boxModel])
+    const app = new TLTestApp().reset().addShapes([
+      {
+        id: 'box1',
+        type: 'box',
+        point: [0, 0],
+        size: [100, 100],
+      },
+    ])
+    app.deleteShape('box1')
     expect(app.document).toMatchObject({
       shapes: [],
-      selectedIds: [],
     })
     expect(app.shapes.size).toBe(0)
   })
 
   it('Removes all shapes', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp().reset().addShapes([
+      {
+        id: 'box1',
+        type: 'box',
+        point: [0, 0],
+        size: [100, 100],
+      },
+    ])
     app.deleteShapes([...app.document.shapes])
     expect(app.document).toMatchObject({
       shapes: [],
-      selectedIds: [],
     })
     expect(app.shapes.size).toBe(0)
   })
 
   it('Removes the selected shape when deleting a shape', () => {
-    const app = testApp.clone()
+    const app = new TLTestApp().reset().addShapes([
+      {
+        id: 'box1',
+        type: 'box',
+        point: [0, 0],
+        size: [100, 100],
+      },
+    ])
     app.selectShapes(['box1']).deleteShapes([app.getShape('box1')])
     expect(app.document).toMatchObject({
       shapes: [],
-      selectedIds: [],
     })
     expect(app.shapes.size).toBe(0)
   })
@@ -295,7 +358,6 @@ describe('TLApp.loadDocument', () => {
   it('Loads a document model', () => {
     const app = new TLTestApp()
     app.loadDocument({
-      selectedIds: ['jbox'],
       shapes: [
         {
           id: 'jbox',
@@ -306,8 +368,8 @@ describe('TLApp.loadDocument', () => {
       ],
     })
     expect(app.getShape('jbox')).toBeDefined()
-    expect(app.selectedIds).toMatchObject(['jbox'])
-    expect(app.selectedShapesArray[0]).toBe(app.getShape('jbox'))
+    // expect(app.selectedIds).toMatchObject(['jbox'])
+    // expect(app.selectedShapesArray[0]).toBe(app.getShape('jbox'))
   })
 
   it('Fails with warning if given a malformed document', () => {
