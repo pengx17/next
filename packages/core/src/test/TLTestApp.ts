@@ -3,7 +3,6 @@
 import { TLEventInfo, TLTargetType } from '~types'
 import {
   TLApp,
-  TLDisplayState,
   TLUserState,
   TLBoxShape,
   TLDotShape,
@@ -130,7 +129,7 @@ export class TLTestApp extends TLApp<S> {
       ...params,
     })
 
-    this.viewport.updateBounds({
+    this.onResize({
       minX: 0,
       minY: 0,
       maxX: 1080,
@@ -349,15 +348,6 @@ export class TLTestApp extends TLApp<S> {
   expectUserStateToBe = (partial: Partial<TLUserState>) => {
     for (const key in partial) {
       expect(this.userState[key as keyof TLUserState]).toEqual(partial[key as keyof TLUserState])
-    }
-    return this
-  }
-
-  expectDisplayStateToBe = (partial: Partial<TLDisplayState>) => {
-    for (const key in partial) {
-      expect(this.displayState[key as keyof TLDisplayState]).toEqual(
-        partial[key as keyof TLDisplayState]
-      )
     }
     return this
   }

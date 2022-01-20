@@ -290,7 +290,7 @@ describe('TLApp.deleteShapes', () => {
         size: [100, 100],
       },
     ])
-    app.deleteShapes([...app.document.shapes])
+    app.reset()
     expect(app.document).toMatchObject({
       shapes: [],
     })

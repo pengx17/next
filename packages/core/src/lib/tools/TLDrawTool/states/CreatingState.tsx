@@ -39,7 +39,7 @@ export class CreatingState<
     const {
       userState: { shiftKey, originPoint },
     } = this.app
-    this.app.history.pause()
+    this.app.pause()
     if (shiftKey && previousShape) {
       // Continue the previous shape. Create points between the shape's
       // last point and the new point, then add the new point to the shape
@@ -84,7 +84,7 @@ export class CreatingState<
 
   onPointerUp: TLStateEvents<S, K>['onPointerUp'] = () => {
     if (!this.shape) throw Error('Expected a creating shape.')
-    this.app.history.resume()
+    this.app.resume()
     this.shape.update({
       isComplete: true,
       points: this.tool.simplify

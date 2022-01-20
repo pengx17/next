@@ -43,7 +43,8 @@ export class RotatingState<
       history,
       selectedShapesArray,
       selectionBounds,
-      userState: { selectionRotation, currentPoint },
+      selectionRotation,
+      userState: { currentPoint },
     } = this.app
 
     if (!selectionBounds) throw Error('Expected selected bounds.')
@@ -70,7 +71,7 @@ export class RotatingState<
   }
 
   onExit = () => {
-    this.app.history.resume()
+    this.app.resume()
     this.snapshot = {}
   }
 
@@ -131,17 +132,17 @@ export class RotatingState<
       }
     })
 
-    const selectionRotation = GeomUtils.clampRadians(initialSelectionRotation + angleDelta)
-    this.app.updateUserState({
-      selectionRotation: shiftKey
-        ? GeomUtils.snapAngleToSegments(selectionRotation, 24)
-        : selectionRotation,
-    })
+    // const selectionRotation = GeomUtils.clampRadians(initialSelectionRotation + angleDelta)
+    // this.app.updateUserState({
+    //   selectionRotation: shiftKey
+    //     ? GeomUtils.snapAngleToSegments(selectionRotation, 24)
+    //     : selectionRotation,
+    // })
     this.updateCursor()
   }
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
-    this.app.history.resume()
+    this.app.resume()
     // this.app.persist()
     this.tool.transition('idle')
   }
@@ -159,10 +160,7 @@ export class RotatingState<
   }
 
   private updateCursor() {
-    const {
-      cursors,
-      userState: { selectionRotation },
-    } = this.app
+    const { cursors, selectionRotation } = this.app
     cursors.setCursor(CURSORS[this.handle], selectionRotation)
   }
 }

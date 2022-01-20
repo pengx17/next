@@ -16,7 +16,7 @@ describe('When using the draw tool', () => {
       .pointerDown([100, 100])
       .expectToBeIn('draw.creating')
     expect(app.shapes.size).toBe(1)
-    const shape = app.getShapesArray()[0]
+    const shape = app.shapesArray[0]
     expect({ ...shape.model, id: 'test_draw' }).toMatchSnapshot('created draw')
   })
 
@@ -28,7 +28,7 @@ describe('When using the draw tool', () => {
       .pointerDown([100, 100])
       .pointerMove([110, 110])
       .pointerMove([120, 120])
-    const shape = app.getShapesArray()[0]
+    const shape = app.shapesArray[0]
     expect(app.shapes.size).toBe(1)
     expect(shape.model.points.length).toBe(3)
   })
@@ -59,7 +59,7 @@ describe('When using the draw tool', () => {
       .pointerDown([220, 220], undefined, { shiftKey: true })
       .pointerMove([300, 300])
     expect(app.shapes.size).toBe(1)
-    const shape = app.getShapesArray()[0]
+    const shape = app.shapesArray[0]
     expect(shape.model.point).toMatchObject([100, 100])
   })
 
@@ -91,7 +91,7 @@ describe('When creating the draw shape', () => {
       .deleteShapes([...app.document.shapes])
       .selectTool('draw')
       .pointerDown([100, 100])
-    const shape = app.getShapesArray()[0]
+    const shape = app.shapesArray[0]
     expect(shape.model.point).toMatchObject([100, 100])
     app.pointerMove([200, 200])
     expect(shape.model.point).toMatchObject([100, 100])
@@ -109,7 +109,7 @@ describe('When extending the draw shape', () => {
       .deleteShapes([...app.document.shapes])
       .selectTool('draw')
       .pointerDown([0, 0])
-    const shape = app.getShapesArray()[0]
+    const shape = app.shapesArray[0]
     app.pointerMove([100, 100]).pointerUp()
     expect(shape.model.points).toMatchObject([
       [0, 0, 0.5],
@@ -141,7 +141,7 @@ describe('When extending the draw shape', () => {
       .pointerUp()
       .pointerDown([300, 300], undefined, { shiftKey: true })
       .pointerMove([400, 400])
-    const shape = app.getShapesArray()[0]
+    const shape = app.shapesArray[0]
     expect(shape.model.point).toMatchObject([100, 100])
   })
 
@@ -156,7 +156,7 @@ describe('When extending the draw shape', () => {
       .pointerDown([300, 300], undefined, { shiftKey: true })
       .pointerMove([400, 400])
       .pointerMove([50, 400])
-    const shape = app.getShapesArray()[0]
+    const shape = app.shapesArray[0]
     expect(shape.model.point).toMatchObject([50, 100])
   })
 
@@ -169,14 +169,13 @@ describe('When extending the draw shape', () => {
       .pointerMove([50, 50])
       .pointerUp()
       .pointerDown([-50, 100], undefined, { shiftKey: true })
-    const shape = app.getShapesArray()[0]
+    const shape = app.shapesArray[0]
     expect(shape.model.point).toMatchObject([-50, 0])
   })
 
   it('Repositions when dragging past initial x and y after shifting points', () => {
-    const app = new TLTestApp()
+    const app = new TLTestApp().reset()
     app
-      .deleteShapes([...app.document.shapes])
       .selectTool('draw')
       .pointerDown([100, 100])
       .pointerMove([200, 200])
@@ -184,7 +183,7 @@ describe('When extending the draw shape', () => {
       .pointerDown([300, 300], undefined, { shiftKey: true })
       .pointerMove([400, 400])
       .pointerMove([50, 400])
-    const shape = app.getShapesArray()[0]
+    const shape = app.shapesArray[0]
     expect(shape.model.point).toMatchObject([50, 100])
   })
 })

@@ -7,13 +7,12 @@ import type { TLToolConstructor } from '../TLTool'
 import {
   TLHistoryManager,
   TLEventManager,
-  // TLDisplayManager,
+  TLViewportManager,
   TLInputManager,
   TLCursorManager,
-  TLDocumentManager,
+  TLUserStateManager,
 } from './managers'
 import { TLRootState } from '../TLState'
-import { TLViewportManager } from './managers'
 import { TLSelectTool } from '../tools'
 import { BoundsUtils, getFirstFromSet, KeyUtils, uniqueId } from '~utils'
 import { TLResizeCorner } from '~types'
@@ -35,8 +34,6 @@ export interface TLUserState<S extends TLShape = TLShape> {
   camera: number[]
   shapes: Map<string, S>
   selectedIds: string[]
-  selectedShapes: Set<S>
-  selectedShapesArray: S[]
   bounds: TLBounds
   isToolLocked: boolean
   erasingShapeIds: string[]
@@ -54,19 +51,16 @@ export interface TLUserState<S extends TLShape = TLShape> {
   previousPoint: number[]
   originScreenPoint: number[]
   originPoint: number[]
-}
-
-export interface TLDisplayState<S extends TLShape = TLShape> {
-  cursor: TLCursor
-  cursorRotation: number
-  shapesInViewport: S[]
-  selectionDirectionHint?: number[]
+  // Display
   showSelection: boolean
   showSelectionDetail: boolean
   showSelectionRotation: boolean
   showContextBar: boolean
   showRotateHandles: boolean
   showResizeHandles: boolean
+  cursor: TLCursor
+  cursorRotation: number
+  selectionDirectionHint?: number[]
 }
 
 export interface TLUserSettings {
@@ -186,9 +180,8 @@ export class TLApp<
     this.viewport = new TLViewportManager(this)
     this.cursors = new TLCursorManager(this)
     this.history = new TLHistoryManager(this)
-    // this.display = new TLDisplayManager(this)
     this.events = new TLEventManager(this)
-    this.doc = new TLDocumentManager(this)
+    this.user = new TLUserStateManager(this)
     this.shapes.clear()
     if (shapes) this.registerShapes(shapes)
     if (this.states) this.registerStates(this.states)
@@ -212,9 +205,8 @@ export class TLApp<
         })
       }
     }
-    this.doc.start()
+    this.user.start()
     this.history.start()
-    // this.display.start()
   }
 
   static id = 'app'
@@ -229,12 +221,16 @@ export class TLApp<
 
   @observable userState = TLApp.defaultUserState as TLUserState<S>
 
-  @observable displayState = TLApp.defaultDisplayState as TLDisplayState<S>
-
   @observable userSettings = TLApp.defaultUserSettings as TLUserSettings
 
   /** A manager for user inputs, e.g. keys and pointers */
-  inputs: TLInputManager<S, K>
+  private inputs: TLInputManager<S, K>
+
+  /** A manager for the user's current document */
+  private user: TLUserStateManager<S, K>
+
+  /** A manager for the events and subscriptions */
+  events: TLEventManager<S, K, this>
 
   /** A manager for the viewport and actions like pan and zoom */
   viewport: TLViewportManager<S, K>
@@ -244,15 +240,6 @@ export class TLApp<
 
   /** A manager for history, i.e. undo and redo */
   history: TLHistoryManager<S, K>
-
-  /** A manager for the display state, e.g. showing selection bounds */
-  // display: TLDisplayManager<S, K>
-
-  /** A manager for the events and subscriptions */
-  events: TLEventManager<S, K, this>
-
-  /** A manager for the user's current document */
-  doc: TLDocumentManager<S, K>
 
   /* ------------------- Tool States ------------------ */
 
@@ -268,8 +255,7 @@ export class TLApp<
 
   /** Load a document model. */
   @action loadDocument(model: TLDocumentModel<S>) {
-    if (this.doc.state !== 'stopped') this.doc.stop()
-    // if (this.display.state !== 'stopped') this.display.stop()
+    if (this.user.state !== 'stopped') this.user.stop()
     try {
       transaction(() => {
         this.document.shapes = []
@@ -281,8 +267,7 @@ export class TLApp<
       console.error(e)
     }
     if (this.history.state === 'running') this.history.reset()
-    // if (this.display.state === 'stopped') this.display.start()
-    if (this.doc.state === 'stopped') this.doc.start()
+    if (this.user.state === 'stopped') this.user.start()
     return this
   }
 
@@ -300,12 +285,6 @@ export class TLApp<
     } else {
       Object.assign(this.userState, userState)
     }
-    return this
-  }
-
-  /** Apply a change to the user state. */
-  @action updateDisplayState(displayState: Partial<TLDisplayState>) {
-    Object.assign(this.displayState, displayState)
     return this
   }
 
@@ -353,8 +332,29 @@ export class TLApp<
 
   /* --------------------- Shapes --------------------- */
 
-  get shapes() {
+  /** A map of the page's current shapes. */
+  @computed get shapes() {
     return this.userState.shapes
+  }
+
+  /** An array of all shapes in the model. */
+  @computed get shapesArray() {
+    const {
+      document: { shapes },
+    } = this
+    return shapes.map(shape => this.getShape(shape.id))
+  }
+
+  @computed get shapesInViewport() {
+    const { selectedShapes, currentView } = this
+    return this.shapesArray.filter(
+      shape =>
+        shape.model.parentId === undefined &&
+        (!shape.canUnmount ||
+          selectedShapes.has(shape) ||
+          BoundsUtils.boundsContain(currentView, shape.rotatedBounds) ||
+          BoundsUtils.boundsCollide(currentView, shape.rotatedBounds))
+    )
   }
 
   private parseModelsFromShapeArg = <T extends S>(
@@ -403,14 +403,13 @@ export class TLApp<
   /** Delete shapes from the document model. */
   @action deleteShapes(shapeModels: string[] | S[] | S['model'][]) {
     if (shapeModels.length === 0) return this
-    const { document, selectedIds } = this
+    const { document, userState } = this
     const models = this.parseModelsFromShapeArg(shapeModels)
     transaction(() => {
-      // document.shapes = document.shapes.filter(model => !models.includes(model))
-      models.forEach(model => {
-        selectedIds.splice(selectedIds.indexOf(model.id), 1)
-        document.shapes.splice(document.shapes.indexOf(model), 1)
-      })
+      document.shapes = document.shapes.filter(model => !models.includes(model))
+      userState.selectedIds = userState.selectedIds.filter(
+        id => !models.map(m => m.id).includes(id)
+      )
     })
     return this
   }
@@ -432,11 +431,6 @@ export class TLApp<
     return ids.map(id => this.getShape(id))
   }
 
-  /** Get an array of all shapes on the page. */
-  getShapesArray = () => {
-    return this.document.shapes.map(shape => this.getShape(shape.id))
-  }
-
   /* ----------------- Selected Shapes ---------------- */
 
   /** An array of selected shape Ids. */
@@ -444,14 +438,17 @@ export class TLApp<
     return this.userState.selectedIds
   }
 
-  /** A set of selected shapes. Set automatically based on document.selectedIds */
-  @computed get selectedShapes() {
-    return this.userState.selectedShapes
-  }
-
   /** An array of selected shapes. Set automatically based on document.selectedIds */
   @computed get selectedShapesArray(): S[] {
-    return this.userState.selectedShapesArray
+    const {
+      userState: { selectedIds },
+    } = this
+    return selectedIds.map(id => this.getShape(id))
+  }
+
+  /** A set of selected shapes. Set automatically based on document.selectedIds */
+  @computed get selectedShapes() {
+    return new Set(this.selectedShapesArray)
   }
 
   /** The rotation of the current selection */
@@ -465,28 +462,11 @@ export class TLApp<
     const { selectedShapesArray } = this
     if (selectedShapesArray.length === 0) return undefined
     if (selectedShapesArray.length === 1) {
-      return { ...selectedShapesArray[0].bounds, rotation: selectedShapesArray[0].model.rotation }
+      const shape = selectedShapesArray[0]
+      return { ...shape.bounds, rotation: shape.model.rotation }
     }
     return BoundsUtils.getCommonBounds(selectedShapesArray.map(shape => shape.rotatedBounds))
   }
-
-  // /** Set the user's selected shapes. */
-  // @action setSelectedShapes(shapes: string[] | S[]) {
-  //   let shapesArray: S[]
-  //   let ids: string[]
-  //   if (typeof shapes[0] === 'string') {
-  //     ids = shapes as string[]
-  //     shapesArray = ids.map(id => this.getShape(id))
-  //   } else {
-  //     shapesArray = shapes as S[]
-  //     ids = shapesArray.map(shape => shape.id)
-  //   }
-  //   transaction(() => {
-  //     this.selectedShapes.clear()
-  //     shapesArray.forEach(shape => this.selectedShapes.add(shape))
-  //   })
-  //   return this
-  // }
 
   @action private setSelectedShapes(shapes: S[] | string[]) {
     return this.updateUserState({
@@ -607,6 +587,10 @@ export class TLApp<
 
   onPinchEnd: TLEvents<S, K>['pinch'] = (info, e) => {
     this.inputs.onPinchEnd([...this.viewport.getPagePoint(info.point), 0.5], e)
+  }
+
+  onResize = (bounds: TLBounds) => {
+    this.viewport.updateBounds(bounds)
   }
 
   /* ----------------------- API ---------------------- */
@@ -922,10 +906,8 @@ export class TLApp<
   static defaultUserState: TLUserState = {
     camera: [0, 0, 1],
     selectedIds: [],
-    shapes: new Map(),
-    selectedShapes: new Set([]),
-    selectedShapesArray: [],
     erasingShapeIds: [],
+    shapes: new Map(),
     bounds: {
       minX: 0,
       minY: 0,
@@ -946,12 +928,8 @@ export class TLApp<
     previousPoint: [0, 0],
     originScreenPoint: [0, 0],
     originPoint: [0, 0],
-  }
-
-  static defaultDisplayState: TLDisplayState = {
     cursor: TLCursor.Default,
     cursorRotation: 0,
-    shapesInViewport: [],
     selectionDirectionHint: undefined,
     showSelection: false,
     showSelectionDetail: false,

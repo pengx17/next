@@ -28,13 +28,13 @@ describe('When using the tool', () => {
       .pointerUp()
     expect(app.isIn('select.idle')).toBe(true)
     expect(app.shapes.size).toBe(1)
-    const shape = app.getShapesArray()[0]
+    const shape = app.shapesArray[0]
     expect({ ...shape.model, id: 'test_line' }).toMatchSnapshot('created line')
   })
 
   it('Cancels creating a shape when escape is pressed', () => {
     const app = new TLTestApp()
-    app.deleteShapes([...app.document.shapes])
+    app.reset()
     expect(app.shapes.size).toBe(0)
     app
       .selectTool('line')

@@ -1,11 +1,10 @@
 import Vec from '@tldraw/vec'
-import { action, autorun, makeObservable, observe, transaction } from 'mobx'
-import { deepObserve } from 'mobx-utils'
-import type { TLApp, TLDocumentModel, TLShape, TLUserState } from '~lib'
+import { autorun } from 'mobx'
+import type { TLApp, TLShape } from '~lib'
 import type { TLEventMap } from '~types'
-import { BoundsUtils, uniqueId } from '~utils'
+import { BoundsUtils } from '~utils'
 
-export class TLDocumentManager<S extends TLShape = TLShape, K extends TLEventMap = TLEventMap> {
+export class TLUserStateManager<S extends TLShape = TLShape, K extends TLEventMap = TLEventMap> {
   app: TLApp<S, K>
 
   state: 'stopped' | 'running' = 'stopped'
@@ -14,52 +13,7 @@ export class TLDocumentManager<S extends TLShape = TLShape, K extends TLEventMap
 
   constructor(app: TLApp<S, K>) {
     this.app = app
-    // makeObservable(this)
   }
-
-  // Consider adding reactions to document.shapes changes, to remove
-  // missing shapes from erasingIds or selectedIds, etc. We want to
-  // provide only one "source of truth" for which shapes exist in the
-  // document.
-
-  // setSelectedShapes = () => {
-  //   const {
-  //     document: { selectedIds },
-  //   } = this.app
-  //   const selectedShapesArray = selectedIds.map(id => this.app.getShape(id))
-  //   this.app.updateUserState({
-  //     selectedShapesArray,
-  //     selectedShapes: new Set(selectedShapesArray),
-  //   })
-  // }
-
-  // setShapes = () => {
-  //   const {
-  //     shapes,
-  //     document: { shapes: models },
-  //   } = this.app
-  //   const toCreate = new Set(models)
-  //   const toDelete = new Set<string>(shapes.keys())
-  //   const shapesToCreate: S['model'][] = []
-  //   models.forEach(model => {
-  //     if (shapes.has(model.id)) {
-  //       // The model already has a shapes
-  //       toCreate.delete(model)
-  //       toDelete.delete(model.id)
-  //       return
-  //     }
-  //     // The model is new, so it needs a shape
-  //     shapesToCreate.push(model)
-  //   })
-  //   const idsToDelete = Array.from(toDelete.values())
-  //   transaction(() => {
-  //     if (shapesToCreate.length) this.app.createShapes(shapesToCreate)
-  //     if (idsToDelete.length) {
-  //       // this.removeShapes(idsToDelete)
-  //       this.app.deselectShapes(idsToDelete)
-  //     }
-  //   })
-  // }
 
   processDocumentChanges = () => {
     const {
@@ -106,16 +60,6 @@ export class TLDocumentManager<S extends TLShape = TLShape, K extends TLEventMap
     }
   }
 
-  processSelectionChanges = () => {
-    const {
-      userState: { selectedIds },
-    } = this.app
-    this.app.updateUserState(userState => {
-      userState.selectedShapesArray = selectedIds.map(id => this.app.getShape(id))
-      userState.selectedShapes = new Set(userState.selectedShapesArray)
-    })
-  }
-
   processDisplayChanges = () => {
     const {
       userState: { ctrlKey },
@@ -124,18 +68,6 @@ export class TLDocumentManager<S extends TLShape = TLShape, K extends TLEventMap
       selectionBounds,
       currentView,
     } = this.app
-
-    // const shapesInViewport = shapes
-    //   .map(shape => this.app.getShape(shape.id))
-    //   .filter(shape => {
-    //     return (
-    //       shape.model.parentId === undefined &&
-    //       (!shape.canUnmount ||
-    //         selectedShapes.has(shape) ||
-    //         BoundsUtils.boundsContain(currentView, shape.rotatedBounds) ||
-    //         BoundsUtils.boundsCollide(currentView, shape.rotatedBounds))
-    //     )
-    //   })
 
     let selectionDirectionHint: number[] | undefined
     let showSelection = false
@@ -178,7 +110,7 @@ export class TLDocumentManager<S extends TLShape = TLShape, K extends TLEventMap
         }
 
         if (
-          ctrlKey &&
+          !ctrlKey &&
           this.app.isInAny('select.idle', 'select.hoveringSelectionHandle') &&
           !selectedShapesArray.every(shape => shape.hideContextBar)
         ) {
@@ -212,7 +144,8 @@ export class TLDocumentManager<S extends TLShape = TLShape, K extends TLEventMap
         }
       }
     }
-    this.app.updateDisplayState({
+
+    this.app.updateUserState({
       showSelection,
       showSelectionRotation,
       showSelectionDetail,
@@ -224,11 +157,7 @@ export class TLDocumentManager<S extends TLShape = TLShape, K extends TLEventMap
   }
 
   start = () => {
-    this.disposables.push(
-      autorun(this.processDocumentChanges),
-      autorun(this.processSelectionChanges)
-      // autorun(this.setShapes)
-    )
+    this.disposables.push(autorun(this.processDocumentChanges), autorun(this.processDisplayChanges))
     this.state = 'running'
   }
 

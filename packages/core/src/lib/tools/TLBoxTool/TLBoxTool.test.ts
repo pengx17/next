@@ -20,7 +20,7 @@ describe('When using the box tool', () => {
 
   it('Creates a shape and transitions to select.idle after pointer up', () => {
     const app = new TLTestApp()
-    app.deleteShapes([...app.document.shapes])
+    app.reset()
     expect(app.shapes.size).toBe(0)
     app
       .selectTool('box')
@@ -29,7 +29,7 @@ describe('When using the box tool', () => {
       .pointerUp()
       .expectToBeIn('select.idle')
     expect(app.shapes.size).toBe(1)
-    const shapes = app.getShapesArray()
+    const shapes = app.shapesArray
 
     expect({ ...shapes[0].model, id: 'test_box' }).toMatchSnapshot('created box')
   })
@@ -56,8 +56,7 @@ describe('When using the box tool', () => {
 })
 
 describe('When creating a box shape', () => {
-  const app = new TLTestApp()
-  app.deleteShapes([...app.document.shapes])
+  const app = new TLTestApp().reset()
   expect(app.document.shapes.length).toBe(0)
   app
     .selectTool('box')
@@ -66,7 +65,7 @@ describe('When creating a box shape', () => {
     .pointerMove([200, 150])
     .expectToBeIn('box.creating')
 
-  const shape = app.getShapesArray()[0]
+  const shape = app.shapesArray[0]
   expect(shape.bounds).toMatchObject({
     minX: 100,
     minY: 100,

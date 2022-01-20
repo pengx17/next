@@ -6,19 +6,17 @@ describe('When using the tool', () => {
   })
 
   it('Transitions to creating and creates a dot shape on pointer down', () => {
-    const app = new TLTestApp()
-    app.deleteShapes([...app.document.shapes]).selectTool('dot')
+    const app = new TLTestApp().reset().selectTool('dot')
     expect(app.shapes.size).toBe(0)
     app.pointerDown([100, 100])
     expect(app.shapes.size).toBe(1)
-    const shape = app.getShapesArray()[0]
+    const shape = app.shapesArray[0]
     expect({ ...shape.model, id: 'test_dot' }).toMatchSnapshot('created dot')
   })
 
   it('Cancels creating a shape when escape is pressed', () => {
-    const app = new TLTestApp()
+    const app = new TLTestApp().reset()
     app
-      .deleteShapes([...app.document.shapes])
       .expectSelectedIdsToBe([])
       .selectTool('dot')
       .pointerDown([100, 100])

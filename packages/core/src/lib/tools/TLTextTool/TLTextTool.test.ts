@@ -28,13 +28,13 @@ describe('When using the box tool', () => {
       .pointerUp()
     expect(app.isIn('select.idle')).toBe(true)
     expect(app.shapes.size).toBe(1)
-    const shape = app.getShapesArray()[0]
+    const shape = app.shapesArray[0]
     expect({ ...shape.model, id: 'test_box' }).toMatchSnapshot('created box')
   })
 
   it('Cancels creating a shape when escape is pressed', () => {
     const app = new TLTestApp()
-    app.deleteShapes([...app.document.shapes])
+    app.reset()
     expect(app.shapes.size).toBe(0)
     app
       .selectTool('box')
@@ -58,7 +58,7 @@ describe('When creating a text shape', () => {
   const app = new TLTestApp().reset()
   app.selectTool('text').pointerDown([100, 100]).pointerUp([100, 100])
   expect(app.shapes.size).toBe(1)
-  expect(app.getShapesArray().length).toBe(1)
-  const shape = app.getShapesArray()[0]
+  expect(app.shapesArray.length).toBe(1)
+  const shape = app.shapesArray[0]
   expect(shape.model.text).toBe('')
 })

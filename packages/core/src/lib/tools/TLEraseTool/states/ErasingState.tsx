@@ -24,8 +24,8 @@ export class ErasingState<
 
   onPointerMove: TLStateEvents<S, K>['onPointerMove'] = () => {
     const {
+      shapesInViewport,
       userState: { currentPoint, previousPoint },
-      displayState: { shapesInViewport },
     } = this.app
     if (Vec.isEqual(previousPoint, currentPoint)) return
     this.points.push(currentPoint)

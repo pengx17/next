@@ -24,7 +24,7 @@ export class TranslatingHandleState<
       fromId: string
     } & TLEventHandleInfo<S>
   ) => {
-    this.app.history.pause()
+    this.app.pause()
     this.index = info.index
     this.shape = info.shape
     this.initialShape = { ...this.shape.model }
@@ -57,7 +57,7 @@ export class TranslatingHandleState<
   }
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
-    this.app.history.resume()
+    this.app.resume()
     // this.app.history.persist()
     this.tool.transition('idle')
   }

@@ -38,7 +38,7 @@ describe('TLShape.clone', () => {
 
   it('Adds the new shape above the cloned shape', () => {
     const app = new TLTestApp()
-    app.deleteShapes([...app.document.shapes]).createShape({
+    app.reset().createShape({
       id: 'box1',
       type: 'box',
       point: [0, 0],
@@ -74,7 +74,7 @@ describe('TLShape.clone', () => {
 describe('TLShape.update', () => {
   it('Updates the shape in the model', () => {
     const app = new TLTestApp()
-    app.deleteShapes([...app.document.shapes]).createShape({
+    app.reset().createShape({
       id: 'box1',
       type: 'box',
       point: [0, 0],
@@ -98,7 +98,7 @@ describe('TLShape.update', () => {
 describe('TLShape.delete', () => {
   it('Removes the shape', () => {
     const app = new TLTestApp()
-    app.deleteShapes([...app.document.shapes])
+    app.reset()
     expect(app.document).toMatchObject({
       shapes: [],
     })

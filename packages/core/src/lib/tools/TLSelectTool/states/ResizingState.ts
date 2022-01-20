@@ -96,7 +96,7 @@ export class ResizingState<
     this.snapshots = {}
     this.initialCommonBounds = {} as TLBounds
     this.selectionRotation = 0
-    this.app.history.resume()
+    this.app.resume()
   }
 
   onWheel: TLEvents<S>['wheel'] = (info, e) => {
@@ -218,7 +218,7 @@ export class ResizingState<
   }
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
-    this.app.history.resume()
+    this.app.resume()
     // this.app.persist()
     this.tool.transition('idle')
   }
@@ -238,9 +238,7 @@ export class ResizingState<
   private updateCursor(scaleX: number, scaleY: number) {
     const isFlippedX = scaleX < 0 && scaleY >= 0
     const isFlippedY = scaleY < 0 && scaleX >= 0
-    const {
-      displayState: { cursor },
-    } = this.app
+    const { cursor } = this.app
     switch (this.handle) {
       case TLResizeCorner.TopLeft:
       case TLResizeCorner.BottomRight: {

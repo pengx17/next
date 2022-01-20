@@ -1,7 +1,6 @@
 export * from './TLCursorManager'
-// export * from './TLDisplayManager'
 export * from './TLEventManager'
 export * from './TLHistoryManager'
 export * from './TLInputManager'
 export * from './TLViewportManager'
-export * from './TLDocumentManager'
+export * from './TLUserStateManager'

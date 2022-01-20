@@ -61,7 +61,7 @@ export class TranslatingState<
     // Set the initial points to the original clone points
     this.initialPoints = this.initialClonePoints
     // Add the clones to the page
-    this.app.addShapes(this.clones)
+    this.app.addShapes(this.clones.map(c => c.model))
     // Select the clones
     this.app.selectShapes(Object.keys(this.initialClonePoints))
     // Move the clones to the pointer
@@ -72,7 +72,7 @@ export class TranslatingState<
 
   onEnter = () => {
     // Pause the history when we enter
-    this.app.history.pause()
+    this.app.pause()
 
     // Set initial data
     const {
@@ -94,7 +94,7 @@ export class TranslatingState<
 
   onExit = () => {
     // Resume the history when we exit
-    this.app.history.resume()
+    this.app.resume()
 
     // Reset initial data
     this.didClone = false
@@ -114,7 +114,7 @@ export class TranslatingState<
   }
 
   onPointerUp: TLEvents<S>['pointer'] = () => {
-    this.app.history.resume()
+    this.app.resume()
     // this.app.persist()
     this.tool.transition('idle')
   }

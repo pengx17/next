@@ -14,7 +14,7 @@ export class PointingState<
   onEnter = () => {
     const {
       userState: { currentPoint },
-      displayState: { shapesInViewport },
+      shapesInViewport,
     } = this.app
 
     this.app.updateUserState({
