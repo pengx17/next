@@ -32,10 +32,9 @@ export interface TLAssetModel {
 
 export interface TLUserState<S extends TLShape = TLShape> {
   camera: number[]
+  bounds: TLBounds
   shapes: Map<string, S>
   selectedIds: string[]
-  bounds: TLBounds
-  isToolLocked: boolean
   erasingShapeIds: string[]
   editingId?: string
   hoveredId?: string
@@ -45,6 +44,7 @@ export interface TLUserState<S extends TLShape = TLShape> {
   altKey: boolean
   spaceKey: boolean
   isPinching: boolean
+  isToolLocked: boolean
   currentScreenPoint: number[]
   currentPoint: number[]
   previousScreenPoint: number[]
