@@ -1,5 +1,5 @@
 import { TLApp, TLShape, TLTool } from '~lib'
-import type { TLEventMap } from '~types'
+import type { TLEvents, TLEventMap } from '~types'
 import {
   IdleState,
   BrushingState,
