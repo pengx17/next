@@ -31,7 +31,6 @@
 
 ;; Debounce it?
 (defn on-persist [app]
-  (println (.-serialized app))
   (let [document (.-serialized app)]
     ;; persit to localstorage
     (.setItem js/sessionStorage persist-key (js/JSON.stringify document))))
@@ -43,6 +42,10 @@
 
 (def model (on-load))
 
+(rum/defc test-comp [props] [:div (js/JSON.stringify props)])
+
 (rum/defc Tldraw []
-  (tldraw/App (clj->js {:onPersist on-persist
+  (tldraw/App (clj->js {:PageComponent test-comp
+                        :onPersist on-persist
                         :model model})))
+

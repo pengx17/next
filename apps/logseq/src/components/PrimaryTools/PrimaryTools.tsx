@@ -130,6 +130,14 @@ export const PrimaryTools = observer(function PrimaryTools() {
         >
           <VideoIcon />
         </Button>
+        <Button
+          data-tool="logseq-portal"
+          data-selected={selectedToolId === 'logseq-portal'}
+          onClick={handleToolClick}
+          onDoubleClick={handleToolDoubleClick}
+        >
+          🥹
+        </Button>
       </div>
       <button className="floating-button"></button>
     </div>

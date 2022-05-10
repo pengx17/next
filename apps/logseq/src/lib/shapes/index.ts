@@ -11,6 +11,7 @@ import type { PolylineShape } from './PolylineShape'
 import type { StarShape } from './StarShape'
 import type { TextShape } from './TextShape'
 import type { YouTubeShape } from './YouTubeShape'
+import type { LogseqPortalShape } from './LogseqPortalShape';
 
 export type Shape =
   | BoxShape
@@ -27,6 +28,7 @@ export type Shape =
   | StarShape
   | TextShape
   | YouTubeShape
+  | LogseqPortalShape
 
 export * from './BoxShape'
 export * from './CodeSandboxShape'
@@ -41,3 +43,4 @@ export * from './PolylineShape'
 export * from './StarShape'
 export * from './TextShape'
 export * from './YouTubeShape'
+export * from './LogseqPortalShape'
