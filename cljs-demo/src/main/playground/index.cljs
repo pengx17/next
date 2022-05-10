@@ -16,9 +16,7 @@
 (def doc (on-load))
 
 (rum/defc root []
-  [:div (Tldraw {:document doc
-                 :showMultiplayerMenu false
-                 :onPersist #(println (on-persist %))})])
+  [:div (Tldraw)])
 
 (defn ^:dev/after-load  start []
   ;; start is called by init and after code reloading finishes

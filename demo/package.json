@@ -1,0 +1,15 @@
+{
+  "name": "demo",
+  "private": true,
+  "version": "0.0.0-dev",
+  "devDependencies": {
+    "vite": "^2.9.8"
+  },
+  "scripts": {
+    "dev": "vite"
+  },
+  "dependencies": {
+    "react": "^18.1.0",
+    "react-dom": "^18.1.0"
+  }
+}

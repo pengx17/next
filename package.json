@@ -13,7 +13,8 @@
     "packages/core",
     "packages/react",
     "packages/utils/*",
-    "apps/*"
+    "apps/*",
+    "demo"
   ],
   "scripts": {
     "build": "lerna run build --stream",
