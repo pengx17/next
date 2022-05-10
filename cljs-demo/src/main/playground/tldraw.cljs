@@ -44,5 +44,5 @@
 (def model (on-load))
 
 (rum/defc Tldraw []
-  (tldraw/App {:onPersist on-persist
-               :model model}))
+  (tldraw/App (clj->js {:onPersist on-persist
+                        :model model})))

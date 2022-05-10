@@ -6,7 +6,7 @@ import fs from 'fs'
 await $`rimraf dist`
 
 // Build with [tsup](https://tsup.egoist.sh)
-await $`tsup src/index.ts --format cjs --target es5`
+await $`tsup src/index.ts --format cjs --target es5 --sourcemap`
 
 // Prepare package.json file
 const packageJson = fs.readFileSync('package.json', 'utf8')
