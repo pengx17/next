@@ -54,8 +54,6 @@ export const ToolBar = observer(function ToolBar(): JSX.Element {
 
   return (
     <div className="toolbar">
-      <button onClick={flipHorizontal}>Flip H</button>
-      <button onClick={flipVertical}>Flip V</button>
       <button onClick={sendToBack}>Send to Back</button>
       <button onClick={sendBackward}>Send Backward</button>
       <button onClick={bringForward}>Bring Forward</button>

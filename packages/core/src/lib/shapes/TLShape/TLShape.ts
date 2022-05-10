@@ -169,7 +169,7 @@ export abstract class TLShape<P extends TLShapeProps = TLShapeProps, M = any> {
   }
 
   protected getCachedSerialized = (): TLShapeModel<P> => {
-    if (this.isDirty) {
+    if (this.isDirty || Object.keys(this.lastSerialized).length === 0) {
       this.nonce++
       this.isDirty = false
       this.lastSerialized = this.getSerialized()

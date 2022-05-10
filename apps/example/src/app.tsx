@@ -90,8 +90,11 @@ function App(): JSX.Element {
     // app.selectAll()
   }, [])
 
-  const onPersist = React.useCallback<TLReactCallbacks<Shape>['onPersist']>(() => {
+  const onPersist = React.useCallback<TLReactCallbacks<Shape>['onPersist']>((app) => {
     // noop
+    setTimeout(() => {
+      console.log(app.serialized.pages[0].shapes)
+    })
   }, [])
 
   const onCreateAssets = React.useCallback<TLReactCallbacks<Shape>['onCreateAssets']>(

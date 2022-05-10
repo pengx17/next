@@ -16,9 +16,3 @@ Object.assign(glob, {
 })
 
 fs.writeFileSync('dist/package.json', JSON.stringify(glob, null, 2))
-
-// copy another one for demo
-// const genFolder = '../../cljs-demo/src/gen'
-// await $`rimraf ${genFolder}/tldraw-logseq`
-// await $`mkdir -p ${genFolder}/tldraw-logseq`
-// await $`cp -r dist/* ${genFolder}/tldraw-logseq`
