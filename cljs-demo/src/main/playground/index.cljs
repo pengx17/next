@@ -16,7 +16,7 @@
 (def doc (on-load))
 
 (rum/defc root []
-  [:div (Tldraw)])
+  [:div.h-screen.w-screen (Tldraw)])
 
 (defn ^:dev/after-load  start []
   ;; start is called by init and after code reloading finishes

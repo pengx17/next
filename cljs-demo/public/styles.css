@@ -1,10 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500&display=swap');
 
-html,
-* {
-  box-sizing: border-box;
-}
-
 :root {
   --color-panel: #ffffff;
   --color-text: #000000;
@@ -16,19 +11,17 @@ html,
     0px 0px 16px -12px rgba(0, 0, 0, 0.2);
 }
 
-body {
-  overscroll-behavior: none;
-  margin: 0px;
-  padding: 0px;
-  font-size: 13px;
+.logseq-tldraw-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.logseq-tldraw label {
   font-family: 'Inter', Arial, Helvetica, sans-serif;
 }
 
-label {
-  font-family: 'Inter', Arial, Helvetica, sans-serif;
-}
-
-button {
+.logseq-tldraw button {
   font-size: 13px;
   font-family: 'Inter', Arial, Helvetica, sans-serif;
   background: none;
@@ -38,19 +31,10 @@ button {
   padding: 4px 8px;
 }
 
-.wrapper {
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  right: 0px;
-  bottom: 0px;
-  width: 100vw;
-  height: 100vh;
-  display: grid;
-  grid-template-rows: 40px 1fr 40px;
-}
-
-.toolbar {
+.logseq-tldraw .toolbar {
+  position: absolute;
+  top: 0;
+  width: 100%;
   grid-row: 1;
   display: flex;
   align-items: center;
@@ -63,13 +47,7 @@ button {
   font-size: inherit;
 }
 
-.app {
-  grid-row: 2;
-  width: 100%;
-  height: 100%;
-}
-
-.contextbar {
+.logseq-tldraw .contextbar {
   pointer-events: all;
   position: relative;
   background-color: var(--color-panel);
@@ -85,7 +63,9 @@ button {
   z-index: 1000;
 }
 
-.statusbar {
+.logseq-tldraw .statusbar {
+  position: absolute;
+  bottom: 0;
   grid-row: 3;
   width: 100%;
   display: flex;
@@ -98,26 +78,26 @@ button {
   border-top: 1px solid black;
 }
 
-.input {
+.logseq-tldraw .input {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.number-input {
+.logseq-tldraw .number-input {
   width: 44px;
   height: 24px;
   padding: 2px;
 }
 
-.color-input {
+.logseq-tldraw .color-input {
   height: 24px;
   padding: 0 2px;
   background: none;
   border-radius: 2px;
 }
 
-.text-input {
+.logseq-tldraw .text-input {
   height: 24px;
   padding: 4px;
   background: none;
@@ -125,11 +105,11 @@ button {
   border-radius: 2px;
 }
 
-.input > label {
+.logseq-tldraw .input > label {
   font-size: 10px;
 }
 
-.primary-tools {
+.logseq-tldraw .primary-tools {
   display: flex;
   position: absolute;
   bottom: 48px;
@@ -142,7 +122,7 @@ button {
   z-index: 10000;
 }
 
-.panel {
+.logseq-tldraw .panel {
   background-color: var(--color-panel);
   box-shadow: var(--shadow-medium);
   pointer-events: all;
@@ -157,24 +137,24 @@ button {
   overflow: hidden;
 }
 
-.floating-panel {
+.logseq-tldraw .primary-tools .floating-panel {
   display: flex;
   border-radius: 128px;
   overflow: hidden;
   padding: 4px;
 }
 
-.floating-panel > :nth-child(1) {
+.logseq-tldraw .floating-panel > :nth-child(1) {
   border-top-left-radius: 20px;
   border-bottom-left-radius: 20px;
 }
 
-.floating-panel > :nth-last-child(1) {
+.logseq-tldraw .floating-panel > :nth-last-child(1) {
   border-top-right-radius: 20px;
   border-bottom-right-radius: 20px;
 }
 
-.button {
+.logseq-tldraw .primary-tools .button {
   position: relative;
   height: 40px;
   width: 40px;
@@ -188,16 +168,16 @@ button {
   cursor: pointer;
 }
 
-.button:hover {
+.logseq-tldraw .primary-tools .button:hover {
   background-color: var(--color-hover);
 }
 
-.button[data-selected='true'] {
+.logseq-tldraw .primary-tools .button[data-selected='true'] {
   background-color: var(--color-selectedFill);
   color: var(--color-selectedContrast);
 }
 
-.floating-panel[data-tool-locked='true'] > .button[data-selected='true']::after {
+.logseq-tldraw .floating-panel[data-tool-locked='true'] > .button[data-selected='true']::after {
   content: '';
   display: block;
   height: 6px;
@@ -210,7 +190,7 @@ button {
   border-radius: 100%;
 }
 
-.text-shape-wrapper {
+.logseq-tldraw .text-shape-wrapper {
   position: absolute;
   white-space: pre-wrap;
   overflow-wrap: break-word;
@@ -236,7 +216,7 @@ button {
   -webkit-touch-callout: none;
 }
 
-.text-shape-content {
+.logseq-tldraw .text-shape-content {
   z-index: 1;
   width: fit-content;
   height: fit-content;
@@ -263,12 +243,12 @@ button {
   -webkit-user-select: none;
 }
 
-.text-shape-content[data-isediting='true'] {
+.logseq-tldraw .text-shape-content[data-isediting='true'] {
   visibility: hidden;
   pointer-events: none;
 }
 
-.text-shape-input {
+.logseq-tldraw .text-shape-input {
   position: absolute;
   top: 0;
   left: 0;
