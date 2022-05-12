@@ -3,9 +3,11 @@
   "name": "tldraw-logseq",
   "license": "MIT",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "scripts": {
     "build": "zx build.mjs",
-    "dev": "shadow-cljs watch frontend"
+    "dev": "tsup --watch",
+    "dev:vite": "tsup --watch --sourcemap inline"
   },
   "devDependencies": {
     "@radix-ui/react-icons": "^1.0.3",

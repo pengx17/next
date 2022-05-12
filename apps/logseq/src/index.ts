@@ -5,4 +5,6 @@
 // export { AppCanvas, AppProvider } from '@tldraw/react'
 // export { useFileDrop } from '~hooks/useFileDrop'
 
+import './styles.css';
+
 export * from './app'
