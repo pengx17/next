@@ -94,9 +94,11 @@ interface LogseqTldrawProps {
 export const App = function App(props: LogseqTldrawProps): JSX.Element {
   const onFileDrop = useFileDrop()
 
+  const Page = React.useMemo(() => React.memo(props.PageComponent), []);
+
   return (
     <LogseqContext.Provider
-      value={{ Page: props.PageComponent, search: props.searchHandler }}
+      value={{ Page, search: props.searchHandler }}
     >
       <AppProvider Shapes={shapes} Tools={tools} onFileDrop={onFileDrop} {...props}>
         <div className="logseq-tldraw logseq-tldraw-wrapper">

@@ -88,7 +88,7 @@ export class LogseqPortalShape extends TLBoxShape<LogseqPortalShapeProps> {
     )
   })
 
-  ReactComponent = observer(({ events, isErasing }: TLComponentProps) => {
+  ReactComponent = observer(({ events, isEditing, isErasing }: TLComponentProps) => {
     const {
       props: { opacity, pageId },
     } = this
@@ -127,7 +127,6 @@ export class LogseqPortalShape extends TLBoxShape<LogseqPortalShapeProps> {
           </div>
         )}
         <div
-          onPointerDown={e => e.stopPropagation()}
           style={{
             width: '100%',
             height: pageId ? 'calc(100% - 32px)' : '100%',
@@ -135,9 +134,12 @@ export class LogseqPortalShape extends TLBoxShape<LogseqPortalShapeProps> {
             userSelect: 'none',
           }}
         >
-          <textarea style={{ height: 200, background: 'red' }} />
           {pageId ? (
-            <div style={{ padding: '0 24px' }}>
+            <div
+              onPointerDown={e => !isEditing && e.stopPropagation()}
+              onPointerUp={e => !isEditing && e.stopPropagation()}
+              style={{ padding: '0 24px' }}
+            >
               <Page pageId={pageId} />
             </div>
           ) : (

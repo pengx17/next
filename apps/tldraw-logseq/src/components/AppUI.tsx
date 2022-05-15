@@ -7,8 +7,8 @@ import { PrimaryTools } from './PrimaryTools'
 export const AppUI = observer(function AppUI() {
   return (
     <>
-      <ToolBar />
-      <StatusBar />
+      {/* <ToolBar /> */}
+      {/* <StatusBar /> */}
       <PrimaryTools />
     </>
   )
