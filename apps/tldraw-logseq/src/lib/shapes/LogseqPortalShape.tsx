@@ -8,34 +8,6 @@ import { observer } from 'mobx-react-lite'
 import { CustomStyleProps, withClampedStyles } from './style-props'
 import { TextInput } from '~components/inputs/TextInput'
 import { LogseqContext } from '~lib/logseq-context'
-import CreatableSelect from 'react-select/creatable'
-
-const PageInput = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
-  const { search } = React.useContext(LogseqContext)
-  const [q, setQ] = React.useState(value)
-
-  const options = React.useMemo(() => {
-    if (search && q) {
-      return (search(q) ?? []).map(v => ({ value: v, label: v }))
-    }
-    return []
-  }, [search, q])
-
-  React.useEffect(() => {
-    setQ(value)
-  }, [value])
-
-  return (
-    <CreatableSelect
-      isClearable
-      placeholder="Search for pages..."
-      options={options}
-      value={options.find(o => o.value === q)}
-      onChange={v => onChange(v?.value ?? '')}
-      onInputChange={v => setQ(v)}
-    />
-  )
-}
 
 export interface LogseqPortalShapeProps extends TLBoxShapeProps, CustomStyleProps {
   type: 'logseq-portal'
@@ -64,19 +36,55 @@ export class LogseqPortalShape extends TLBoxShape<LogseqPortalShapeProps> {
 
   ReactContextBar = observer(() => {
     const { pageId } = this.props
+    const [q, setQ] = React.useState(pageId)
     const rInput = React.useRef<HTMLInputElement>(null)
+    const { search } = React.useContext(LogseqContext)
     const app = useApp()
 
+    const secretPrefix = 'œ::'
+
     const commitChange = React.useCallback((id: string) => {
+      setQ(id)
       this.update({ pageId: id, size: LogseqPortalShape.defaultProps.size })
       app.persist()
       rInput.current?.blur()
     }, [])
 
+    const handleChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+      const _q = e.currentTarget.value
+      if (_q.startsWith(secretPrefix)) {
+        const id = _q.substring(secretPrefix.length)
+        commitChange(id)
+      } else {
+        setQ(_q)
+      }
+    }, [])
+
+    const options = React.useMemo(() => {
+      if (search && q) {
+        return search(q)
+      }
+      return null
+    }, [search, q])
+
     return (
-      <div style={{ width: '200px' }}>
-        <PageInput onChange={commitChange} value={pageId} />
-      </div>
+      <>
+        <TextInput
+          ref={rInput}
+          label="Page name or block UUID"
+          type="text"
+          value={q}
+          onChange={handleChange}
+          list="logseq-portal-search-results"
+        />
+        <datalist id="logseq-portal-search-results">
+          {options?.map(option => (
+            <option key={option} value={secretPrefix + option}>
+              {option}
+            </option>
+          ))}
+        </datalist>
+      </>
     )
   })
 
@@ -88,10 +96,6 @@ export class LogseqPortalShape extends TLBoxShape<LogseqPortalShapeProps> {
     const app = useApp()
     const { Page } = React.useContext(LogseqContext)
     const isSelected = app.selectedIds.has(this.id)
-
-    const handlePointerDown = React.useCallback(e => {
-      e.stopPropagation()
-    }, [])
 
     if (!Page) {
       return null
@@ -123,6 +127,7 @@ export class LogseqPortalShape extends TLBoxShape<LogseqPortalShapeProps> {
           </div>
         )}
         <div
+          onPointerDown={e => e.stopPropagation()}
           style={{
             width: '100%',
             height: pageId ? 'calc(100% - 32px)' : '100%',
@@ -130,8 +135,9 @@ export class LogseqPortalShape extends TLBoxShape<LogseqPortalShapeProps> {
             userSelect: 'none',
           }}
         >
+          <textarea style={{ height: 200, background: 'red' }} />
           {pageId ? (
-            <div onPointerDown={handlePointerDown} style={{ padding: '0 24px' }}>
+            <div style={{ padding: '0 24px' }}>
               <Page pageId={pageId} />
             </div>
           ) : (

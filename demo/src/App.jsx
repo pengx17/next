@@ -44,7 +44,6 @@ const documentModel = onLoad() ?? {
 const list = ['foo', 'bar']
 
 const Page = props => {
-  console.log(props)
   return <pre>{JSON.stringify(props, null, 2)}</pre>
 }
 
