@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
 import { TLBoxShape, TLBoxShapeProps } from '@tldraw/core'
-import { HTMLContainer, TLComponentProps } from '@tldraw/react'
+import { HTMLContainer, TLComponentProps, useApp } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { CustomStyleProps, withClampedStyles } from './style-props'
 import { TextInput } from '~components/inputs/TextInput'
@@ -38,13 +38,15 @@ export class YouTubeShape extends TLBoxShape<YouTubeShapeProps> {
   ReactContextBar = observer(() => {
     const { embedId } = this.props
     const rInput = React.useRef<HTMLInputElement>(null)
+    const app = useApp()
     const handleChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
       const url = e.currentTarget.value
       const match = url.match(
         /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/
       )
       const embedId = match?.[1] ?? url ?? ''
-      this.update({ embedId })
+      this.update({ embedId, size: YouTubeShape.defaultProps.size })
+      app.persist()
     }, [])
     return (
       <>
@@ -63,6 +65,8 @@ export class YouTubeShape extends TLBoxShape<YouTubeShapeProps> {
     const {
       props: { opacity, embedId },
     } = this
+    const app = useApp()
+    const isSelected = app.selectedIds.has(this.id)
     return (
       <HTMLContainer
         style={{
@@ -72,12 +76,27 @@ export class YouTubeShape extends TLBoxShape<YouTubeShapeProps> {
         }}
         {...events}
       >
+        {embedId && (
+          <div
+            style={{
+              height: '32px',
+              width: '100%',
+              background: '#bbb',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {embedId}
+          </div>
+        )}
         <div
           style={{
             width: '100%',
-            height: '100%',
-            pointerEvents: isEditing ? 'all' : 'none',
+            height: embedId ? 'calc(100% - 32px)' : '100%',
+            pointerEvents: isEditing ? 'none' : 'all',
             userSelect: 'none',
+            position: 'relative',
           }}
         >
           {embedId ? (
@@ -87,6 +106,7 @@ export class YouTubeShape extends TLBoxShape<YouTubeShapeProps> {
                 paddingBottom: '56.25%',
                 position: 'relative',
                 height: 0,
+                opacity: isSelected ? 0.5 : 1,
               }}
             >
               <iframe

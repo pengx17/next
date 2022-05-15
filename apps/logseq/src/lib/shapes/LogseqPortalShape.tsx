@@ -3,11 +3,39 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react'
 import { TLBoxShape, TLBoxShapeProps } from '@tldraw/core'
-import { HTMLContainer, TLComponentProps } from '@tldraw/react'
+import { HTMLContainer, TLComponentProps, useApp } from '@tldraw/react'
 import { observer } from 'mobx-react-lite'
 import { CustomStyleProps, withClampedStyles } from './style-props'
 import { TextInput } from '~components/inputs/TextInput'
 import { LogseqContext } from '~lib/logseq-context'
+import CreatableSelect from 'react-select/creatable'
+
+const PageInput = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
+  const { search } = React.useContext(LogseqContext)
+  const [q, setQ] = React.useState(value)
+
+  const options = React.useMemo(() => {
+    if (search && q) {
+      return (search(q) ?? []).map(v => ({ value: v, label: v }))
+    }
+    return []
+  }, [search, q])
+
+  React.useEffect(() => {
+    setQ(value)
+  }, [value])
+
+  return (
+    <CreatableSelect
+      isClearable
+      placeholder="Search for pages..."
+      options={options}
+      value={options.find(o => o.value === q)}
+      onChange={v => onChange(v?.value ?? '')}
+      onInputChange={v => setQ(v)}
+    />
+  )
+}
 
 export interface LogseqPortalShapeProps extends TLBoxShapeProps, CustomStyleProps {
   type: 'logseq-portal'
@@ -30,70 +58,92 @@ export class LogseqPortalShape extends TLBoxShape<LogseqPortalShapeProps> {
     pageId: '',
   }
 
-  aspectRatio = 480 / 853
-
   canChangeAspectRatio = true
-
   canFlip = false
-
-  canEdit = true
+  canEdit = false
 
   ReactContextBar = observer(() => {
     const { pageId } = this.props
     const rInput = React.useRef<HTMLInputElement>(null)
-    const handleChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-      const pageId = e.currentTarget.value
-      this.update({ pageId })
+    const app = useApp()
+
+    const commitChange = React.useCallback((id: string) => {
+      this.update({ pageId: id, size: LogseqPortalShape.defaultProps.size })
+      app.persist()
+      rInput.current?.blur()
     }, [])
+
     return (
-      <>
-        <TextInput
-          ref={rInput}
-          label="Page name or block UUID"
-          type="text"
-          value={pageId}
-          onChange={handleChange}
-        />
-      </>
+      <div style={{ width: '200px' }}>
+        <PageInput onChange={commitChange} value={pageId} />
+      </div>
     )
   })
 
-  ReactComponent = observer(({ events, isEditing, isErasing }: TLComponentProps) => {
+  ReactComponent = observer(({ events, isErasing }: TLComponentProps) => {
     const {
       props: { opacity, pageId },
     } = this
 
-    const { Page } = React.useContext(LogseqContext);
+    const app = useApp()
+    const { Page } = React.useContext(LogseqContext)
+    const isSelected = app.selectedIds.has(this.id)
+
+    const handlePointerDown = React.useCallback(e => {
+      e.stopPropagation()
+    }, [])
+
+    if (!Page) {
+      return null
+    }
+
     return (
       <HTMLContainer
         style={{
           overflow: 'hidden',
           pointerEvents: 'all',
           opacity: isErasing ? 0.2 : opacity,
+          border: '1px solid rgb(52, 52, 52)',
+          backgroundColor: '#ffffff',
         }}
         {...events}
       >
+        {pageId && (
+          <div
+            style={{
+              height: '32px',
+              width: '100%',
+              background: '#bbb',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {pageId}
+          </div>
+        )}
         <div
           style={{
             width: '100%',
-            height: '100%',
-            pointerEvents: isEditing ? 'all' : 'none',
+            height: pageId ? 'calc(100% - 32px)' : '100%',
+            pointerEvents: isSelected ? 'none' : 'all',
             userSelect: 'none',
           }}
         >
           {pageId ? (
-            <Page pageId={pageId} />
+            <div onPointerDown={handlePointerDown} style={{ padding: '0 24px' }}>
+              <Page pageId={pageId} />
+            </div>
           ) : (
             <div
               style={{
+                opacity: isSelected ? 0.5 : 1,
                 width: '100%',
                 height: '100%',
                 display: 'flex',
                 alignItems: 'center',
                 overflow: 'hidden',
                 justifyContent: 'center',
-                backgroundColor: '#ffffff',
-                border: '1px solid rgb(52, 52, 52)',
                 padding: 16,
               }}
             >
@@ -116,8 +166,8 @@ export class LogseqPortalShape extends TLBoxShape<LogseqPortalShapeProps> {
 
   validateProps = (props: Partial<LogseqPortalShapeProps>) => {
     if (props.size !== undefined) {
-      props.size[0] = Math.max(props.size[0], 1)
-      props.size[1] = Math.max(props.size[0] * this.aspectRatio, 1)
+      props.size[0] = Math.max(props.size[0], 50)
+      props.size[1] = Math.max(props.size[1], 50)
     }
     return withClampedStyles(props)
   }

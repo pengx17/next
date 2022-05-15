@@ -41,10 +41,22 @@ const documentModel = onLoad() ?? {
   assets: [],
 }
 
+const list = ['foo', 'bar']
+
+const Page = props => {
+  console.log(props)
+  return <pre>{JSON.stringify(props, null, 2)}</pre>
+}
+
 export default function App() {
   return (
     <div className="h-screen w-screen">
-      <TldrawApp model={documentModel} onPersist={onPersist} />
+      <TldrawApp
+        PageComponent={Page}
+        searchHandler={q => (q ? list : [])}
+        model={documentModel}
+        onPersist={onPersist}
+      />
     </div>
   )
 }

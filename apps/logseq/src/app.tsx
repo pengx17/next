@@ -28,7 +28,7 @@ import {
   StarShape,
   TextShape,
   YouTubeShape,
-  LogseqPortalShape
+  LogseqPortalShape,
 } from '~lib/shapes'
 import {
   BoxTool,
@@ -44,7 +44,6 @@ import {
   StarTool,
   TextTool,
   YouTubeTool,
-  
 } from '~lib/tools'
 
 const components: TLReactComponents<Shape> = {
@@ -65,7 +64,7 @@ const shapes: TLReactShapeConstructor<Shape>[] = [
   StarShape,
   TextShape,
   YouTubeShape,
-  LogseqPortalShape
+  LogseqPortalShape,
 ]
 
 const tools: TLReactToolConstructor<Shape>[] = [
@@ -81,11 +80,12 @@ const tools: TLReactToolConstructor<Shape>[] = [
   StarTool,
   TextTool,
   YouTubeTool,
-  LogseqPortalTool
+  LogseqPortalTool,
 ]
 
 interface LogseqTldrawProps {
   PageComponent: any
+  searchHandler: (query: string) => string[]
   model?: TLDocumentModel<Shape>
   onMount?: TLReactCallbacks<Shape>['onMount']
   onPersist?: TLReactCallbacks<Shape>['onPersist']
@@ -95,7 +95,9 @@ export const App = function App(props: LogseqTldrawProps): JSX.Element {
   const onFileDrop = useFileDrop()
 
   return (
-    <LogseqContext.Provider value={{ Page: props.PageComponent }}>
+    <LogseqContext.Provider
+      value={{ Page: props.PageComponent, search: props.searchHandler }}
+    >
       <AppProvider Shapes={shapes} Tools={tools} onFileDrop={onFileDrop} {...props}>
         <div className="logseq-tldraw logseq-tldraw-wrapper">
           <AppCanvas components={components} />
